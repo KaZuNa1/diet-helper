@@ -1,0 +1,15 @@
+{
+  "name": "diet-helper",
+  "version": "1.0.0",
+  "description": "Diet Helper Desktop App",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev"
+  },
+  "devDependencies": {
+    "electron": "^32.0.0"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}
