@@ -8,6 +8,7 @@ class DietHelper {
     constructor() {
         this.foods = [];
         this.tags = [];
+        this.currentFoodId = null; // Track currently viewed food for deletion
         this.dataManager = new DataManager();
         this.uiManager = new UIManager();
         this.modalManager = new ModalManager();
@@ -55,6 +56,11 @@ class DietHelper {
             this.hideFoodDetails();
         });
 
+        // Delete Food Button - NEW
+        document.getElementById('deleteFoodBtn').addEventListener('click', () => {
+            this.deleteFood();
+        });
+
         // Close Tags Button
         document.getElementById('closeTagsBtn').addEventListener('click', () => {
             this.hideManageTagsForm();
@@ -84,12 +90,63 @@ class DietHelper {
         const food = this.foods.find(f => f.id === foodId);
         if (!food) return;
 
+        // Store the current food ID for deletion
+        this.currentFoodId = foodId;
+        
         this.uiManager.showFoodDetails(food, this.tags);
         this.modalManager.showFoodDetails();
     }
 
     hideFoodDetails() {
+        this.currentFoodId = null; // Clear current food ID
         this.modalManager.hideFoodDetails();
+    }
+
+    // NEW: Delete food functionality
+    async deleteFood() {
+        if (!this.currentFoodId) return;
+
+        const food = this.foods.find(f => f.id === this.currentFoodId);
+        if (!food) return;
+
+        const confirmed = this.modalManager.showConfirmation(
+            `Are you sure you want to delete "${food.name}"? This action cannot be undone.`,
+            () => {
+                this.performDeleteFood(this.currentFoodId);
+            }
+        );
+    }
+
+    // NEW: Perform the actual food deletion
+    async performDeleteFood(foodId) {
+        try {
+            // Find the food to get image path for cleanup
+            const food = this.foods.find(f => f.id === foodId);
+            
+            // Remove from foods array
+            this.foods = this.foods.filter(f => f.id !== foodId);
+            
+            // Save updated data
+            await this.saveAllData();
+            
+            // Update UI
+            this.uiManager.renderFoods(this.foods, this.tags);
+            
+            // Close the modal
+            this.hideFoodDetails();
+            
+            // Optional: Clean up image file if using file system
+            if (food && food.imageUrl) {
+                // If you have image cleanup functionality in DataManager
+                // await this.dataManager.deleteImage(food.imageUrl);
+            }
+            
+            console.log(`Food "${food?.name}" deleted successfully`);
+            
+        } catch (error) {
+            console.error('Error deleting food:', error);
+            alert('Failed to delete food. Please try again.');
+        }
     }
 
     async saveFood() {

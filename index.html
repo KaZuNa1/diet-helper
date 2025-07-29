@@ -69,6 +69,49 @@
         }
         .error-message { color: red; font-size: 12px; margin-top: 5px; }
         .hidden { display: none; }
+        
+        /* Button styles for modal actions */
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
     </style>
 </head>
 <body>
@@ -90,7 +133,10 @@
                 <div id="detailsTags" style="color: #666; margin-bottom: 15px;"></div>
             </div>
         </div>
-        <button id="closeFoodDetailsBtn">Close</button>
+        <div class="modal-buttons">
+            <button id="deleteFoodBtn" class="btn-danger">Delete</button>
+            <button id="closeFoodDetailsBtn" class="btn-secondary">Close</button>
+        </div>
     </div>
     
     <!-- Add Food Dropdown -->
@@ -108,8 +154,10 @@
             <label>Select Tags:</label>
             <div id="tagsList"></div>
         </div>
-        <button id="saveFoodBtn">Save Food</button>
-        <button id="cancelFoodBtn">Cancel</button>
+        <div class="modal-buttons">
+            <button id="saveFoodBtn" class="btn-primary">Save Food</button>
+            <button id="cancelFoodBtn" class="btn-secondary">Cancel</button>
+        </div>
     </div>
     
     <!-- Manage Tags Dropdown -->
@@ -118,10 +166,12 @@
         <div class="form-group">
             <input type="text" id="newTagName" placeholder="Enter tag name">
             <div id="tagNameError" class="error-message hidden">Please enter tag name</div>
-            <button id="addTagBtn">Add Tag</button>
+            <button id="addTagBtn" class="btn-primary">Add Tag</button>
         </div>
         <div id="existingTags"></div>
-        <button id="closeTagsBtn">Close</button>
+        <div class="modal-buttons">
+            <button id="closeTagsBtn" class="btn-secondary">Close</button>
+        </div>
     </div>
     
     <!-- Food List -->

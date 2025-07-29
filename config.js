@@ -82,17 +82,19 @@ const CONFIG = {
             LOAD_FAILED: 'Failed to load data',
             MAX_FOODS_REACHED: 'Maximum number of foods reached (1000)',
             MAX_TAGS_REACHED: 'Maximum number of tags reached (100)',
-            MAX_TAGS_PER_FOOD: 'Maximum 10 tags per food item'
+            MAX_TAGS_PER_FOOD: 'Maximum 10 tags per food item',
+            DELETE_FOOD_FAILED: 'Failed to delete food. Please try again.'
         },
         SUCCESS: {
             FOOD_SAVED: 'Food saved successfully',
             TAG_SAVED: 'Tag saved successfully',
             DATA_LOADED: 'Data loaded successfully',
-            BACKUP_CREATED: 'Backup created successfully'
+            BACKUP_CREATED: 'Backup created successfully',
+            FOOD_DELETED: 'Food deleted successfully'
         },
         CONFIRMATIONS: {
             DELETE_TAG: 'Are you sure you want to delete this tag? It will be removed from all foods.',
-            DELETE_FOOD: 'Are you sure you want to delete this food item?',
+            DELETE_FOOD: 'Are you sure you want to delete this food item? This action cannot be undone.',
             CLEAR_ALL_DATA: 'Are you sure you want to clear all data? This cannot be undone.',
             RESTORE_BACKUP: 'Are you sure you want to restore from backup? Current data will be lost.'
         }
@@ -115,7 +117,8 @@ const CONFIG = {
         MANAGE_TAGS: 'Ctrl+T',
         CLOSE_MODAL: 'Escape',
         SAVE: 'Ctrl+S',
-        SEARCH: 'Ctrl+F'
+        SEARCH: 'Ctrl+F',
+        DELETE: 'Delete'
     },
 
     // Development settings
