@@ -150,30 +150,38 @@ class DietHelper {
     }
 
     async saveFood() {
-        const formData = this.uiManager.getFoodFormData();
-        
-        if (!formData.name) {
-            this.uiManager.showError('foodNameError', CONFIG.MESSAGES.ERRORS.FOOD_NAME_REQUIRED);
-            this.uiManager.focusElement('foodName');
-            return;
-        }
-        
-        this.uiManager.hideError('foodNameError');
-
-        // Handle image
-        let imageUrl = '';
-        if (formData.image) {
-            this.modalManager.showLoading('addFood', 'Saving image...');
-            const imageResult = await this.dataManager.saveImage(formData.image);
-            this.modalManager.hideLoading();
-            
-            if (imageResult.success) {
-                imageUrl = imageResult.path;
-            }
-        }
-
-        this.createAndSaveFood(formData.name, imageUrl, formData.tags);
+    const formData = this.uiManager.getFoodFormData();
+    
+    if (!formData.name) {
+        this.uiManager.showError('foodNameError', CONFIG.MESSAGES.ERRORS.FOOD_NAME_REQUIRED);
+        this.uiManager.focusElement('foodName');
+        return;
     }
+    
+    this.uiManager.hideError('foodNameError');
+
+    // FIXED: Disable save button instead of overlay
+    const saveBtn = document.getElementById('saveFoodBtn');
+    const originalText = saveBtn.textContent;
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    // Handle image
+    let imageUrl = '';
+    if (formData.image) {
+        const imageResult = await this.dataManager.saveImage(formData.image);
+        
+        if (imageResult.success) {
+            imageUrl = imageResult.path;
+        }
+    }
+
+    // Re-enable button
+    saveBtn.disabled = false;
+    saveBtn.textContent = originalText;
+
+    this.createAndSaveFood(formData.name, imageUrl, formData.tags);
+}
 
     async createAndSaveFood(name, imageUrl, selectedTags) {
         const newFood = new Food(

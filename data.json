@@ -1,5 +1,49 @@
 {
-  "foods": [],
+  "foods": [
+    {
+      "id": 1753961635607,
+      "name": "sdaads",
+      "imageUrl": "C:\\Users\\Tuguldur\\Desktop\\diet manager\\images\\food_1753961635605.jpg",
+      "selected": false,
+      "tags": [
+        1753615528102
+      ]
+    },
+    {
+      "id": 1753961745447,
+      "name": "dsaasd",
+      "imageUrl": "C:\\Users\\Tuguldur\\Desktop\\diet manager\\images\\food_1753961745445.jpg",
+      "selected": false,
+      "tags": [
+        1753615528102
+      ]
+    },
+    {
+      "id": 1753961756951,
+      "name": "adsadsdasda",
+      "imageUrl": "",
+      "selected": false,
+      "tags": []
+    },
+    {
+      "id": 1753961764658,
+      "name": "sadadsads",
+      "imageUrl": "C:\\Users\\Tuguldur\\Desktop\\diet manager\\images\\food_1753961764651.PNG",
+      "selected": false,
+      "tags": [
+        1753615528102
+      ]
+    },
+    {
+      "id": 1753961792745,
+      "name": "dsdsa",
+      "imageUrl": "C:\\Users\\Tuguldur\\Desktop\\diet manager\\images\\food_1753961792743.PNG",
+      "selected": false,
+      "tags": [
+        1753615603326
+      ]
+    }
+  ],
   "tags": [
     {
       "id": 1753615528102,

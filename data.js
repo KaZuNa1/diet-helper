@@ -2,9 +2,10 @@ import { CONFIG, ConfigUtils } from './config.js';
 
 export class DataManager {
     constructor() {
-        this.dataFile = CONFIG.FILES.DATA_FILE;
-        this.imagesDir = CONFIG.FILES.IMAGES_DIR;
-    }
+    this.dataFile = CONFIG.FILES.DATA_FILE;
+    this.imagesDir = CONFIG.FILES.IMAGES_DIR;
+    this.hiddenCanvas = null; // ADD THIS LINE
+}
 
     // Save data to JSON file
     async saveData(data) {
@@ -128,42 +129,54 @@ export class DataManager {
 
     // Compress image to reduce storage size
     async compressImage(base64Data, mimeType) {
-        return new Promise((resolve, reject) => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const img = new Image();
+    return new Promise((resolve, reject) => {
+        // FIXED: Create hidden canvas to prevent visual glitches
+        if (!this.hiddenCanvas) {
+            this.hiddenCanvas = document.createElement('canvas');
+            this.hiddenCanvas.style.cssText = `
+                position: absolute;
+                left: -9999px;
+                top: -9999px;
+                visibility: hidden;
+            `;
+            document.body.appendChild(this.hiddenCanvas);
+        }
+        
+        const canvas = this.hiddenCanvas; // Use hidden canvas instead of creating new one
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = () => {
+            // Calculate new dimensions while maintaining aspect ratio
+            const maxWidth = 800;
+            const maxHeight = 600;
+            let { width, height } = img;
             
-            img.onload = () => {
-                // Calculate new dimensions while maintaining aspect ratio
-                const maxWidth = 800;
-                const maxHeight = 600;
-                let { width, height } = img;
-                
-                if (width > height) {
-                    if (width > maxWidth) {
-                        height = (height * maxWidth) / width;
-                        width = maxWidth;
-                    }
-                } else {
-                    if (height > maxHeight) {
-                        width = (width * maxHeight) / height;
-                        height = maxHeight;
-                    }
+            if (width > height) {
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
                 }
-                
-                canvas.width = width;
-                canvas.height = height;
-                
-                // Draw and compress
-                ctx.drawImage(img, 0, 0, width, height);
-                const compressedData = canvas.toDataURL(mimeType || 'image/jpeg', CONFIG.IMAGES.QUALITY);
-                resolve(compressedData);
-            };
+            } else {
+                if (height > maxHeight) {
+                    width = (width * maxHeight) / height;
+                    height = maxHeight;
+                }
+            }
             
-            img.onerror = () => reject(new Error('Failed to load image for compression'));
-            img.src = base64Data;
-        });
-    }
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Draw and compress
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedData = canvas.toDataURL(mimeType || 'image/jpeg', CONFIG.IMAGES.QUALITY);
+            resolve(compressedData);
+        };
+        
+        img.onerror = () => reject(new Error('Failed to load image for compression'));
+        img.src = base64Data;
+    });
+}
 
     // Validate food data
     validateFood(foodData) {

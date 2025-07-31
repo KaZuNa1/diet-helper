@@ -43,12 +43,18 @@ export class ModalManager {
     }
 
     // FIXED: Replace the shared overlay system
-    replaceSharedOverlay() {
-        const oldOverlay = document.getElementById('modalOverlay');
-        if (oldOverlay) {
-            oldOverlay.remove();
-        }
+    // FIXED: Replace the shared overlay system
+// FIXED: Replace the shared overlay system
+replaceSharedOverlay() {
+    // Don't remove the overlay, just disable its functionality
+    const oldOverlay = document.getElementById('modalOverlay');
+    if (oldOverlay) {
+        oldOverlay.style.display = 'none !important';
+        oldOverlay.style.visibility = 'hidden';
+        // Remove any existing event listeners
+        oldOverlay.replaceWith(oldOverlay.cloneNode(true));
     }
+}
 
     initializeEventListeners() {
         // FIXED: Add individual click handlers for each overlay
@@ -80,25 +86,31 @@ export class ModalManager {
 
     // FIXED: Generic method to show any modal
     showModal(modalType) {
-        this.closeActiveModal(); // Close any open modal first
-        
-        const { modal, overlay } = this.modals[modalType];
-        if (!modal || !overlay) return;
+    this.closeActiveModal(); // Close any open modal first
+    
+    const { modal, overlay } = this.modals[modalType];
+    if (!modal || !overlay) return;
 
-        this.activeModal = modalType;
-        
-        overlay.style.display = 'block';
-        overlay.classList.add('active');
-        modal.classList.add('active');
-        
-        // Prevent body scrolling when modal is open
-        document.body.style.overflow = 'hidden';
+    this.activeModal = modalType;
+    
+    // FIXED: Reset modal dimensions to prevent size issues
+    modal.style.width = '';
+    modal.style.height = '';
+    modal.style.maxWidth = '90vw';
+    modal.style.maxHeight = '90vh';
+    
+    overlay.style.display = 'block';
+    overlay.classList.add('active');
+    modal.classList.add('active');
+    
+    // Prevent body scrolling when modal is open
+    document.body.style.overflow = 'hidden';
 
-        // Add animation if enabled
-        if (CONFIG.FEATURES.ANIMATIONS_ENABLED) {
-            this.animateIn(modalType);
-        }
+    // Add animation if enabled
+    if (CONFIG.FEATURES.ANIMATIONS_ENABLED) {
+        this.animateIn(modalType);
     }
+}
 
     // FIXED: Generic method to hide any modal
     hideModal(modalType) {
