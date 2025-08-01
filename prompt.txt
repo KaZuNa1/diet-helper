@@ -1,0 +1,1675 @@
+
+okay so here is my current project that named diet helper and helps me to organize my diet:
+it consists of index html style css and those js files:
+models,app,config,modal,ui,data
+
+i will give you every files:
+index html:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diet Helper</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Diet Helper</h1>
+
+    <button id="addFoodBtn">Add Food</button>
+    <button id="manageTagsBtn">Manage Tags</button>
+
+    <!-- Food Details Dropdown -->
+    <div id="foodDetailsDropdown" class="dropdown">
+        <h3>Food Details</h3>
+        <div id="foodDetailsContent">
+            <div style="text-align: center;">
+                <img id="detailsImage" style="width: 200px; height: 200px; object-fit: cover; margin-bottom: 15px;" src="" alt="">
+                <h3 id="detailsName" style="margin: 10px 0;"></h3>
+                <div id="detailsTags" style="color: #666; margin-bottom: 15px;"></div>
+            </div>
+        </div>
+        <div class="modal-buttons">
+            <button id="deleteFoodBtn" class="btn-danger">Delete</button>
+            <button id="closeFoodDetailsBtn" class="btn-secondary">Close</button>
+        </div>
+    </div>
+
+    <!-- Add Food Dropdown -->
+    <div id="addFoodDropdown" class="dropdown">
+        <h3>Add New Food</h3>
+        <div class="form-group">
+            <input type="text" id="foodName" placeholder="Enter food name">
+            <div id="foodNameError" class="error-message hidden">Please enter food name</div>
+        </div>
+        <div class="form-group">
+            <label>Food Image:</label>
+            <input type="file" id="foodImage" accept="image/*">
+        </div>
+        <div class="form-group">
+            <label>Select Tags:</label>
+            <div id="tagsList"></div>
+        </div>
+        <div class="modal-buttons">
+            <button id="saveFoodBtn" class="btn-primary">Save Food</button>
+            <button id="cancelFoodBtn" class="btn-secondary">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Manage Tags Dropdown -->
+    <div id="manageTagsDropdown" class="dropdown">
+        <h3>Manage Tags</h3>
+        <div class="form-group">
+            <input type="text" id="newTagName" placeholder="Enter tag name">
+            <div id="tagNameError" class="error-message hidden">Please enter tag name</div>
+            <button id="addTagBtn" class="btn-primary">Add Tag</button>
+        </div>
+        <div id="existingTags"></div>
+        <div class="modal-buttons">
+            <button id="closeTagsBtn" class="btn-secondary">Close</button>
+        </div>
+    </div>
+
+    <!-- Food List -->
+    <div id="foodList">
+        <h2>Foods</h2>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
+
+style.css: 
+body { font-family: Arial, sans-serif; margin: 20px; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .dropdown { 
+            display: none; 
+            position: fixed; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            background: white; 
+            border: 2px solid #ccc; 
+            padding: 20px; 
+            z-index: 1000; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border-radius: 8px;
+            min-width: 300px;
+        }
+        .dropdown.active { display: block; }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        .modal-overlay.active { display: block; }
+        .form-group { margin: 10px 0; }
+        .form-group label { display: block; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 200px; padding: 5px; }
+        .tag-item { margin: 5px 0; padding: 5px; border: 1px solid #ddd; }
+        .tag-checkbox { margin-right: 10px; }
+        .food-item { 
+            border: 1px solid #ccc; 
+            margin: 10px; 
+            padding: 10px; 
+            display: inline-block; 
+            width: 120px; 
+            text-align: center; 
+            vertical-align: top;
+        }
+        .food-image { 
+            width: 100px; 
+            height: 100px; 
+            object-fit: cover; 
+            display: block; 
+            margin: 0 auto 10px auto;
+            cursor: pointer;
+        }
+        .food-image:hover {
+            opacity: 0.8;
+            border: 2px solid 
+#007bff;
+        }
+        .food-name {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .food-tags {
+            font-size: 12px;
+            color: #666;
+        }
+        .error-message { color: red; font-size: 12px; margin-top: 5px; }
+        .hidden { display: none; }
+
+        /* Button styles for modal actions */
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-primary {
+            background-color: 
+#007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .btn-primary:hover {
+            background-color: 
+#0056b3;
+        }
+
+        .btn-danger {
+            background-color: 
+#dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .btn-danger:hover {
+            background-color: 
+#c82333;
+        }
+
+        .btn-secondary {
+            background-color: 
+#6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .btn-secondary:hover {
+            background-color: 
+#545b62;
+        }
+        #modalOverlay {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+models:
+export class Food {
+    constructor(id, name, imageUrl, selected, tags) {
+        this.id = id;
+        this.name = name;
+        this.imageUrl = imageUrl;
+        this.selected = selected;
+        this.tags = tags;
+    }
+}
+
+app :
+
+import { CONFIG } from './config.js';
+import { Food } from './models.js';
+import { DataManager } from './data.js';
+import { UIManager } from './ui.js';
+import { ModalManager } from './modal.js';
+
+class DietHelper {
+    constructor() {
+        this.foods = [];
+        this.tags = [];
+        this.currentFoodId = null; // Track currently viewed food for deletion
+        this.dataManager = new DataManager();
+        this.uiManager = new UIManager();
+        this.modalManager = new ModalManager();
+        this.init();
+    }
+
+    async init() {
+        const result = await this.dataManager.loadData();
+        if (result.success) {
+            this.foods = result.data.foods;
+            this.tags = result.data.tags;
+        }
+        this.initializeEventListeners();
+        this.uiManager.renderFoods(this.foods, this.tags);
+    }
+
+    initializeEventListeners() {
+        // Add Food Button
+        document.getElementById('addFoodBtn').addEventListener('click', () => {
+            this.showAddFoodForm();
+        });
+
+        // Manage Tags Button
+        document.getElementById('manageTagsBtn').addEventListener('click', () => {
+            this.showManageTagsForm();
+        });
+
+        // Save Food Button
+        document.getElementById('saveFoodBtn').addEventListener('click', () => {
+            this.saveFood();
+        });
+
+        // Cancel Food Button
+        document.getElementById('cancelFoodBtn').addEventListener('click', () => {
+            this.hideAddFoodForm();
+        });
+
+        // Add Tag Button
+        document.getElementById('addTagBtn').addEventListener('click', () => {
+            this.addTag();
+        });
+
+        // Close Food Details Button
+        document.getElementById('closeFoodDetailsBtn').addEventListener('click', () => {
+            this.hideFoodDetails();
+        });
+
+        // Delete Food Button - NEW
+        document.getElementById('deleteFoodBtn').addEventListener('click', () => {
+            this.deleteFood();
+        });
+
+        // Close Tags Button
+        document.getElementById('closeTagsBtn').addEventListener('click', () => {
+            this.hideManageTagsForm();
+        });
+    }
+
+    showAddFoodForm() {
+        this.uiManager.renderTagsForSelection(this.tags);
+        this.modalManager.showAddFood();
+    }
+
+    hideAddFoodForm() {
+        this.modalManager.hideAddFood();
+        this.uiManager.clearFoodForm();
+    }
+
+    showManageTagsForm() {
+        this.uiManager.renderExistingTags(this.tags);
+        this.modalManager.showManageTags();
+    }
+
+    hideManageTagsForm() {
+        this.modalManager.hideManageTags();
+    }
+
+    showFoodDetails(foodId) {
+        const food = this.foods.find(f => f.id === foodId);
+        if (!food) return;
+
+        // Store the current food ID for deletion
+        this.currentFoodId = foodId;
+        
+        this.uiManager.showFoodDetails(food, this.tags);
+        this.modalManager.showFoodDetails();
+    }
+
+    hideFoodDetails() {
+        this.currentFoodId = null; // Clear current food ID
+        this.modalManager.hideFoodDetails();
+    }
+
+    // NEW: Delete food functionality
+    async deleteFood() {
+        if (!this.currentFoodId) return;
+
+        const food = this.foods.find(f => f.id === this.currentFoodId);
+        if (!food) return;
+
+        const confirmed = this.modalManager.showConfirmation(
+            `Are you sure you want to delete "${food.name}"? This action cannot be undone.`,
+            () => {
+                this.performDeleteFood(this.currentFoodId);
+            }
+        );
+    }
+
+    // NEW: Perform the actual food deletion
+    async performDeleteFood(foodId) {
+        try {
+            // Find the food to get image path for cleanup
+            const food = this.foods.find(f => f.id === foodId);
+            
+            // Remove from foods array
+            this.foods = this.foods.filter(f => f.id !== foodId);
+            
+            // Save updated data
+            await this.saveAllData();
+            
+            // Update UI
+            this.uiManager.renderFoods(this.foods, this.tags);
+            
+            // Close the modal
+            this.hideFoodDetails();
+            
+            // Optional: Clean up image file if using file system
+            if (food && food.imageUrl) {
+                // If you have image cleanup functionality in DataManager
+                // await this.dataManager.deleteImage(food.imageUrl);
+            }
+            
+            console.log(`Food "${food?.name}" deleted successfully`);
+            
+        } catch (error) {
+            console.error('Error deleting food:', error);
+            alert('Failed to delete food. Please try again.');
+        }
+    }
+
+    async saveFood() {
+    const formData = this.uiManager.getFoodFormData();
+    
+    if (!formData.name) {
+        this.uiManager.showError('foodNameError', CONFIG.MESSAGES.ERRORS.FOOD_NAME_REQUIRED);
+        this.uiManager.focusElement('foodName');
+        return;
+    }
+    
+    this.uiManager.hideError('foodNameError');
+
+    // FIXED: Disable save button instead of overlay
+    const saveBtn = document.getElementById('saveFoodBtn');
+    const originalText = saveBtn.textContent;
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    // Handle image
+    let imageUrl = '';
+    if (formData.image) {
+        const imageResult = await this.dataManager.saveImage(formData.image);
+        
+        if (imageResult.success) {
+            imageUrl = imageResult.path;
+        }
+    }
+
+    // Re-enable button
+    saveBtn.disabled = false;
+    saveBtn.textContent = originalText;
+
+    this.createAndSaveFood(formData.name, imageUrl, formData.tags);
+}
+
+    async createAndSaveFood(name, imageUrl, selectedTags) {
+        const newFood = new Food(
+            Date.now(),
+            name,
+            imageUrl,
+            false,
+            selectedTags
+        );
+
+        // Validate food data
+        const validation = this.dataManager.validateFood(newFood);
+        if (!validation.isValid) {
+            alert('Invalid food data: ' + validation.errors.join(', '));
+            return;
+        }
+
+        this.foods.push(newFood);
+        await this.saveAllData();
+        this.uiManager.renderFoods(this.foods, this.tags);
+        this.hideAddFoodForm();
+    }
+
+    async addTag() {
+        const formData = this.uiManager.getTagFormData();
+        
+        if (!formData.name) {
+            this.uiManager.showError('tagNameError', CONFIG.MESSAGES.ERRORS.TAG_NAME_REQUIRED);
+            this.uiManager.focusElement('newTagName');
+            return;
+        }
+        
+        this.uiManager.hideError('tagNameError');
+
+        const newTag = {
+            id: Date.now(),
+            name: formData.name
+        };
+
+        // Validate tag data
+        const validation = this.dataManager.validateTag(newTag);
+        if (!validation.isValid) {
+            alert('Invalid tag data: ' + validation.errors.join(', '));
+            return;
+        }
+
+        this.tags.push(newTag);
+        this.uiManager.clearTagForm();
+        await this.saveAllData();
+        this.uiManager.renderExistingTags(this.tags);
+    }
+
+    async deleteTag(tagId) {
+        const confirmed = this.modalManager.showConfirmation(
+            CONFIG.MESSAGES.CONFIRMATIONS.DELETE_TAG,
+            () => {
+                this.performDeleteTag(tagId);
+            }
+        );
+    }
+
+    async performDeleteTag(tagId) {
+        this.tags = this.tags.filter(tag => tag.id !== tagId);
+        // Remove tag from all foods
+        this.foods.forEach(food => {
+            food.tags = food.tags.filter(id => id !== tagId);
+        });
+        await this.saveAllData();
+        this.uiManager.renderExistingTags(this.tags);
+        // Re-render foods in case any displayed foods had this tag
+        this.uiManager.renderFoods(this.foods, this.tags);
+    }
+
+    async saveAllData() {
+        const data = {
+            foods: this.foods,
+            tags: this.tags
+        };
+        
+        const result = await this.dataManager.saveData(data);
+        if (!result.success) {
+            console.error('Failed to save data:', result.error);
+            alert(CONFIG.MESSAGES.ERRORS.SAVE_FAILED);
+        }
+    }
+}
+
+// Initialize the app
+const dietHelper = new DietHelper();
+
+// Make available for HTML onclick handlers (only this instance)
+window.dietHelper = dietHelper;
+
+config js:
+const CONFIG = {
+    // File paths and directories
+    FILES: {
+        DATA_FILE: 'data.json',
+        BACKUP_DIR: 'backups',
+        IMAGES_DIR: 'images',
+        LOGS_DIR: 'logs'
+    },
+
+    // Storage keys for browser fallback
+    STORAGE: {
+        MAIN_DATA: 'dietHelperData',
+        BACKUP_PREFIX: 'dietHelperBackup_',
+        SETTINGS: 'dietHelperSettings'
+    },
+
+    // UI Configuration
+    UI: {
+        FOOD_IMAGE_SIZE: {
+            GRID: { width: 100, height: 100 },
+            MODAL: { width: 200, height: 200 }
+        },
+        MODAL_ANIMATION_DURATION: 200,
+        GRID_COLUMNS: 'auto-fit',
+        MIN_CARD_WIDTH: 120
+    },
+
+    // Validation rules
+    VALIDATION: {
+        FOOD_NAME: {
+            MIN_LENGTH: 1,
+            MAX_LENGTH: 100,
+            REQUIRED: true
+        },
+        TAG_NAME: {
+            MIN_LENGTH: 1,
+            MAX_LENGTH: 50,
+            REQUIRED: true
+        },
+        MAX_TAGS_PER_FOOD: 10,
+        MAX_TOTAL_TAGS: 100,
+        MAX_TOTAL_FOODS: 1000
+    },
+
+    // Image handling
+    IMAGES: {
+        SUPPORTED_FORMATS: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
+        QUALITY: 0.8,
+        THUMBNAIL_SIZE: { width: 100, height: 100 }
+    },
+
+    // Default data structure
+    DEFAULTS: {
+        EMPTY_DATA: {
+            foods: [],
+            tags: []
+        },
+        NEW_FOOD: {
+            id: null,
+            name: '',
+            imageUrl: '',
+            selected: false,
+            tags: []
+        },
+        NEW_TAG: {
+            id: null,
+            name: ''
+        }
+    },
+
+    // Error messages
+    MESSAGES: {
+        ERRORS: {
+            FOOD_NAME_REQUIRED: 'Please enter food name',
+            TAG_NAME_REQUIRED: 'Please enter tag name',
+            FOOD_NAME_TOO_LONG: 'Food name is too long (max 100 characters)',
+            TAG_NAME_TOO_LONG: 'Tag name is too long (max 50 characters)',
+            INVALID_IMAGE_FORMAT: 'Unsupported image format. Please use JPG, PNG, GIF, or WebP',
+            IMAGE_TOO_LARGE: 'Image file is too large (max 5MB)',
+            SAVE_FAILED: 'Failed to save data. Please try again.',
+            LOAD_FAILED: 'Failed to load data',
+            MAX_FOODS_REACHED: 'Maximum number of foods reached (1000)',
+            MAX_TAGS_REACHED: 'Maximum number of tags reached (100)',
+            MAX_TAGS_PER_FOOD: 'Maximum 10 tags per food item',
+            DELETE_FOOD_FAILED: 'Failed to delete food. Please try again.'
+        },
+        SUCCESS: {
+            FOOD_SAVED: 'Food saved successfully',
+            TAG_SAVED: 'Tag saved successfully',
+            DATA_LOADED: 'Data loaded successfully',
+            BACKUP_CREATED: 'Backup created successfully',
+            FOOD_DELETED: 'Food deleted successfully'
+        },
+        CONFIRMATIONS: {
+            DELETE_TAG: 'Are you sure you want to delete this tag? It will be removed from all foods.',
+            DELETE_FOOD: 'Are you sure you want to delete this food item? This action cannot be undone.',
+            CLEAR_ALL_DATA: 'Are you sure you want to clear all data? This cannot be undone.',
+            RESTORE_BACKUP: 'Are you sure you want to restore from backup? Current data will be lost.'
+        }
+    },
+
+    // Feature flags
+    FEATURES: {
+        ANIMATIONS_ENABLED: true,
+        BACKUP_ENABLED: true,
+        IMAGE_COMPRESSION: true,
+        KEYBOARD_SHORTCUTS: true,
+        DARK_MODE: false,
+        EXPORT_IMPORT: true,
+        STATISTICS: false
+    },
+
+    // Keyboard shortcuts
+    SHORTCUTS: {
+        ADD_FOOD: 'Ctrl+N',
+        MANAGE_TAGS: 'Ctrl+T',
+        CLOSE_MODAL: 'Escape',
+        SAVE: 'Ctrl+S',
+        SEARCH: 'Ctrl+F',
+        DELETE: 'Delete'
+    },
+
+    // Development settings
+    DEBUG: {
+        ENABLED: false,
+        LOG_LEVEL: 'info', // 'debug', 'info', 'warn', 'error'
+        SHOW_PERFORMANCE: false
+    },
+
+    // App metadata
+    APP: {
+        NAME: 'Diet Helper',
+        VERSION: '1.0.0',
+        AUTHOR: 'Your Name',
+        DESCRIPTION: 'A simple diet management application'
+    },
+
+    // Environment detection
+    ENV: {
+        IS_ELECTRON: typeof require !== 'undefined',
+        IS_DEVELOPMENT: false // Will be set based on environment
+    }
+};
+
+// Utility functions for config
+const ConfigUtils = {
+    // Get nested config value safely
+    get(path, defaultValue = null) {
+        const keys = path.split('.');
+        let current = CONFIG;
+        
+        for (const key of keys) {
+            if (current && typeof current === 'object' && key in current) {
+                current = current[key];
+            } else {
+                return defaultValue;
+            }
+        }
+        
+        return current;
+    },
+
+    // Set nested config value
+    set(path, value) {
+        const keys = path.split('.');
+        const lastKey = keys.pop();
+        let current = CONFIG;
+        
+        for (const key of keys) {
+            if (!(key in current)) {
+                current[key] = {};
+            }
+            current = current[key];
+        }
+        
+        current[lastKey] = value;
+    },
+
+    // Validate image file
+    validateImage(file) {
+        if (!file) return { valid: false, error: 'No file provided' };
+        
+        const extension = file.name.split('.').pop().toLowerCase();
+        if (!CONFIG.IMAGES.SUPPORTED_FORMATS.includes(extension)) {
+            return { 
+                valid: false, 
+                error: CONFIG.MESSAGES.ERRORS.INVALID_IMAGE_FORMAT 
+            };
+        }
+        
+        if (file.size > CONFIG.IMAGES.MAX_FILE_SIZE) {
+            return { 
+                valid: false, 
+                error: CONFIG.MESSAGES.ERRORS.IMAGE_TOO_LARGE 
+            };
+        }
+        
+        return { valid: true };
+    },
+
+    // Validate food name
+    validateFoodName(name) {
+        if (!name || name.trim().length === 0) {
+            return { 
+                valid: false, 
+                error: CONFIG.MESSAGES.ERRORS.FOOD_NAME_REQUIRED 
+            };
+        }
+        
+        if (name.length > CONFIG.VALIDATION.FOOD_NAME.MAX_LENGTH) {
+            return { 
+                valid: false, 
+                error: CONFIG.MESSAGES.ERRORS.FOOD_NAME_TOO_LONG 
+            };
+        }
+        
+        return { valid: true };
+    },
+
+    // Validate tag name
+    validateTagName(name) {
+        if (!name || name.trim().length === 0) {
+            return { 
+                valid: false, 
+                error: CONFIG.MESSAGES.ERRORS.TAG_NAME_REQUIRED 
+            };
+        }
+        
+        if (name.length > CONFIG.VALIDATION.TAG_NAME.MAX_LENGTH) {
+            return { 
+                valid: false, 
+                error: CONFIG.MESSAGES.ERRORS.TAG_NAME_TOO_LONG 
+            };
+        }
+        
+        return { valid: true };
+    },
+
+    // Check if feature is enabled
+    isFeatureEnabled(feature) {
+        return CONFIG.FEATURES[feature] === true;
+    },
+
+    // Get file path
+    getFilePath(fileKey) {
+        return CONFIG.FILES[fileKey] || '';
+    },
+
+    // Get storage key
+    getStorageKey(keyName) {
+        return CONFIG.STORAGE[keyName] || '';
+    },
+
+    // Debug logging
+    log(level, message, data = null) {
+        if (!CONFIG.DEBUG.ENABLED) return;
+        
+        const levels = ['debug', 'info', 'warn', 'error'];
+        const currentLevelIndex = levels.indexOf(CONFIG.DEBUG.LOG_LEVEL);
+        const messageLevelIndex = levels.indexOf(level);
+        
+        if (messageLevelIndex >= currentLevelIndex) {
+            const timestamp = new Date().toISOString();
+            const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+            
+            console[level === 'debug' ? 'log' : level](logMessage, data || '');
+        }
+    }
+};
+
+// Set environment
+ConfigUtils.set('ENV.IS_DEVELOPMENT', window.location.hostname === 'localhost');
+
+// Export using ES6 modules
+export { CONFIG, ConfigUtils };
+
+modal js:
+import { CONFIG } from './config.js';
+
+export class ModalManager {
+    constructor() {
+        // FIXED: Create individual overlays for each modal type for better isolation
+        this.modals = {
+            foodDetails: {
+                modal: document.getElementById('foodDetailsDropdown'),
+                overlay: this.createOverlay('foodDetailsOverlay')
+            },
+            addFood: {
+                modal: document.getElementById('addFoodDropdown'),
+                overlay: this.createOverlay('addFoodOverlay')
+            },
+            manageTags: {
+                modal: document.getElementById('manageTagsDropdown'),
+                overlay: this.createOverlay('manageTagsOverlay')
+            }
+        };
+
+        this.activeModal = null;
+        this.initializeEventListeners();
+        this.replaceSharedOverlay();
+    }
+
+    // FIXED: Create individual overlay for each modal
+    createOverlay(id) {
+        const overlay = document.createElement('div');
+        overlay.id = id;
+        overlay.className = 'modal-overlay';
+        overlay.style.cssText = `
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        `;
+        document.body.appendChild(overlay);
+        return overlay;
+    }
+
+    // FIXED: Replace the shared overlay system
+    // FIXED: Replace the shared overlay system
+// FIXED: Replace the shared overlay system
+replaceSharedOverlay() {
+    // Don't remove the overlay, just disable its functionality
+    const oldOverlay = document.getElementById('modalOverlay');
+    if (oldOverlay) {
+        oldOverlay.style.display = 'none !important';
+        oldOverlay.style.visibility = 'hidden';
+        // Remove any existing event listeners
+        oldOverlay.replaceWith(oldOverlay.cloneNode(true));
+    }
+}
+
+    initializeEventListeners() {
+        // FIXED: Add individual click handlers for each overlay
+        Object.keys(this.modals).forEach(modalType => {
+            const { overlay } = this.modals[modalType];
+            if (overlay) {
+                overlay.addEventListener('click', () => {
+                    this.closeModal(modalType);
+                });
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeActiveModal();
+            }
+        });
+
+        // Prevent modal content clicks from closing modal
+        Object.values(this.modals).forEach(({ modal }) => {
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+        });
+    }
+
+    // FIXED: Generic method to show any modal
+    showModal(modalType) {
+    this.closeActiveModal(); // Close any open modal first
+    
+    const { modal, overlay } = this.modals[modalType];
+    if (!modal || !overlay) return;
+
+    this.activeModal = modalType;
+    
+    // FIXED: Reset modal dimensions to prevent size issues
+    modal.style.width = '';
+    modal.style.height = '';
+    modal.style.maxWidth = '90vw';
+    modal.style.maxHeight = '90vh';
+    
+    overlay.style.display = 'block';
+    overlay.classList.add('active');
+    modal.classList.add('active');
+    
+    // Prevent body scrolling when modal is open
+    document.body.style.overflow = 'hidden';
+
+    // Add animation if enabled
+    if (CONFIG.FEATURES.ANIMATIONS_ENABLED) {
+        this.animateIn(modalType);
+    }
+}
+
+    // FIXED: Generic method to hide any modal
+    hideModal(modalType) {
+        const { modal, overlay } = this.modals[modalType];
+        if (!modal || !overlay) return;
+
+        const doHide = () => {
+            overlay.style.display = 'none';
+            overlay.classList.remove('active');
+            modal.classList.remove('active');
+            
+            if (this.activeModal === modalType) {
+                this.activeModal = null;
+                document.body.style.overflow = 'auto';
+            }
+        };
+
+        if (CONFIG.FEATURES.ANIMATIONS_ENABLED) {
+            this.animateOut(modalType, doHide);
+        } else {
+            doHide();
+        }
+    }
+
+    // FIXED: Close specific modal
+    closeModal(modalType) {
+        this.hideModal(modalType);
+    }
+
+    // Show food details modal
+    showFoodDetails() {
+        this.showModal('foodDetails');
+    }
+
+    // Hide food details modal
+    hideFoodDetails() {
+        this.hideModal('foodDetails');
+    }
+
+    // Show add food modal
+    showAddFood() {
+        this.showModal('addFood');
+        
+        // Focus on first input
+        setTimeout(() => {
+            const nameInput = document.getElementById('foodName');
+            if (nameInput) nameInput.focus();
+        }, 100);
+    }
+
+    // Hide add food modal
+    hideAddFood() {
+        this.hideModal('addFood');
+    }
+
+    // Show manage tags modal
+    showManageTags() {
+        this.showModal('manageTags');
+        
+        // Focus on tag input
+        setTimeout(() => {
+            const tagInput = document.getElementById('newTagName');
+            if (tagInput) tagInput.focus();
+        }, 100);
+    }
+
+    // Hide manage tags modal
+    hideManageTags() {
+        this.hideModal('manageTags');
+    }
+
+    // Close currently active modal
+    closeActiveModal() {
+        if (this.activeModal) {
+            this.hideModal(this.activeModal);
+        }
+    }
+
+    // Check if any modal is open
+    isModalOpen() {
+        return this.activeModal !== null;
+    }
+
+    // Get currently active modal
+    getActiveModal() {
+        return this.activeModal;
+    }
+
+    // Show confirmation dialog
+    showConfirmation(message, onConfirm, onCancel = null) {
+        const confirmed = confirm(message);
+        if (confirmed && onConfirm) {
+            onConfirm();
+        } else if (!confirmed && onCancel) {
+            onCancel();
+        }
+        return confirmed;
+    }
+
+    // Show loading state in modal
+    showLoading(modalType, message = 'Loading...') {
+        const { modal } = this.modals[modalType];
+        if (modal) {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = `modalLoading_${modalType}`;
+            loadingDiv.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+            `;
+            loadingDiv.innerHTML = `<p style="color: #666;">${message}</p>`;
+            modal.style.position = 'relative';
+            modal.appendChild(loadingDiv);
+        }
+    }
+
+    // Hide loading state
+    hideLoading(modalType = null) {
+        if (modalType) {
+            const loadingDiv = document.getElementById(`modalLoading_${modalType}`);
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
+        } else {
+            // Remove all loading divs
+            Object.keys(this.modals).forEach(type => {
+                const loadingDiv = document.getElementById(`modalLoading_${type}`);
+                if (loadingDiv) {
+                    loadingDiv.remove();
+                }
+            });
+        }
+    }
+
+    // Animate modal entrance
+    animateIn(modalType) {
+        const { modal } = this.modals[modalType];
+        if (modal) {
+            modal.style.transform = 'translate(-50%, -60%) scale(0.9)';
+            modal.style.opacity = '0';
+            
+            // Trigger animation
+            requestAnimationFrame(() => {
+                modal.style.transition = `all ${CONFIG.UI.MODAL_ANIMATION_DURATION}ms ease-out`;
+                modal.style.transform = 'translate(-50%, -50%) scale(1)';
+                modal.style.opacity = '1';
+            });
+        }
+    }
+
+    // Animate modal exit
+    animateOut(modalType, callback = null) {
+        const { modal } = this.modals[modalType];
+        if (modal) {
+            modal.style.transition = `all ${CONFIG.UI.MODAL_ANIMATION_DURATION * 0.75}ms ease-in`;
+            modal.style.transform = 'translate(-50%, -60%) scale(0.9)';
+            modal.style.opacity = '0';
+            
+            setTimeout(() => {
+                modal.style.transition = '';
+                modal.style.transform = '';
+                modal.style.opacity = '';
+                if (callback) callback();
+            }, CONFIG.UI.MODAL_ANIMATION_DURATION * 0.75);
+        } else if (callback) {
+            callback();
+        }
+    }
+
+    // Enhanced show methods with animation (keeping for backward compatibility)
+    showFoodDetailsAnimated() {
+        this.showFoodDetails();
+    }
+
+    showAddFoodAnimated() {
+        this.showAddFood();
+    }
+
+    showManageTagsAnimated() {
+        this.showManageTags();
+    }
+
+    // Enhanced hide methods with animation (keeping for backward compatibility)
+    hideFoodDetailsAnimated() {
+        this.hideFoodDetails();
+    }
+
+    hideAddFoodAnimated() {
+        this.hideAddFood();
+    }
+
+    hideManageTagsAnimated() {
+        this.hideManageTags();
+    }
+
+    // FIXED: Cleanup method for proper resource management
+    destroy() {
+        // Remove created overlays
+        Object.values(this.modals).forEach(({ overlay }) => {
+            if (overlay && overlay.parentNode) {
+                overlay.parentNode.removeChild(overlay);
+            }
+        });
+        
+        // Reset body overflow
+        document.body.style.overflow = 'auto';
+        
+        this.activeModal = null;
+    }
+}
+
+ui js:
+import { CONFIG } from './config.js';
+
+export class UIManager {
+    constructor() {
+        this.elements = {
+            foodList: document.getElementById('foodList'),
+            tagsList: document.getElementById('tagsList'),
+            existingTags: document.getElementById('existingTags'),
+            detailsImage: document.getElementById('detailsImage'),
+            detailsName: document.getElementById('detailsName'),
+            detailsTags: document.getElementById('detailsTags')
+        };
+        
+        // FIXED: Track event listeners for cleanup
+        this.eventListeners = new Map();
+        this.currentFoodElements = [];
+        this.currentTagElements = [];
+    }
+
+    // FIXED: Add event listener with cleanup tracking
+    addEventListenerWithCleanup(element, event, handler, identifier) {
+        // Remove existing listener if it exists
+        this.removeEventListener(identifier);
+        
+        // Add new listener
+        element.addEventListener(event, handler);
+        
+        // Store for cleanup
+        this.eventListeners.set(identifier, {
+            element,
+            event,
+            handler
+        });
+    }
+
+    // FIXED: Remove specific event listener
+    removeEventListener(identifier) {
+        const listener = this.eventListeners.get(identifier);
+        if (listener) {
+            listener.element.removeEventListener(listener.event, listener.handler);
+            this.eventListeners.delete(identifier);
+        }
+    }
+
+    // FIXED: Clean up all event listeners
+    cleanup() {
+        this.eventListeners.forEach((listener, identifier) => {
+            listener.element.removeEventListener(listener.event, listener.handler);
+        });
+        this.eventListeners.clear();
+        this.currentFoodElements = [];
+        this.currentTagElements = [];
+    }
+
+    // FIXED: Render all foods in grid layout with proper event management
+    renderFoods(foods, tags) {
+        // Clean up existing event listeners
+        this.currentFoodElements.forEach(identifier => {
+            this.removeEventListener(identifier);
+        });
+        this.currentFoodElements = [];
+
+        this.elements.foodList.innerHTML = '<h2>Foods</h2>';
+
+        if (foods.length === 0) {
+            const emptyMessage = document.createElement('p');
+            emptyMessage.textContent = 'No foods added yet. Click "Add Food" to get started!';
+            emptyMessage.style.color = '#666';
+            emptyMessage.style.fontStyle = 'italic';
+            this.elements.foodList.appendChild(emptyMessage);
+            return;
+        }
+
+        foods.forEach(food => {
+            const foodDiv = document.createElement('div');
+            foodDiv.className = 'food-item';
+            
+            foodDiv.innerHTML = `
+                ${food.imageUrl ? 
+                    `<img src="${food.imageUrl}" class="food-image" data-food-id="${food.id}">` : 
+                    `<div class="food-image" style="background: #f0f0f0; line-height: 100px; cursor: pointer;" data-food-id="${food.id}">No Image</div>`
+                }
+                <div class="food-name">${this.escapeHtml(food.name)}</div>
+            `;
+            
+            // FIXED: Add click event listener with cleanup tracking
+            const imageElement = foodDiv.querySelector('.food-image');
+            const clickHandler = () => {
+                window.dietHelper.showFoodDetails(food.id);
+            };
+            
+            const listenerId = `food-image-${food.id}`;
+            this.addEventListenerWithCleanup(imageElement, 'click', clickHandler, listenerId);
+            this.currentFoodElements.push(listenerId);
+            
+            this.elements.foodList.appendChild(foodDiv);
+        });
+    }
+
+    // Render tags for selection in food form
+    renderTagsForSelection(tags) {
+        this.elements.tagsList.innerHTML = '';
+
+        if (tags.length === 0) {
+            const noTagsMsg = document.createElement('p');
+            noTagsMsg.textContent = 'No tags available. Add some tags first!';
+            noTagsMsg.style.color = '#666';
+            noTagsMsg.style.fontSize = '12px';
+            this.elements.tagsList.appendChild(noTagsMsg);
+            return;
+        }
+
+        tags.forEach(tag => {
+            const tagDiv = document.createElement('div');
+            tagDiv.className = 'tag-item';
+            tagDiv.innerHTML = `
+                <input type="checkbox" class="tag-checkbox" value="${tag.id}" id="tag_${tag.id}">
+                <label for="tag_${tag.id}">${this.escapeHtml(tag.name)}</label>
+            `;
+            this.elements.tagsList.appendChild(tagDiv);
+        });
+    }
+
+    // FIXED: Render existing tags in manage tags form with proper event management
+    renderExistingTags(tags) {
+        // Clean up existing tag event listeners
+        this.currentTagElements.forEach(identifier => {
+            this.removeEventListener(identifier);
+        });
+        this.currentTagElements = [];
+
+        this.elements.existingTags.innerHTML = '';
+
+        if (tags.length === 0) {
+            const noTagsMsg = document.createElement('p');
+            noTagsMsg.textContent = 'No tags created yet.';
+            noTagsMsg.style.color = '#666';
+            noTagsMsg.style.fontSize = '12px';
+            this.elements.existingTags.appendChild(noTagsMsg);
+            return;
+        }
+
+        tags.forEach(tag => {
+            const tagDiv = document.createElement('div');
+            tagDiv.className = 'tag-item';
+            tagDiv.innerHTML = `
+                <span>${this.escapeHtml(tag.name)}</span>
+                <button class="delete-tag-btn" data-tag-id="${tag.id}" style="margin-left: 10px; padding: 2px 8px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">Delete</button>
+            `;
+            
+            // FIXED: Add click event listener with cleanup tracking
+            const deleteBtn = tagDiv.querySelector('.delete-tag-btn');
+            const clickHandler = () => {
+                window.dietHelper.deleteTag(tag.id);
+            };
+            
+            const listenerId = `delete-tag-${tag.id}`;
+            this.addEventListenerWithCleanup(deleteBtn, 'click', clickHandler, listenerId);
+            this.currentTagElements.push(listenerId);
+            
+            this.elements.existingTags.appendChild(tagDiv);
+        });
+    }
+
+    // Show food details in modal
+    showFoodDetails(food, tags) {
+        const tagNames = food.tags.map(tagId => {
+            const tag = tags.find(t => t.id === tagId);
+            return tag ? tag.name : '';
+        }).filter(name => name);
+
+        // Populate details
+        this.elements.detailsImage.src = food.imageUrl || '';
+        this.elements.detailsImage.style.display = food.imageUrl ? 'block' : 'none';
+        this.elements.detailsImage.style.width = CONFIG.UI.FOOD_IMAGE_SIZE.MODAL.width + 'px';
+        this.elements.detailsImage.style.height = CONFIG.UI.FOOD_IMAGE_SIZE.MODAL.height + 'px';
+        
+        if (!food.imageUrl) {
+            // Show placeholder for no image
+            this.elements.detailsImage.style.display = 'block';
+            this.elements.detailsImage.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+        }
+        
+        this.elements.detailsName.textContent = food.name;
+        this.elements.detailsTags.textContent = tagNames.length > 0 ? `Tags: ${tagNames.join(', ')}` : 'No tags';
+    }
+
+    // Clear food form
+    clearFoodForm() {
+        const nameField = document.getElementById('foodName');
+        const imageField = document.getElementById('foodImage');
+        const errorDiv = document.getElementById('foodNameError');
+        
+        if (nameField) nameField.value = '';
+        if (imageField) imageField.value = '';
+        if (errorDiv) errorDiv.classList.add('hidden');
+        
+        // Clear tag selections
+        const checkboxes = document.querySelectorAll('.tag-checkbox');
+        checkboxes.forEach(cb => cb.checked = false);
+    }
+
+    // Clear tag form
+    clearTagForm() {
+        const tagField = document.getElementById('newTagName');
+        const errorDiv = document.getElementById('tagNameError');
+        
+        if (tagField) tagField.value = '';
+        if (errorDiv) errorDiv.classList.add('hidden');
+    }
+
+    // Show/hide error messages
+    showError(elementId, message = null) {
+        const errorDiv = document.getElementById(elementId);
+        if (errorDiv) {
+            // Use provided message or default from config
+            const errorMessage = message || CONFIG.MESSAGES.ERRORS.FOOD_NAME_REQUIRED;
+            errorDiv.textContent = errorMessage;
+            errorDiv.classList.remove('hidden');
+        }
+    }
+
+    hideError(elementId) {
+        const errorDiv = document.getElementById(elementId);
+        if (errorDiv) {
+            errorDiv.classList.add('hidden');
+        }
+    }
+
+    // Get selected tags from checkboxes
+    getSelectedTags() {
+        const selectedTags = [];
+        const checkboxes = document.querySelectorAll('.tag-checkbox:checked');
+        checkboxes.forEach(cb => {
+            selectedTags.push(parseInt(cb.value));
+        });
+        return selectedTags;
+    }
+
+    // Get form input values
+    getFoodFormData() {
+        return {
+            name: document.getElementById('foodName')?.value.trim() || '',
+            image: document.getElementById('foodImage')?.files[0] || null,
+            tags: this.getSelectedTags()
+        };
+    }
+
+    getTagFormData() {
+        return {
+            name: document.getElementById('newTagName')?.value.trim() || ''
+        };
+    }
+
+    // Utility function to escape HTML
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Show loading state
+    showLoading(elementId, message = 'Loading...') {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.innerHTML = `<p style="text-align: center; color: #666;">${message}</p>`;
+        }
+    }
+
+    // Focus on element
+    focusElement(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            setTimeout(() => element.focus(), 100);
+        }
+    }
+
+    // FIXED: Cleanup method to be called when UIManager is destroyed
+    destroy() {
+        this.cleanup();
+    }
+}
+
+data js:
+import { CONFIG, ConfigUtils } from './config.js';
+
+export class DataManager {
+    constructor() {
+    this.dataFile = CONFIG.FILES.DATA_FILE;
+    this.imagesDir = CONFIG.FILES.IMAGES_DIR;
+    this.hiddenCanvas = null; // ADD THIS LINE
+}
+
+    // Save data to JSON file
+    async saveData(data) {
+        try {
+            if (typeof require !== 'undefined') {
+                // Electron environment
+                const { ipcRenderer } = require('electron');
+                const result = await ipcRenderer.invoke('save-data', data);
+                return result;
+            } else {
+                // Browser fallback
+                localStorage.setItem(CONFIG.STORAGE.MAIN_DATA, JSON.stringify(data));
+                return { success: true };
+            }
+        } catch (error) {
+            console.error('Error saving data:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Load data from JSON file
+    async loadData() {
+        try {
+            if (typeof require !== 'undefined') {
+                // Electron environment
+                const { ipcRenderer } = require('electron');
+                const data = await ipcRenderer.invoke('load-data');
+                return {
+                    success: true,
+                    data: {
+                        foods: data.foods || [],
+                        tags: data.tags || []
+                    }
+                };
+            } else {
+                // Browser fallback
+                const data = JSON.parse(localStorage.getItem(CONFIG.STORAGE.MAIN_DATA) || '{}');
+                return {
+                    success: true,
+                    data: {
+                        foods: data.foods || [],
+                        tags: data.tags || []
+                    }
+                };
+            }
+        } catch (error) {
+            console.error('Error loading data:', error);
+            return {
+                success: false,
+                data: { foods: [], tags: [] },
+                error: error.message
+            };
+        }
+    }
+
+    // Save image file - FIXED: Now converts to base64 for persistence
+    async saveImage(imageFile) {
+        try {
+            if (!imageFile) {
+                return { success: false, error: 'No image file provided' };
+            }
+
+            // Validate image using ConfigUtils
+            const validation = ConfigUtils.validateImage(imageFile);
+            if (!validation.valid) {
+                return { success: false, error: validation.error };
+            }
+
+            if (typeof require !== 'undefined') {
+                // Electron environment - save image to file system
+                const reader = new FileReader();
+                
+                return new Promise((resolve) => {
+                    reader.onload = async (e) => {
+                        try {
+                            const { ipcRenderer } = require('electron');
+                            const fileName = `food_${Date.now()}.${imageFile.name.split('.').pop()}`;
+                            const result = await ipcRenderer.invoke('save-image', e.target.result, fileName);
+                            resolve(result);
+                        } catch (error) {
+                            resolve({ success: false, error: error.message });
+                        }
+                    };
+                    reader.readAsDataURL(imageFile);
+                });
+            } else {
+                // Browser fallback - convert to base64 for localStorage persistence
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            // Optionally compress image if it's too large
+                            const base64Data = e.target.result;
+                            if (CONFIG.FEATURES.IMAGE_COMPRESSION && base64Data.length > 500000) { // ~375KB
+                                this.compressImage(base64Data, imageFile.type)
+                                    .then(compressedData => {
+                                        resolve({ success: true, path: compressedData });
+                                    })
+                                    .catch(error => {
+                                        console.warn('Image compression failed, using original:', error);
+                                        resolve({ success: true, path: base64Data });
+                                    });
+                            } else {
+                                resolve({ success: true, path: base64Data });
+                            }
+                        } catch (error) {
+                            resolve({ success: false, error: error.message });
+                        }
+                    };
+                    reader.onerror = () => {
+                        resolve({ success: false, error: 'Failed to read image file' });
+                    };
+                    reader.readAsDataURL(imageFile);
+                });
+            }
+        } catch (error) {
+            console.error('Error saving image:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Compress image to reduce storage size
+    async compressImage(base64Data, mimeType) {
+    return new Promise((resolve, reject) => {
+        // FIXED: Create hidden canvas to prevent visual glitches
+        if (!this.hiddenCanvas) {
+            this.hiddenCanvas = document.createElement('canvas');
+            this.hiddenCanvas.style.cssText = `
+                position: absolute;
+                left: -9999px;
+                top: -9999px;
+                visibility: hidden;
+            `;
+            document.body.appendChild(this.hiddenCanvas);
+        }
+        
+        const canvas = this.hiddenCanvas; // Use hidden canvas instead of creating new one
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = () => {
+            // Calculate new dimensions while maintaining aspect ratio
+            const maxWidth = 800;
+            const maxHeight = 600;
+            let { width, height } = img;
+            
+            if (width > height) {
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                }
+            } else {
+                if (height > maxHeight) {
+                    width = (width * maxHeight) / height;
+                    height = maxHeight;
+                }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Draw and compress
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedData = canvas.toDataURL(mimeType || 'image/jpeg', CONFIG.IMAGES.QUALITY);
+            resolve(compressedData);
+        };
+        
+        img.onerror = () => reject(new Error('Failed to load image for compression'));
+        img.src = base64Data;
+    });
+}
+
+    // Validate food data
+    validateFood(foodData) {
+        const errors = [];
+
+        const nameValidation = ConfigUtils.validateFoodName(foodData.name);
+        if (!nameValidation.valid) {
+            errors.push(nameValidation.error);
+        }
+
+        if (!foodData.id || typeof foodData.id !== 'number') {
+            errors.push('Food ID is required and must be a number');
+        }
+
+        if (foodData.tags && !Array.isArray(foodData.tags)) {
+            errors.push('Tags must be an array');
+        }
+
+        if (foodData.tags && foodData.tags.length > CONFIG.VALIDATION.MAX_TAGS_PER_FOOD) {
+            errors.push(CONFIG.MESSAGES.ERRORS.MAX_TAGS_PER_FOOD);
+        }
+
+        return {
+            isValid: errors.length === 0,
+            errors: errors
+        };
+    }
+
+    // Validate tag data
+    validateTag(tagData) {
+        const errors = [];
+
+        const nameValidation = ConfigUtils.validateTagName(tagData.name);
+        if (!nameValidation.valid) {
+            errors.push(nameValidation.error);
+        }
+
+        if (!tagData.id || typeof tagData.id !== 'number') {
+            errors.push('Tag ID is required and must be a number');
+        }
+
+        return {
+            isValid: errors.length === 0,
+            errors: errors
+        };
+    }
+
+    // Create backup of current data
+    async createBackup() {
+        try {
+            const loadResult = await this.loadData();
+            if (!loadResult.success) {
+                return { success: false, error: 'Failed to load current data for backup' };
+            }
+
+            const backupData = {
+                ...loadResult.data,
+                backupDate: new Date().toISOString()
+            };
+
+            if (typeof require !== 'undefined') {
+                const { ipcRenderer } = require('electron');
+                const backupFileName = `backup_${Date.now()}.json`;
+                // You'd need to add a backup IPC handler in main.js
+                // const result = await ipcRenderer.invoke('create-backup', backupData, backupFileName);
+                // return result;
+                
+                // For now, just return success
+                return { success: true, message: 'Backup feature needs IPC handler implementation' };
+            } else {
+                localStorage.setItem(`${CONFIG.STORAGE.BACKUP_PREFIX}${Date.now()}`, JSON.stringify(backupData));
+                return { success: true, message: 'Backup created in localStorage' };
+            }
+        } catch (error) {
+            console.error('Error creating backup:', error);
+            return { success: false, error: error.message };
+        }
+    }
+}
+
+// Export for use in other files
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = DataManager;
+} else {
+    window.DataManager = DataManager;
+}
+
+first of all just get familiar with my code
+
+
+okay but from now on when i ask you improvement implementation dont give me full code files ok? 
+just give me needed part and where i have to add or replace in which file and in which section like 
+after that function before that function in that funcvtion ect right?
+
+
+now i want to upgrade my project by adding category system
+first of all my project has now one main container div foodlist named and remove that,
+html has to be contains these 2 buttons: manage tags ,add category
+
+and implement add category button's functionality:
+if i click on this button it creates category div with 3 button :
++ button in top left corner : this is add foods button and if i click this modal form pops and i can add foods and click save and that food has to be saved in that container displayed in that container
+
+rename button on top right corner: it renames containers default name
+delete button on beside of rename button: it deletes that whole container with its food together
+
+so everytime i click add caategory it creates container that i can add food on it
+and i can click and create many as i wanted there is no limit for container
+
+first dont apply any fancy ui style or any unneccessary functions that can affect performance  i need solid working functionality
