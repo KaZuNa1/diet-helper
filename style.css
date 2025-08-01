@@ -109,3 +109,15 @@ body { font-family: Arial, sans-serif; margin: 20px; }
     display: none !important;
     visibility: hidden !important;
 }
+
+/* Inline editing styles */
+span[id^="categoryName-"]:hover {
+    background-color: #f0f0f0;
+    border-radius: 3px;
+}
+
+input[type="text"] {
+    border: 1px solid #007bff;
+    border-radius: 3px;
+    outline: none;
+}

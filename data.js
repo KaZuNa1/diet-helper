@@ -27,39 +27,41 @@ export class DataManager {
     }
 
     // Load data from JSON file
-    async loadData() {
-        try {
-            if (typeof require !== 'undefined') {
-                // Electron environment
-                const { ipcRenderer } = require('electron');
-                const data = await ipcRenderer.invoke('load-data');
-                return {
-                    success: true,
-                    data: {
-                        foods: data.foods || [],
-                        tags: data.tags || []
-                    }
-                };
-            } else {
-                // Browser fallback
-                const data = JSON.parse(localStorage.getItem(CONFIG.STORAGE.MAIN_DATA) || '{}');
-                return {
-                    success: true,
-                    data: {
-                        foods: data.foods || [],
-                        tags: data.tags || []
-                    }
-                };
-            }
-        } catch (error) {
-            console.error('Error loading data:', error);
+   async loadData() {
+    try {
+        if (typeof require !== 'undefined') {
+            // Electron environment
+            const { ipcRenderer } = require('electron');
+            const data = await ipcRenderer.invoke('load-data');
             return {
-                success: false,
-                data: { foods: [], tags: [] },
-                error: error.message
+                success: true,
+                data: {
+                    foods: data.foods || [],
+                    tags: data.tags || [],
+                    categories: data.categories || []
+                }
+            };
+        } else {
+            // Browser fallback
+            const data = JSON.parse(localStorage.getItem(CONFIG.STORAGE.MAIN_DATA) || '{}');
+            return {
+                success: true,
+                data: {
+                    foods: data.foods || [],
+                    tags: data.tags || [],
+                    categories: data.categories || []
+                }
             };
         }
+    } catch (error) {
+        console.error('Error loading data:', error);
+        return {
+            success: false,
+            data: { foods: [], tags: [], categories: [] },
+            error: error.message
+        };
     }
+}
 
     // Save image file - FIXED: Now converts to base64 for persistence
     async saveImage(imageFile) {

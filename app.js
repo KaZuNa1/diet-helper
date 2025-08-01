@@ -1,5 +1,5 @@
 import { CONFIG } from './config.js';
-import { Food } from './models.js';
+import { Food, Category } from './models.js';
 import { DataManager } from './data.js';
 import { UIManager } from './ui.js';
 import { ModalManager } from './modal.js';
@@ -8,6 +8,8 @@ class DietHelper {
     constructor() {
         this.foods = [];
         this.tags = [];
+        this.categories = [];
+this.currentCategoryId = null;
         this.currentFoodId = null; // Track currently viewed food for deletion
         this.dataManager = new DataManager();
         this.uiManager = new UIManager();
@@ -20,21 +22,24 @@ class DietHelper {
         if (result.success) {
             this.foods = result.data.foods;
             this.tags = result.data.tags;
+            this.categories = result.data.categories || [];
+this.uiManager.renderCategories(this.categories, this.tags);
         }
         this.initializeEventListeners();
-        this.uiManager.renderFoods(this.foods, this.tags);
+    
     }
 
     initializeEventListeners() {
-        // Add Food Button
-        document.getElementById('addFoodBtn').addEventListener('click', () => {
-            this.showAddFoodForm();
-        });
-
+    
         // Manage Tags Button
         document.getElementById('manageTagsBtn').addEventListener('click', () => {
             this.showManageTagsForm();
         });
+
+        // Add Category Button
+document.getElementById('addCategoryBtn').addEventListener('click', () => {
+    this.addCategory();
+});
 
         // Save Food Button
         document.getElementById('saveFoodBtn').addEventListener('click', () => {
@@ -67,10 +72,11 @@ class DietHelper {
         });
     }
 
-    showAddFoodForm() {
-        this.uiManager.renderTagsForSelection(this.tags);
-        this.modalManager.showAddFood();
-    }
+    showAddFoodForm(categoryId = null) {
+    this.currentCategoryId = categoryId;
+    this.uiManager.renderTagsForSelection(this.tags);
+    this.modalManager.showAddFood();
+}
 
     hideAddFoodForm() {
         this.modalManager.hideAddFood();
@@ -119,35 +125,25 @@ class DietHelper {
 
     // NEW: Perform the actual food deletion
     async performDeleteFood(foodId) {
-        try {
-            // Find the food to get image path for cleanup
-            const food = this.foods.find(f => f.id === foodId);
-            
-            // Remove from foods array
-            this.foods = this.foods.filter(f => f.id !== foodId);
-            
-            // Save updated data
-            await this.saveAllData();
-            
-            // Update UI
-            this.uiManager.renderFoods(this.foods, this.tags);
-            
-            // Close the modal
-            this.hideFoodDetails();
-            
-            // Optional: Clean up image file if using file system
-            if (food && food.imageUrl) {
-                // If you have image cleanup functionality in DataManager
-                // await this.dataManager.deleteImage(food.imageUrl);
+    try {
+        if (this.currentCategoryId) {
+            const category = this.categories.find(c => c.id === this.currentCategoryId);
+            if (category) {
+                category.foods = category.foods.filter(f => f.id !== foodId);
             }
-            
-            console.log(`Food "${food?.name}" deleted successfully`);
-            
-        } catch (error) {
-            console.error('Error deleting food:', error);
-            alert('Failed to delete food. Please try again.');
+        } else {
+            this.foods = this.foods.filter(f => f.id !== foodId);
         }
+        
+        await this.saveAllData();
+        this.uiManager.renderCategories(this.categories, this.tags);
+        this.hideFoodDetails();
+        
+    } catch (error) {
+        console.error('Error deleting food:', error);
+        alert('Failed to delete food. Please try again.');
     }
+}
 
     async saveFood() {
     const formData = this.uiManager.getFoodFormData();
@@ -199,10 +195,18 @@ class DietHelper {
             return;
         }
 
-        this.foods.push(newFood);
-        await this.saveAllData();
-        this.uiManager.renderFoods(this.foods, this.tags);
-        this.hideAddFoodForm();
+       if (this.currentCategoryId) {
+    const category = this.categories.find(c => c.id === this.currentCategoryId);
+    if (category) {
+        category.foods.push(newFood);
+    }
+} else {
+    this.foods.push(newFood);
+}
+
+await this.saveAllData();
+this.uiManager.renderCategories(this.categories, this.tags);
+this.hideAddFoodForm();
     }
 
     async addTag() {
@@ -255,10 +259,98 @@ class DietHelper {
         this.uiManager.renderFoods(this.foods, this.tags);
     }
 
+    addCategory() {
+    const newCategory = new Category(
+        Date.now(),
+        `Category ${this.categories.length + 1}`,
+        []
+    );
+    this.categories.push(newCategory);
+    this.saveAllData();
+    this.uiManager.renderCategories(this.categories, this.tags);
+}
+
+startRenameCategory(categoryId) {
+    const category = this.categories.find(c => c.id === categoryId);
+    if (!category) return;
+    
+    const nameSpan = document.getElementById(`categoryName-${categoryId}`);
+    if (!nameSpan) return;
+    
+    // Store original name in case of cancel
+    const originalName = category.name;
+    
+    // Create input element
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = category.name;
+    input.style.cssText = 'font-weight: bold; padding: 2px 5px; margin-right: 10px;';
+    
+    // Replace span with input
+    nameSpan.parentNode.replaceChild(input, nameSpan);
+    input.focus();
+    input.select();
+    
+    // Handle save on Enter or blur
+    const saveRename = () => {
+        const newName = input.value.trim();
+        if (newName && newName !== originalName) {
+            category.name = newName;
+            this.saveAllData();
+        }
+        this.uiManager.renderCategories(this.categories, this.tags);
+    };
+    
+    // Handle cancel on Escape
+    const cancelRename = (e) => {
+        if (e.key === 'Escape') {
+            this.uiManager.renderCategories(this.categories, this.tags);
+        }
+    };
+    
+    input.addEventListener('blur', saveRename);
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            saveRename();
+        } else if (e.key === 'Escape') {
+            cancelRename(e);
+        }
+    });
+}
+
+renameCategory(categoryId) {
+    // This is now just an alias for startRenameCategory
+    this.startRenameCategory(categoryId);
+}
+
+deleteCategory(categoryId) {
+    if (confirm('Delete this category and all its foods?')) {
+        this.categories = this.categories.filter(c => c.id !== categoryId);
+        this.saveAllData();
+        this.uiManager.renderCategories(this.categories, this.tags);
+    }
+}
+
+showCategoryFoodDetails(categoryId, foodId) {
+    const category = this.categories.find(c => c.id === categoryId);
+    if (!category) return;
+    
+    const food = category.foods.find(f => f.id === foodId);
+    if (!food) return;
+
+    this.currentFoodId = foodId;
+    this.currentCategoryId = categoryId;
+    
+    this.uiManager.showFoodDetails(food, this.tags);
+    this.modalManager.showFoodDetails();
+}
+
     async saveAllData() {
         const data = {
             foods: this.foods,
-            tags: this.tags
+            tags: this.tags,
+            categories: this.categories
         };
         
         const result = await this.dataManager.saveData(data);

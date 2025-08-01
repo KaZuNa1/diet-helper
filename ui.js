@@ -3,13 +3,13 @@ import { CONFIG } from './config.js';
 export class UIManager {
     constructor() {
         this.elements = {
-            foodList: document.getElementById('foodList'),
-            tagsList: document.getElementById('tagsList'),
-            existingTags: document.getElementById('existingTags'),
-            detailsImage: document.getElementById('detailsImage'),
-            detailsName: document.getElementById('detailsName'),
-            detailsTags: document.getElementById('detailsTags')
-        };
+    categoriesContainer: document.getElementById('categoriesContainer'),
+    tagsList: document.getElementById('tagsList'),
+    existingTags: document.getElementById('existingTags'),
+    detailsImage: document.getElementById('detailsImage'),
+    detailsName: document.getElementById('detailsName'),
+    detailsTags: document.getElementById('detailsTags')
+};
         
         // FIXED: Track event listeners for cleanup
         this.eventListeners = new Map();
@@ -53,49 +53,67 @@ export class UIManager {
     }
 
     // FIXED: Render all foods in grid layout with proper event management
-    renderFoods(foods, tags) {
-        // Clean up existing event listeners
-        this.currentFoodElements.forEach(identifier => {
-            this.removeEventListener(identifier);
-        });
-        this.currentFoodElements = [];
+    renderCategories(categories, tags) {
+    this.cleanup();
+    this.elements.categoriesContainer.innerHTML = '';
 
-        this.elements.foodList.innerHTML = '<h2>Foods</h2>';
-
-        if (foods.length === 0) {
-            const emptyMessage = document.createElement('p');
-            emptyMessage.textContent = 'No foods added yet. Click "Add Food" to get started!';
-            emptyMessage.style.color = '#666';
-            emptyMessage.style.fontStyle = 'italic';
-            this.elements.foodList.appendChild(emptyMessage);
-            return;
+    categories.forEach(category => {
+        const categoryDiv = document.createElement('div');
+        categoryDiv.className = 'category-container';
+        categoryDiv.style.cssText = 'border: 1px solid #ccc; margin: 10px; padding: 10px;';
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.style.cssText = 'display: flex; justify-content: space-between; margin-bottom: 10px;';
+        
+        headerDiv.innerHTML = `
+            <button onclick="window.dietHelper.showAddFoodForm(${category.id})" style="padding: 5px 10px;">+ Add Food</button>
+            <div>
+                <span id="categoryName-${category.id}" 
+      style="margin-right: 10px; font-weight: bold; cursor: pointer; padding: 2px 5px;" 
+      ondblclick="window.dietHelper.startRenameCategory(${category.id})"
+      title="Double-click to rename">${this.escapeHtml(category.name)}</span>
+<button onclick="window.dietHelper.startRenameCategory(${category.id})" style="padding: 5px 10px;">Rename</button>
+                <button onclick="window.dietHelper.deleteCategory(${category.id})" style="padding: 5px 10px;">Delete</button>
+            </div>
+        `;
+        
+        categoryDiv.appendChild(headerDiv);
+        
+        const foodsDiv = document.createElement('div');
+        foodsDiv.style.cssText = 'display: flex; flex-wrap: wrap;';
+        
+        if (category.foods.length === 0) {
+            foodsDiv.innerHTML = '<p style="color: #666;">No foods in this category</p>';
+        } else {
+            category.foods.forEach(food => {
+                const foodDiv = document.createElement('div');
+                foodDiv.className = 'food-item';
+                
+                foodDiv.innerHTML = `
+                    ${food.imageUrl ? 
+                        `<img src="${food.imageUrl}" class="food-image" data-category-id="${category.id}" data-food-id="${food.id}">` : 
+                        `<div class="food-image" style="background: #f0f0f0; line-height: 100px; cursor: pointer;" data-category-id="${category.id}" data-food-id="${food.id}">No Image</div>`
+                    }
+                    <div class="food-name">${this.escapeHtml(food.name)}</div>
+                `;
+                
+                const imageElement = foodDiv.querySelector('.food-image');
+                const clickHandler = () => {
+                    window.dietHelper.showCategoryFoodDetails(category.id, food.id);
+                };
+                
+                const listenerId = `food-image-${category.id}-${food.id}`;
+                this.addEventListenerWithCleanup(imageElement, 'click', clickHandler, listenerId);
+                this.currentFoodElements.push(listenerId);
+                
+                foodsDiv.appendChild(foodDiv);
+            });
         }
-
-        foods.forEach(food => {
-            const foodDiv = document.createElement('div');
-            foodDiv.className = 'food-item';
-            
-            foodDiv.innerHTML = `
-                ${food.imageUrl ? 
-                    `<img src="${food.imageUrl}" class="food-image" data-food-id="${food.id}">` : 
-                    `<div class="food-image" style="background: #f0f0f0; line-height: 100px; cursor: pointer;" data-food-id="${food.id}">No Image</div>`
-                }
-                <div class="food-name">${this.escapeHtml(food.name)}</div>
-            `;
-            
-            // FIXED: Add click event listener with cleanup tracking
-            const imageElement = foodDiv.querySelector('.food-image');
-            const clickHandler = () => {
-                window.dietHelper.showFoodDetails(food.id);
-            };
-            
-            const listenerId = `food-image-${food.id}`;
-            this.addEventListenerWithCleanup(imageElement, 'click', clickHandler, listenerId);
-            this.currentFoodElements.push(listenerId);
-            
-            this.elements.foodList.appendChild(foodDiv);
-        });
-    }
+        
+        categoryDiv.appendChild(foodsDiv);
+        this.elements.categoriesContainer.appendChild(categoryDiv);
+    });
+}
 
     // Render tags for selection in food form
     renderTagsForSelection(tags) {

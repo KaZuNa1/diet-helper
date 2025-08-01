@@ -7,3 +7,11 @@ export class Food {
         this.tags = tags;
     }
 }
+
+export class Category {
+    constructor(id, name, foods) {
+        this.id = id;
+        this.name = name;
+        this.foods = foods || [];
+    }
+}
