@@ -110,34 +110,64 @@ document.getElementById('addCategoryBtn').addEventListener('click', () => {
 
     // NEW: Delete food functionality
     async deleteFood() {
-        if (!this.currentFoodId) return;
-
-        const food = this.foods.find(f => f.id === this.currentFoodId);
-        if (!food) return;
-
-        const confirmed = this.modalManager.showConfirmation(
-            `Are you sure you want to delete "${food.name}"? This action cannot be undone.`,
-            () => {
-                this.performDeleteFood(this.currentFoodId);
-            }
-        );
+    console.log('Delete button clicked');
+    console.log('Current food ID:', this.currentFoodId);
+    console.log('Current category ID:', this.currentCategoryId);
+    
+    if (!this.currentFoodId) {
+        console.log('No food ID found');
+        return;
     }
 
+    let foodName = 'this food';
+    
+    if (this.currentCategoryId) {
+        const category = this.categories.find(c => c.id === this.currentCategoryId);
+        const food = category?.foods.find(f => f.id === this.currentFoodId);
+        foodName = food?.name || 'this food';
+    } else {
+        const food = this.foods.find(f => f.id === this.currentFoodId);
+        foodName = food?.name || 'this food';
+    }
+
+    const confirmed = confirm(`Are you sure you want to delete "${foodName}"? This action cannot be undone.`);
+    
+    if (confirmed) {
+        console.log('User confirmed deletion');
+        this.performDeleteFood(this.currentFoodId);
+    } else {
+        console.log('User cancelled deletion');
+    }
+}
+
     // NEW: Perform the actual food deletion
-    async performDeleteFood(foodId) {
+  async performDeleteFood(foodId) {
     try {
+        let food = null;
+        
         if (this.currentCategoryId) {
             const category = this.categories.find(c => c.id === this.currentCategoryId);
             if (category) {
+                food = category.foods.find(f => f.id === foodId);
                 category.foods = category.foods.filter(f => f.id !== foodId);
             }
         } else {
+            food = this.foods.find(f => f.id === foodId);
             this.foods = this.foods.filter(f => f.id !== foodId);
+        }
+        
+        // Delete the image file if it exists and is not base64
+        if (food && food.imageUrl && !food.imageUrl.startsWith('data:')) {
+            console.log('Attempting to delete image:', food.imageUrl);
+            const deleteResult = await this.dataManager.deleteImage(food.imageUrl);
+            console.log('Delete image result:', deleteResult);
         }
         
         await this.saveAllData();
         this.uiManager.renderCategories(this.categories, this.tags);
         this.hideFoodDetails();
+        
+        console.log(`Food "${food?.name}" deleted successfully`);
         
     } catch (error) {
         console.error('Error deleting food:', error);
@@ -333,6 +363,7 @@ deleteCategory(categoryId) {
 }
 
 showCategoryFoodDetails(categoryId, foodId) {
+     console.log('Showing food details - Category:', categoryId, 'Food:', foodId);
     const category = this.categories.find(c => c.id === categoryId);
     if (!category) return;
     

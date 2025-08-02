@@ -42,7 +42,32 @@
     {
       "id": 1753615603326,
       "name": "sda"
+    },
+    {
+      "id": 1754105315529,
+      "name": "123"
     }
   ],
-  "categories": []
+  "categories": [
+    {
+      "id": 1754039209144,
+      "name": "Category 1",
+      "foods": []
+    },
+    {
+      "id": 1754039435647,
+      "name": "Category 2",
+      "foods": []
+    },
+    {
+      "id": 1754039435876,
+      "name": "Category 3",
+      "foods": []
+    },
+    {
+      "id": 1754105268724,
+      "name": "Category 4",
+      "foods": []
+    }
+  ]
 }

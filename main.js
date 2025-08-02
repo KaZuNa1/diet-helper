@@ -66,8 +66,33 @@ ipcMain.handle('save-image', async (event, imageData, fileName) => {
         const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
         fs.writeFileSync(imagePath, base64Data, 'base64');
         
-        return { success: true, path: imagePath };
+        // Return relative path instead of absolute path
+        return { success: true, path: path.join('images', fileName) };
     } catch (error) {
+        return { success: false, error: error.message };
+    }
+});
+
+ipcMain.handle('delete-image', async (event, imagePath) => {
+    try {
+        const fs = require('fs').promises;
+        const path = require('path');
+        
+        // Construct full path
+        const fullPath = path.join(__dirname, imagePath);
+        
+        // Check if file exists
+        try {
+            await fs.access(fullPath);
+            // Delete the file
+            await fs.unlink(fullPath);
+            return { success: true };
+        } catch (err) {
+            // File doesn't exist, that's okay
+            return { success: true };
+        }
+    } catch (error) {
+        console.error('Error deleting image file:', error);
         return { success: false, error: error.message };
     }
 });

@@ -129,6 +129,32 @@ export class DataManager {
         }
     }
 
+    async deleteImage(imagePath) {
+    try {
+        if (!imagePath) return { success: true };
+        
+        if (typeof require !== 'undefined') {
+            // Electron environment - delete actual file
+            try {
+                const { ipcRenderer } = require('electron');
+                const result = await ipcRenderer.invoke('delete-image', imagePath);
+                return result;
+            } catch (electronError) {
+                // If handler not registered, just log warning
+                console.warn('Image deletion not implemented in Electron main process');
+                return { success: true, warning: 'Image handler not registered' };
+            }
+        } else {
+            // Browser environment - no file to delete (base64 stored in localStorage)
+            return { success: true };
+        }
+    } catch (error) {
+        console.error('Error deleting image:', error);
+        // Don't fail the food deletion if image deletion fails
+        return { success: true, warning: 'Image file could not be deleted' };
+    }
+}
+
     // Compress image to reduce storage size
     async compressImage(base64Data, mimeType) {
     return new Promise((resolve, reject) => {
