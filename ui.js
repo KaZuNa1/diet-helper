@@ -53,7 +53,7 @@ export class UIManager {
     }
 
     // FIXED: Render all foods in grid layout with proper event management
-    renderCategories(categories, tags, isEditMode = false) {
+    renderCategories(categories, isEditMode = false) {
     this.cleanup();
     this.elements.categoriesContainer.innerHTML = '';
 

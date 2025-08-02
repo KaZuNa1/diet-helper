@@ -24,7 +24,7 @@ this.isEditMode = false;
             this.foods = result.data.foods;
             this.tags = result.data.tags;
             this.categories = result.data.categories || [];
-this.uiManager.renderCategories(this.categories, this.tags, this.isEditMode);
+this.uiManager.renderCategories(this.categories, this.isEditMode);
         }
         this.initializeEventListeners();
     
@@ -180,7 +180,7 @@ document.getElementById('cancelCategoryBtn').addEventListener('click', () => {
         }
         
         await this.saveAllData();
-       this.uiManager.renderCategories(this.categories, this.tags, this.isEditMode);
+       this.uiManager.renderCategories(this.categories, this.isEditMode);
         this.hideFoodDetails();
         
         console.log(`Food "${food?.name}" deleted successfully`);
@@ -251,7 +251,7 @@ document.getElementById('cancelCategoryBtn').addEventListener('click', () => {
 }
 
 await this.saveAllData();
-this.uiManager.renderCategories(this.categories, this.tags, this.isEditMode);
+this.uiManager.renderCategories(this.categories, this.isEditMode);
 this.hideAddFoodForm();
     }
 
@@ -331,7 +331,7 @@ saveCategory() {
     
     this.categories.push(newCategory);
     this.saveAllData();
-    this.uiManager.renderCategories(this.categories, this.tags, this.isEditMode);
+    this.uiManager.renderCategories(this.categories, this.isEditMode);
     this.hideAddCategoryForm();
 }
 
@@ -352,7 +352,7 @@ toggleEditMode() {
     }
     
     // Re-render to apply changes
-    this.uiManager.renderCategories(this.categories, this.tags, this.isEditMode);
+    this.uiManager.renderCategories(this.categories, this.isEditMode);
 }
 startRenameCategory(categoryId) {
     const category = this.categories.find(c => c.id === categoryId);
@@ -382,13 +382,13 @@ startRenameCategory(categoryId) {
             category.name = newName;
             this.saveAllData();
         }
-       this.uiManager.renderCategories(this.categories, this.tags, this.isEditMode);
+       this.uiManager.renderCategories(this.categories, this.isEditMode);
     };
     
     // Handle cancel on Escape
     const cancelRename = (e) => {
         if (e.key === 'Escape') {
-           this.uiManager.renderCategories(this.categories, this.tags, this.isEditMode);
+          this.uiManager.renderCategories(this.categories, this.isEditMode);
         }
     };
     
@@ -412,7 +412,7 @@ deleteCategory(categoryId) {
     if (confirm('Delete this category and all its foods?')) {
         this.categories = this.categories.filter(c => c.id !== categoryId);
         this.saveAllData();
-        this.uiManager.renderCategories(this.categories, this.tags, this.isEditMode);
+       this.uiManager.renderCategories(this.categories, this.isEditMode);
     }
 }
 
