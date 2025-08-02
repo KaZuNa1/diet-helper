@@ -38,7 +38,17 @@ this.uiManager.renderCategories(this.categories, this.tags);
 
         // Add Category Button
 document.getElementById('addCategoryBtn').addEventListener('click', () => {
-    this.addCategory();
+    this.showAddCategoryForm();
+});
+
+// Save Category Button
+document.getElementById('saveCategoryBtn').addEventListener('click', () => {
+    this.saveCategory();
+});
+
+// Cancel Category Button
+document.getElementById('cancelCategoryBtn').addEventListener('click', () => {
+    this.hideAddCategoryForm();
 });
 
         // Save Food Button
@@ -289,17 +299,35 @@ this.hideAddFoodForm();
         this.uiManager.renderFoods(this.foods, this.tags);
     }
 
-    addCategory() {
+    showAddCategoryForm() {
+    document.getElementById('categoryNameInput').value = '';
+    this.uiManager.hideError('categoryNameError');
+    this.modalManager.showAddCategory();
+}
+
+hideAddCategoryForm() {
+    this.modalManager.hideAddCategory();
+}
+
+saveCategory() {
+    const categoryName = document.getElementById('categoryNameInput').value.trim();
+    
+    if (!categoryName) {
+        this.uiManager.showError('categoryNameError', 'Please enter category name');
+        return;
+    }
+    
     const newCategory = new Category(
         Date.now(),
-        `Category ${this.categories.length + 1}`,
+        categoryName,
         []
     );
+    
     this.categories.push(newCategory);
     this.saveAllData();
     this.uiManager.renderCategories(this.categories, this.tags);
+    this.hideAddCategoryForm();
 }
-
 startRenameCategory(categoryId) {
     const category = this.categories.find(c => c.id === categoryId);
     if (!category) return;

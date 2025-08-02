@@ -15,7 +15,11 @@ export class ModalManager {
             manageTags: {
                 modal: document.getElementById('manageTagsDropdown'),
                 overlay: this.createOverlay('manageTagsOverlay')
-            }
+            },
+            addCategory: {
+    modal: document.getElementById('addCategoryDropdown'),
+    overlay: this.createOverlay('addCategoryOverlay')
+}
         };
 
         this.activeModal = null;
@@ -181,6 +185,21 @@ replaceSharedOverlay() {
     hideManageTags() {
         this.hideModal('manageTags');
     }
+    // Show add category modal
+showAddCategory() {
+    this.showModal('addCategory');
+    
+    // Focus on input
+    setTimeout(() => {
+        const input = document.getElementById('categoryNameInput');
+        if (input) input.focus();
+    }, 100);
+}
+
+// Hide add category modal
+hideAddCategory() {
+    this.hideModal('addCategory');
+}
 
     // Close currently active modal
     closeActiveModal() {
