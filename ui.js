@@ -53,7 +53,7 @@ export class UIManager {
     }
 
     // FIXED: Render all foods in grid layout with proper event management
-    renderCategories(categories, tags) {
+    renderCategories(categories, tags, isEditMode = false) {
     this.cleanup();
     this.elements.categoriesContainer.innerHTML = '';
 
@@ -72,8 +72,8 @@ export class UIManager {
       style="margin-right: 10px; font-weight: bold; cursor: pointer; padding: 2px 5px;" 
       ondblclick="window.dietHelper.startRenameCategory(${category.id})"
       title="Double-click to rename">${this.escapeHtml(category.name)}</span>
-<button onclick="window.dietHelper.startRenameCategory(${category.id})" style="padding: 5px 10px;">Rename</button>
-                <button onclick="window.dietHelper.deleteCategory(${category.id})" style="padding: 5px 10px;">Delete</button>
+               <button onclick="window.dietHelper.startRenameCategory(${category.id})" style="padding: 5px 10px; display: ${isEditMode ? 'inline-block' : 'none'};">Rename</button>
+<button onclick="window.dietHelper.deleteCategory(${category.id})" style="padding: 5px 10px; display: ${isEditMode ? 'inline-block' : 'none'};">Delete</button>
             </div>
         `;
         

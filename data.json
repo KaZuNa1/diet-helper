@@ -48,5 +48,16 @@
       "name": "123"
     }
   ],
-  "categories": []
+  "categories": [
+    {
+      "id": 1754109710851,
+      "name": "dsaads",
+      "foods": []
+    },
+    {
+      "id": 1754109712721,
+      "name": "dsaadsads",
+      "foods": []
+    }
+  ]
 }

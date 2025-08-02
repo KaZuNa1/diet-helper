@@ -10,6 +10,7 @@ class DietHelper {
         this.tags = [];
         this.categories = [];
 this.currentCategoryId = null;
+this.isEditMode = false;
         this.currentFoodId = null; // Track currently viewed food for deletion
         this.dataManager = new DataManager();
         this.uiManager = new UIManager();
@@ -23,7 +24,7 @@ this.currentCategoryId = null;
             this.foods = result.data.foods;
             this.tags = result.data.tags;
             this.categories = result.data.categories || [];
-this.uiManager.renderCategories(this.categories, this.tags);
+this.uiManager.renderCategories(this.categories, this.tags, this.isEditMode);
         }
         this.initializeEventListeners();
     
@@ -35,6 +36,11 @@ this.uiManager.renderCategories(this.categories, this.tags);
         document.getElementById('manageTagsBtn').addEventListener('click', () => {
             this.showManageTagsForm();
         });
+
+        // Edit Mode Button
+document.getElementById('editModeBtn').addEventListener('click', () => {
+    this.toggleEditMode();
+});
 
         // Add Category Button
 document.getElementById('addCategoryBtn').addEventListener('click', () => {
@@ -174,7 +180,7 @@ document.getElementById('cancelCategoryBtn').addEventListener('click', () => {
         }
         
         await this.saveAllData();
-        this.uiManager.renderCategories(this.categories, this.tags);
+       this.uiManager.renderCategories(this.categories, this.tags, this.isEditMode);
         this.hideFoodDetails();
         
         console.log(`Food "${food?.name}" deleted successfully`);
@@ -245,7 +251,7 @@ document.getElementById('cancelCategoryBtn').addEventListener('click', () => {
 }
 
 await this.saveAllData();
-this.uiManager.renderCategories(this.categories, this.tags);
+this.uiManager.renderCategories(this.categories, this.tags, this.isEditMode);
 this.hideAddFoodForm();
     }
 
@@ -325,8 +331,28 @@ saveCategory() {
     
     this.categories.push(newCategory);
     this.saveAllData();
-    this.uiManager.renderCategories(this.categories, this.tags);
+    this.uiManager.renderCategories(this.categories, this.tags, this.isEditMode);
     this.hideAddCategoryForm();
+}
+
+toggleEditMode() {
+    this.isEditMode = !this.isEditMode;
+    
+    // Update button text
+    const editBtn = document.getElementById('editModeBtn');
+    editBtn.textContent = this.isEditMode ? 'Done' : 'Edit';
+    editBtn.style.backgroundColor = this.isEditMode ? '#28a745' : '';
+    
+    // Update categories display
+    const container = document.getElementById('categoriesContainer');
+    if (this.isEditMode) {
+        container.classList.add('edit-mode');
+    } else {
+        container.classList.remove('edit-mode');
+    }
+    
+    // Re-render to apply changes
+    this.uiManager.renderCategories(this.categories, this.tags, this.isEditMode);
 }
 startRenameCategory(categoryId) {
     const category = this.categories.find(c => c.id === categoryId);
@@ -356,13 +382,13 @@ startRenameCategory(categoryId) {
             category.name = newName;
             this.saveAllData();
         }
-        this.uiManager.renderCategories(this.categories, this.tags);
+       this.uiManager.renderCategories(this.categories, this.tags, this.isEditMode);
     };
     
     // Handle cancel on Escape
     const cancelRename = (e) => {
         if (e.key === 'Escape') {
-            this.uiManager.renderCategories(this.categories, this.tags);
+           this.uiManager.renderCategories(this.categories, this.tags, this.isEditMode);
         }
     };
     
@@ -386,7 +412,7 @@ deleteCategory(categoryId) {
     if (confirm('Delete this category and all its foods?')) {
         this.categories = this.categories.filter(c => c.id !== categoryId);
         this.saveAllData();
-        this.uiManager.renderCategories(this.categories, this.tags);
+        this.uiManager.renderCategories(this.categories, this.tags, this.isEditMode);
     }
 }
 

@@ -121,3 +121,8 @@ input[type="text"] {
     border-radius: 3px;
     outline: none;
 }
+
+/* Edit mode styles */
+.edit-mode .category-container {
+    border: 2px solid #007bff !important;
+}
