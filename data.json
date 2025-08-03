@@ -54,14 +54,32 @@
   ],
   "categories": [
     {
-      "id": 1754109710851,
-      "name": "dsaads",
-      "foods": []
+      "id": 1754184894764,
+      "name": "adsadsads",
+      "foods": [
+        {
+          "id": 1754184900330,
+          "name": "adsadsads",
+          "imageUrl": "images\\food_1754184900327.jpg",
+          "selected": false,
+          "tags": [
+            1754105315529,
+            1754110201300
+          ]
+        }
+      ]
     },
     {
       "id": 1754109712721,
-      "name": "dsaadsads",
+      "name": "protein",
       "foods": [
+        {
+          "id": 1754184334718,
+          "name": "dasdas",
+          "imageUrl": "",
+          "selected": false,
+          "tags": []
+        },
         {
           "id": 1754110206481,
           "name": "dsaadsads",
@@ -74,6 +92,16 @@
           ]
         }
       ]
+    },
+    {
+      "id": 1754109710851,
+      "name": "fats",
+      "foods": []
+    },
+    {
+      "id": 1754110535195,
+      "name": "veggies",
+      "foods": []
     }
   ]
 }

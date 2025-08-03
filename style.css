@@ -126,3 +126,31 @@ input[type="text"] {
 .edit-mode .category-container {
     border: 2px solid #007bff !important;
 }
+
+
+/* Sortable styles */
+.edit-mode .category-header {
+    cursor: move;
+    background: #f5f5f5;
+    margin: -10px -10px 10px -10px;
+    padding: 10px;
+}
+
+.edit-mode .food-item {
+    cursor: move;
+    transition: transform 0.2s;
+}
+
+.edit-mode .food-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.sortable-ghost {
+    opacity: 0.4;
+}
+
+.sortable-drag {
+    opacity: 0.8;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}

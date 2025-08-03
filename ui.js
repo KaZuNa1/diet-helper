@@ -53,7 +53,7 @@ export class UIManager {
     }
 
     // FIXED: Render all foods in grid layout with proper event management
-    renderCategories(categories, isEditMode = false) {
+   renderCategories(categories, isEditMode = false) {
     this.cleanup();
     this.elements.categoriesContainer.innerHTML = '';
 
@@ -63,23 +63,25 @@ export class UIManager {
         categoryDiv.style.cssText = 'border: 1px solid #ccc; margin: 10px; padding: 10px;';
         
         const headerDiv = document.createElement('div');
+        headerDiv.className = 'category-header';  // Add class for drag handle
         headerDiv.style.cssText = 'display: flex; justify-content: space-between; margin-bottom: 10px;';
         
         headerDiv.innerHTML = `
             <button onclick="window.dietHelper.showAddFoodForm(${category.id})" style="padding: 5px 10px;">+ Add Food</button>
             <div>
                 <span id="categoryName-${category.id}" 
-      style="margin-right: 10px; font-weight: bold; cursor: pointer; padding: 2px 5px;" 
-      ondblclick="window.dietHelper.startRenameCategory(${category.id})"
-      title="Double-click to rename">${this.escapeHtml(category.name)}</span>
-               <button onclick="window.dietHelper.startRenameCategory(${category.id})" style="padding: 5px 10px; display: ${isEditMode ? 'inline-block' : 'none'};">Rename</button>
-<button onclick="window.dietHelper.deleteCategory(${category.id})" style="padding: 5px 10px; display: ${isEditMode ? 'inline-block' : 'none'};">Delete</button>
+                      style="margin-right: 10px; font-weight: bold; cursor: pointer; padding: 2px 5px;" 
+                      ondblclick="window.dietHelper.startRenameCategory(${category.id})"
+                      title="Double-click to rename">${this.escapeHtml(category.name)}</span>
+                <button onclick="window.dietHelper.startRenameCategory(${category.id})" style="padding: 5px 10px; display: ${isEditMode ? 'inline-block' : 'none'};">Rename</button>
+                <button onclick="window.dietHelper.deleteCategory(${category.id})" style="padding: 5px 10px; display: ${isEditMode ? 'inline-block' : 'none'};">Delete</button>
             </div>
         `;
         
         categoryDiv.appendChild(headerDiv);
         
         const foodsDiv = document.createElement('div');
+        foodsDiv.id = `foods-${category.id}`;  // Add ID for sortable
         foodsDiv.style.cssText = 'display: flex; flex-wrap: wrap;';
         
         if (category.foods.length === 0) {

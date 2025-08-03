@@ -11,6 +11,8 @@ class DietHelper {
         this.categories = [];
 this.currentCategoryId = null;
 this.isEditMode = false;
+this.categorySortable = null;
+this.foodSortables = {};    
         this.currentFoodId = null; // Track currently viewed food for deletion
         this.dataManager = new DataManager();
         this.uiManager = new UIManager();
@@ -343,17 +345,84 @@ toggleEditMode() {
     editBtn.textContent = this.isEditMode ? 'Done' : 'Edit';
     editBtn.style.backgroundColor = this.isEditMode ? '#28a745' : '';
     
-    // Update categories display
+    // First, re-render with edit mode state
+    this.uiManager.renderCategories(this.categories, this.isEditMode);
+    
+    // Then, update container classes and sorting
     const container = document.getElementById('categoriesContainer');
     if (this.isEditMode) {
         container.classList.add('edit-mode');
+        // Enable sorting AFTER rendering
+        setTimeout(() => {
+    this.enableCategorySorting();
+}, 150);  // Slightly longer delay
     } else {
         container.classList.remove('edit-mode');
+        this.disableCategorySorting();
+    }
+}
+
+enableCategorySorting() {
+    const container = document.getElementById('categoriesContainer');
+    
+    // Enable category sorting
+    this.categorySortable = Sortable.create(container, {
+        animation: 150,
+        handle: '.category-header',  // Change to header only
+        draggable: '.category-container',
+        onEnd: (evt) => {
+            const movedCategory = this.categories.splice(evt.oldIndex, 1)[0];
+            this.categories.splice(evt.newIndex, 0, movedCategory);
+            this.saveAllData();
+        }
+    });
+    
+    // Enable food sorting within each category
+    this.enableFoodSorting();
+}
+
+disableCategorySorting() {
+    // Disable category sorting
+    if (this.categorySortable) {
+        this.categorySortable.destroy();
+        this.categorySortable = null;
     }
     
-    // Re-render to apply changes
-    this.uiManager.renderCategories(this.categories, this.isEditMode);
+    // Disable food sorting
+    this.disableFoodSorting();
 }
+
+enableFoodSorting() {
+    this.categories.forEach(category => {
+        const foodsContainer = document.getElementById(`foods-${category.id}`);
+        if (foodsContainer) {
+            this.foodSortables[category.id] = Sortable.create(foodsContainer, {
+                group: `foods-${category.id}`,  // Unique group per category
+                animation: 150,
+                draggable: '.food-item',
+                onEnd: (evt) => {
+                    // Reorder foods in the category
+                    const movedFood = category.foods.splice(evt.oldIndex, 1)[0];
+                    category.foods.splice(evt.newIndex, 0, movedFood);
+                    this.saveAllData();
+                }
+            });
+        }
+    });
+}
+
+disableFoodSorting() {
+    Object.values(this.foodSortables).forEach(sortable => {
+        if (sortable) {
+            sortable.destroy();
+        }
+    });
+    this.foodSortables = {};
+}
+
+
+
+
 startRenameCategory(categoryId) {
     const category = this.categories.find(c => c.id === categoryId);
     if (!category) return;
