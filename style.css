@@ -206,3 +206,121 @@ body {
 #confirmationDropdown {
   z-index: 1011;
 }
+/* Filter Panel Styles */
+.filter-panel {
+  margin: 20px 5px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #f8f9fa;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.filter-header {
+  padding: 12px 15px;
+  background: #e9ecef;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  font-weight: 500;
+}
+
+.filter-header:hover {
+  background: #dee2e6;
+}
+
+.filter-count {
+  background: #007bff;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-left: 10px;
+  display: none;
+}
+
+.filter-count.active {
+  display: inline-block;
+}
+
+.filter-toggle {
+  transition: transform 0.3s ease;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.filter-toggle.open {
+  transform: rotate(180deg);
+}
+
+.filter-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding: 0 15px;
+}
+
+.filter-content.open {
+  max-height: 400px;
+  padding: 15px;
+}
+
+.filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.filter-tag-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.filter-tag-item:hover {
+  background: #f0f0f0;
+  border-color: #007bff;
+}
+
+.filter-tag-item.selected {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.filter-tag-item input[type='checkbox'] {
+  margin-right: 6px;
+  cursor: pointer;
+}
+
+.filter-actions {
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+  text-align: right;
+}
+
+#clearFiltersBtn {
+  padding: 6px 15px;
+  font-size: 14px;
+}
+
+/* Food item opacity for filtering */
+.food-item {
+  transition: opacity 0.3s ease;
+}
+
+.food-item.filtered-out {
+  opacity: 0.3;
+  pointer-events: none;
+}

@@ -115,6 +115,10 @@ export class UIManager {
       categoryDiv.appendChild(foodsDiv)
       this.elements.categoriesContainer.appendChild(categoryDiv)
     })
+    // Apply filters after rendering
+    if (window.dietHelper && window.dietHelper.applyFilters) {
+      window.dietHelper.applyFilters()
+    }
   }
 
   // Render tags for selection in food form

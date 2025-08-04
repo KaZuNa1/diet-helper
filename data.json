@@ -1,52 +1,103 @@
 {
-  "foods": [
+  "foods": [],
+  "tags": [
     {
-      "id": 1753961635607,
-      "name": "sdaads",
-      "imageUrl": "C:\\Users\\Tuguldur\\Desktop\\diet manager\\images\\food_1753961635605.jpg",
-      "selected": false,
-      "tags": []
+      "id": 1754302377169,
+      "name": "1"
     },
     {
-      "id": 1753961745447,
-      "name": "dsaasd",
-      "imageUrl": "C:\\Users\\Tuguldur\\Desktop\\diet manager\\images\\food_1753961745445.jpg",
-      "selected": false,
-      "tags": []
+      "id": 1754302378090,
+      "name": "2"
     },
     {
-      "id": 1753961756951,
-      "name": "adsadsdasda",
-      "imageUrl": "",
-      "selected": false,
-      "tags": []
+      "id": 1754302379041,
+      "name": "3"
     },
     {
-      "id": 1753961764658,
-      "name": "sadadsads",
-      "imageUrl": "C:\\Users\\Tuguldur\\Desktop\\diet manager\\images\\food_1753961764651.PNG",
-      "selected": false,
-      "tags": []
+      "id": 1754302379906,
+      "name": "4"
     },
     {
-      "id": 1753961792745,
-      "name": "dsdsa",
-      "imageUrl": "C:\\Users\\Tuguldur\\Desktop\\diet manager\\images\\food_1753961792743.PNG",
-      "selected": false,
-      "tags": []
+      "id": 1754302380738,
+      "name": "5"
     }
   ],
-  "tags": [],
   "categories": [
     {
-      "id": 1754109712721,
-      "name": "VEGGIES",
-      "foods": []
+      "id": 1754302368287,
+      "name": "dsadsdas",
+      "foods": [
+        {
+          "id": 1754302385600,
+          "name": "dasadsads",
+          "imageUrl": "",
+          "selected": false,
+          "tags": [
+            1754302377169
+          ]
+        },
+        {
+          "id": 1754302395468,
+          "name": "dsaass",
+          "imageUrl": "",
+          "selected": false,
+          "tags": [
+            1754302377169,
+            1754302378090,
+            1754302379041
+          ]
+        }
+      ]
     },
     {
-      "id": 1754299933180,
-      "name": "k",
-      "foods": []
+      "id": 1754302370721,
+      "name": "dsaadsads",
+      "foods": [
+        {
+          "id": 1754302388540,
+          "name": "dsadas",
+          "imageUrl": "",
+          "selected": false,
+          "tags": [
+            1754302378090
+          ]
+        },
+        {
+          "id": 1754302399307,
+          "name": "dsadasads",
+          "imageUrl": "",
+          "selected": false,
+          "tags": [
+            1754302377169,
+            1754302378090,
+            1754302379041,
+            1754302379906,
+            1754302380738
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1754302372235,
+      "name": "dsaadsdas",
+      "foods": [
+        {
+          "id": 1754302390856,
+          "name": "dasasdda",
+          "imageUrl": "",
+          "selected": false,
+          "tags": [
+            1754302378090
+          ]
+        },
+        {
+          "id": 1754302405100,
+          "name": "adsdasadsdas",
+          "imageUrl": "",
+          "selected": false,
+          "tags": []
+        }
+      ]
     }
   ]
 }

@@ -35,6 +35,8 @@ class DietHelper {
     this.dataManager = new DataManager()
     this.uiManager = new UIManager()
     this.modalManager = new ModalManager()
+    this.selectedFilterTags = new Set() // Store selected tag IDs
+    this.isFilterPanelOpen = false
     this.init()
   }
 
@@ -47,6 +49,7 @@ class DietHelper {
       this.uiManager.renderCategories(this.categories, this.isEditMode)
     }
     this.initializeEventListeners()
+    this.initializeFilterPanel()
   }
 
   initializeEventListeners() {
@@ -309,6 +312,7 @@ class DietHelper {
     this.uiManager.clearTagForm()
     await this.saveAllData()
     this.uiManager.renderExistingTags(this.tags)
+    this.renderFilterTags()
   }
 
   async deleteTag(tagId) {
@@ -328,6 +332,10 @@ class DietHelper {
     })
     await this.saveAllData()
     this.uiManager.renderExistingTags(this.tags)
+    // Update filter panel
+    this.selectedFilterTags.delete(tagId)
+    this.renderFilterTags()
+    this.applyFilters()
     // Re-render foods in case any displayed foods had this tag
     this.uiManager.renderFoods(this.foods, this.tags)
   }
@@ -544,6 +552,168 @@ class DietHelper {
       console.error('Failed to save data:', result.error)
       alert(CONFIG.MESSAGES.ERRORS.SAVE_FAILED)
     }
+  }
+  // Initialize filter panel
+  initializeFilterPanel() {
+    // Set up filter panel toggle
+    const filterHeader = document.getElementById('filterHeader')
+    filterHeader.addEventListener('click', () => this.toggleFilterPanel())
+
+    // Set up clear filters button
+    const clearBtn = document.getElementById('clearFiltersBtn')
+    clearBtn.addEventListener('click', () => this.clearAllFilters())
+
+    // Render filter tags
+    this.renderFilterTags()
+    // Set up filter mode toggle
+    const filterModeToggle = document.getElementById('filterModeToggle')
+    filterModeToggle.addEventListener('change', () => {
+      this.applyFilters()
+    })
+  }
+
+  // Toggle filter panel open/closed
+  toggleFilterPanel() {
+    this.isFilterPanelOpen = !this.isFilterPanelOpen
+
+    const filterContent = document.getElementById('filterContent')
+    const filterToggle = document.getElementById('filterToggle')
+
+    if (this.isFilterPanelOpen) {
+      filterContent.classList.add('open')
+      filterToggle.classList.add('open')
+    } else {
+      filterContent.classList.remove('open')
+      filterToggle.classList.remove('open')
+    }
+  }
+
+  // Render filter tags in the panel
+  renderFilterTags() {
+    const filterTagsContainer = document.getElementById('filterTags')
+    filterTagsContainer.innerHTML = ''
+
+    this.tags.forEach((tag) => {
+      const tagDiv = document.createElement('div')
+      tagDiv.className = 'filter-tag-item'
+      if (this.selectedFilterTags.has(tag.id)) {
+        tagDiv.classList.add('selected')
+      }
+
+      const checkbox = document.createElement('input')
+      checkbox.type = 'checkbox'
+      checkbox.checked = this.selectedFilterTags.has(tag.id)
+      checkbox.id = `filter-tag-${tag.id}`
+
+      const label = document.createElement('label')
+      label.htmlFor = `filter-tag-${tag.id}`
+      label.textContent = tag.name
+      label.style.cursor = 'pointer'
+      label.style.marginBottom = '0'
+
+      tagDiv.appendChild(checkbox)
+      tagDiv.appendChild(label)
+
+      tagDiv.addEventListener('click', (e) => {
+        if (e.target.type !== 'checkbox') {
+          checkbox.checked = !checkbox.checked
+        }
+        this.toggleFilterTag(tag.id)
+      })
+
+      filterTagsContainer.appendChild(tagDiv)
+    })
+
+    this.updateFilterCount()
+  }
+
+  // Toggle a tag filter
+  toggleFilterTag(tagId) {
+    if (this.selectedFilterTags.has(tagId)) {
+      this.selectedFilterTags.delete(tagId)
+    } else {
+      this.selectedFilterTags.add(tagId)
+    }
+
+    // Update UI
+    this.renderFilterTags()
+    this.applyFilters()
+  }
+
+  // Clear all filters
+  clearAllFilters() {
+    this.selectedFilterTags.clear()
+    this.renderFilterTags()
+    this.applyFilters()
+  }
+
+  // Update filter count display
+  updateFilterCount() {
+    const filterCount = document.getElementById('filterCount')
+    const count = this.selectedFilterTags.size
+
+    if (count > 0) {
+      filterCount.textContent = `(${count})`
+      filterCount.classList.add('active')
+    } else {
+      filterCount.classList.remove('active')
+    }
+  }
+
+  // Apply filters to food items
+  // Apply filters to food items
+  // Apply filters to food items
+  applyFilters() {
+    const allFoodItems = document.querySelectorAll('.food-item')
+    const useOrLogic = document.getElementById('filterModeToggle').checked
+
+    if (this.selectedFilterTags.size === 0) {
+      // No filters - show all foods normally
+      allFoodItems.forEach((item) => {
+        item.classList.remove('filtered-out')
+      })
+      return
+    }
+
+    // Apply filters
+    allFoodItems.forEach((foodItem) => {
+      const foodImage = foodItem.querySelector('.food-image')
+      if (!foodImage) return
+
+      const foodId = parseInt(foodImage.dataset.foodId)
+      const categoryId = foodImage.dataset.categoryId
+        ? parseInt(foodImage.dataset.categoryId)
+        : null
+
+      let food = null
+
+      if (categoryId) {
+        const category = this.categories.find((c) => c.id === categoryId)
+        food = category?.foods.find((f) => f.id === foodId)
+      } else {
+        food = this.foods.find((f) => f.id === foodId)
+      }
+
+      if (food) {
+        let shouldShow = false
+
+        if (useOrLogic) {
+          // OR logic - has ANY of the selected tags
+          shouldShow = food.tags.some((tagId) => this.selectedFilterTags.has(tagId))
+        } else {
+          // AND logic (default) - has ALL selected tags
+          shouldShow = Array.from(this.selectedFilterTags).every((tagId) =>
+            food.tags.includes(tagId)
+          )
+        }
+
+        if (shouldShow) {
+          foodItem.classList.remove('filtered-out')
+        } else {
+          foodItem.classList.add('filtered-out')
+        }
+      }
+    })
   }
 }
 

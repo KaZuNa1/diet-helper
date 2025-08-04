@@ -13,6 +13,27 @@
     <button id="manageTagsBtn">Manage Tags</button>
     <button id="editModeBtn">Edit</button>
 
+    <!-- Filter Panel -->
+    <div id="filterPanel" class="filter-panel">
+      <div class="filter-header" id="filterHeader">
+        <span>🏷️ Filter by Tags</span>
+        <span id="filterCount" class="filter-count"></span>
+        <span class="filter-toggle" id="filterToggle">▼</span>
+      </div>
+      <div id="filterContent" class="filter-content">
+        <div id="filterTags" class="filter-tags">
+          <!-- Tag checkboxes will be dynamically added here -->
+        </div>
+        <div class="filter-actions">
+          <label style="float: left; font-size: 14px">
+            <input type="checkbox" id="filterModeToggle" style="margin-right: 5px" />
+            Match ANY tag (instead of ALL)
+          </label>
+          <button id="clearFiltersBtn" class="btn-secondary">Clear All</button>
+        </div>
+      </div>
+    </div>
+
     <div id="categoriesContainer"></div>
 
     <!-- Food Details Dropdown -->
