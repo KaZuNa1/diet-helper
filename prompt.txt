@@ -1673,3 +1673,4 @@ so everytime i click add caategory it creates container that i can add food on i
 and i can click and create many as i wanted there is no limit for container
 
 first dont apply any fancy ui style or any unneccessary functions that can affect performance  i need solid working functionality
+dont forget about data persistency like it has to be save all datas it hasnt to be refreshes

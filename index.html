@@ -1,85 +1,100 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Diet Helper</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
     <h1>Diet Helper</h1>
-    
-     <button id="addCategoryBtn">Add Category</button>
+
+    <button id="addCategoryBtn">Add Category</button>
     <button id="manageTagsBtn">Manage Tags</button>
     <button id="editModeBtn">Edit</button>
 
     <div id="categoriesContainer"></div>
-    
+
     <!-- Food Details Dropdown -->
     <div id="foodDetailsDropdown" class="dropdown">
-        <h3>Food Details</h3>
-        <div id="foodDetailsContent">
-            <div style="text-align: center;">
-                <img id="detailsImage" style="width: 200px; height: 200px; object-fit: cover; margin-bottom: 15px;" src="" alt="">
-                <h3 id="detailsName" style="margin: 10px 0;"></h3>
-                <div id="detailsTags" style="color: #666; margin-bottom: 15px;"></div>
-            </div>
+      <h3>Food Details</h3>
+      <div id="foodDetailsContent">
+        <div style="text-align: center">
+          <img
+            id="detailsImage"
+            style="width: 200px; height: 200px; object-fit: cover; margin-bottom: 15px"
+            src=""
+            alt=""
+          />
+          <h3 id="detailsName" style="margin: 10px 0"></h3>
+          <div id="detailsTags" style="color: #666; margin-bottom: 15px"></div>
         </div>
-        <div class="modal-buttons">
-            <button id="deleteFoodBtn" class="btn-danger">Delete</button>
-            <button id="closeFoodDetailsBtn" class="btn-secondary">Close</button>
-        </div>
+      </div>
+      <div class="modal-buttons">
+        <button id="deleteFoodBtn" class="btn-danger">Delete</button>
+        <button id="closeFoodDetailsBtn" class="btn-secondary">Close</button>
+      </div>
     </div>
-    
+
     <!-- Add Food Dropdown -->
     <div id="addFoodDropdown" class="dropdown">
-        <h3>Add New Food</h3>
-        <div class="form-group">
-            <input type="text" id="foodName" placeholder="Enter food name">
-            <div id="foodNameError" class="error-message hidden">Please enter food name</div>
-        </div>
-        <div class="form-group">
-            <label>Food Image:</label>
-            <input type="file" id="foodImage" accept="image/*">
-        </div>
-        <div class="form-group">
-            <label>Select Tags:</label>
-            <div id="tagsList"></div>
-        </div>
-        <div class="modal-buttons">
-            <button id="saveFoodBtn" class="btn-primary">Save Food</button>
-            <button id="cancelFoodBtn" class="btn-secondary">Cancel</button>
-        </div>
+      <h3>Add New Food</h3>
+      <div class="form-group">
+        <input type="text" id="foodName" placeholder="Enter food name" />
+        <div id="foodNameError" class="error-message hidden">Please enter food name</div>
+      </div>
+      <div class="form-group">
+        <label>Food Image:</label>
+        <input type="file" id="foodImage" accept="image/*" />
+      </div>
+      <div class="form-group">
+        <label>Select Tags:</label>
+        <div id="tagsList"></div>
+      </div>
+      <div class="modal-buttons">
+        <button id="saveFoodBtn" class="btn-primary">Save Food</button>
+        <button id="cancelFoodBtn" class="btn-secondary">Cancel</button>
+      </div>
     </div>
-    
+
     <!-- Manage Tags Dropdown -->
     <div id="manageTagsDropdown" class="dropdown">
-        <h3>Manage Tags</h3>
-        <div class="form-group">
-            <input type="text" id="newTagName" placeholder="Enter tag name">
-            <div id="tagNameError" class="error-message hidden">Please enter tag name</div>
-            <button id="addTagBtn" class="btn-primary">Add Tag</button>
-        </div>
-        <div id="existingTags"></div>
-        <div class="modal-buttons">
-            <button id="closeTagsBtn" class="btn-secondary">Close</button>
-        </div>
+      <h3>Manage Tags</h3>
+      <div class="form-group">
+        <input type="text" id="newTagName" placeholder="Enter tag name" />
+        <div id="tagNameError" class="error-message hidden">Please enter tag name</div>
+        <button id="addTagBtn" class="btn-primary">Add Tag</button>
+      </div>
+      <div id="existingTags"></div>
+      <div class="modal-buttons">
+        <button id="closeTagsBtn" class="btn-secondary">Close</button>
+      </div>
     </div>
 
     <!-- Add Category Modal -->
-<div id="addCategoryDropdown" class="dropdown">
-    <h3>Add New Category</h3>
-    <div class="form-group">
-        <input type="text" id="categoryNameInput" placeholder="Enter category name">
+    <div id="addCategoryDropdown" class="dropdown">
+      <h3>Add New Category</h3>
+      <div class="form-group">
+        <input type="text" id="categoryNameInput" placeholder="Enter category name" />
         <div id="categoryNameError" class="error-message hidden">Please enter category name</div>
-    </div>
-    <div class="modal-buttons">
+      </div>
+      <div class="modal-buttons">
         <button id="saveCategoryBtn" class="btn-primary">Save Category</button>
         <button id="cancelCategoryBtn" class="btn-secondary">Cancel</button>
+      </div>
     </div>
-</div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationDropdown" class="dropdown">
+      <h3 id="confirmTitle">Confirm Delete</h3>
+      <p id="confirmMessage" style="margin: 20px 0; color: #333"></p>
+      <div class="modal-buttons">
+        <button id="confirmYesBtn" class="btn-danger">Delete</button>
+        <button id="confirmNoBtn" class="btn-secondary">Cancel</button>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script type="module" src="app.js"></script>
-</body>
+  </body>
 </html>
