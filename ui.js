@@ -223,14 +223,13 @@ export class UIManager {
       })
       .filter((name) => name)
 
-    // Populate details
+    // Populate basic details
     this.elements.detailsImage.src = food.imageUrl || ''
     this.elements.detailsImage.style.display = food.imageUrl ? 'block' : 'none'
     this.elements.detailsImage.style.width = CONFIG.UI.FOOD_IMAGE_SIZE.MODAL.width + 'px'
     this.elements.detailsImage.style.height = CONFIG.UI.FOOD_IMAGE_SIZE.MODAL.height + 'px'
 
     if (!food.imageUrl) {
-      // Show placeholder for no image
       this.elements.detailsImage.style.display = 'block'
       this.elements.detailsImage.src =
         'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='
@@ -239,6 +238,94 @@ export class UIManager {
     this.elements.detailsName.textContent = food.name
     this.elements.detailsTags.textContent =
       tagNames.length > 0 ? `Tags: ${tagNames.join(', ')}` : 'No tags'
+
+    // Show/hide notes section
+    const notesSection = document.getElementById('detailsNotesSection')
+    const notesElement = document.getElementById('detailsNotes')
+    if (food.notes) {
+      notesElement.textContent = food.notes
+      notesElement.style.fontStyle = 'normal'
+      notesElement.style.color = '#555'
+    } else {
+      notesElement.textContent = 'No notes added'
+      notesElement.style.fontStyle = 'italic'
+      notesElement.style.color = '#999'
+    }
+    notesSection.style.display = 'block'
+
+    // Show/hide nutrition section
+    const nutritionSection = document.getElementById('detailsNutritionSection')
+    const hasNutrition = food.nutrition && typeof food.nutrition === 'object'
+
+    if (hasNutrition) {
+      // Make sure we're not overwriting the structure
+      const proteinEl = document.getElementById('detailsProtein')
+      const fatEl = document.getElementById('detailsFat')
+      const carbsEl = document.getElementById('detailsCarbs')
+      const fiberEl = document.getElementById('detailsFiber')
+      const sugarEl = document.getElementById('detailsSugar')
+      const sodiumEl = document.getElementById('detailsSodium')
+
+      if (proteinEl)
+        proteinEl.textContent =
+          food.nutrition.protein !== null && food.nutrition.protein !== undefined
+            ? `${food.nutrition.protein}g`
+            : '-'
+      if (fatEl)
+        fatEl.textContent =
+          food.nutrition.fat !== null && food.nutrition.fat !== undefined
+            ? `${food.nutrition.fat}g`
+            : '-'
+      if (carbsEl)
+        carbsEl.textContent =
+          food.nutrition.carbs !== null && food.nutrition.carbs !== undefined
+            ? `${food.nutrition.carbs}g`
+            : '-'
+      if (fiberEl)
+        fiberEl.textContent =
+          food.nutrition.fiber !== null && food.nutrition.fiber !== undefined
+            ? `${food.nutrition.fiber}g`
+            : '-'
+      if (sugarEl)
+        sugarEl.textContent =
+          food.nutrition.sugar !== null && food.nutrition.sugar !== undefined
+            ? `${food.nutrition.sugar}g`
+            : '-'
+      if (sodiumEl)
+        sodiumEl.textContent =
+          food.nutrition.sodium !== null && food.nutrition.sodium !== undefined
+            ? `${food.nutrition.sodium}mg`
+            : '-'
+    } else {
+      // Set all to dash if no nutrition object
+      const elements = [
+        'detailsProtein',
+        'detailsFat',
+        'detailsCarbs',
+        'detailsFiber',
+        'detailsSugar',
+        'detailsSodium',
+      ]
+      elements.forEach((id) => {
+        const el = document.getElementById(id)
+        if (el) el.textContent = '-'
+      })
+    }
+    nutritionSection.style.display = 'block'
+
+    // Show/hide specific data section
+    const specificSection = document.getElementById('detailsSpecificSection')
+    const specificElement = document.getElementById('detailsSpecificData')
+    if (food.specificData) {
+      specificElement.textContent = food.specificData
+      specificElement.style.fontStyle = 'normal'
+      specificElement.style.color = '#555'
+    } else {
+      specificElement.textContent = 'No specific information added'
+      specificElement.style.fontStyle = 'italic'
+      specificElement.style.color = '#999'
+    }
+    specificSection.style.display = 'block'
   }
 
   // Clear food form
@@ -246,10 +333,21 @@ export class UIManager {
     const nameField = document.getElementById('foodName')
     const imageField = document.getElementById('foodImage')
     const errorDiv = document.getElementById('foodNameError')
+    const notesField = document.getElementById('foodNotes')
+    const specificDataField = document.getElementById('foodSpecificData')
 
     if (nameField) nameField.value = ''
     if (imageField) imageField.value = ''
     if (errorDiv) errorDiv.classList.add('hidden')
+    if (notesField) notesField.value = ''
+    if (specificDataField) specificDataField.value = ''
+
+    // Clear nutrition fields
+    const nutritionFields = ['Protein', 'Fat', 'Carbs', 'Fiber', 'Sugar', 'Sodium']
+    nutritionFields.forEach((field) => {
+      const input = document.getElementById(`nutrition${field}`)
+      if (input) input.value = ''
+    })
 
     // Clear tag selections
     const checkboxes = document.querySelectorAll('.tag-checkbox')
@@ -327,7 +425,105 @@ export class UIManager {
       name: document.getElementById('foodName')?.value.trim() || '',
       image: document.getElementById('foodImage')?.files[0] || null,
       tags: this.getSelectedTags(),
+      notes: document.getElementById('foodNotes')?.value.trim() || '',
+      nutrition: {
+        protein:
+          document.getElementById('nutritionProtein')?.value !== ''
+            ? parseFloat(document.getElementById('nutritionProtein').value)
+            : null,
+        fat:
+          document.getElementById('nutritionFat')?.value !== ''
+            ? parseFloat(document.getElementById('nutritionFat').value)
+            : null,
+        carbs:
+          document.getElementById('nutritionCarbs')?.value !== ''
+            ? parseFloat(document.getElementById('nutritionCarbs').value)
+            : null,
+        fiber:
+          document.getElementById('nutritionFiber')?.value !== ''
+            ? parseFloat(document.getElementById('nutritionFiber').value)
+            : null,
+        sugar:
+          document.getElementById('nutritionSugar')?.value !== ''
+            ? parseFloat(document.getElementById('nutritionSugar').value)
+            : null,
+        sodium:
+          document.getElementById('nutritionSodium')?.value !== ''
+            ? parseFloat(document.getElementById('nutritionSodium').value)
+            : null,
+      },
+      specificData: document.getElementById('foodSpecificData')?.value.trim() || '',
     }
+  }
+
+  renderTagsForEdit(tags, selectedTagIds = []) {
+    const container = document.getElementById('editTagsList')
+    container.innerHTML = ''
+
+    if (tags.length === 0) {
+      const noTagsMsg = document.createElement('p')
+      noTagsMsg.textContent = 'No tags available. Add some tags first!'
+      noTagsMsg.style.color = '#666'
+      noTagsMsg.style.fontSize = '12px'
+      container.appendChild(noTagsMsg)
+      return
+    }
+
+    tags.forEach((tag) => {
+      const tagDiv = document.createElement('div')
+      tagDiv.className = 'tag-item'
+      const isChecked = selectedTagIds.includes(tag.id)
+      tagDiv.innerHTML = `
+      <input type="checkbox" class="edit-tag-checkbox" value="${tag.id}" id="edit_tag_${tag.id}" ${isChecked ? 'checked' : ''}>
+      <label for="edit_tag_${tag.id}">${this.escapeHtml(tag.name)}</label>
+    `
+      container.appendChild(tagDiv)
+    })
+  }
+
+  getEditFoodFormData() {
+    return {
+      name: document.getElementById('editFoodName')?.value.trim() || '',
+      image: document.getElementById('editFoodImage')?.files[0] || null,
+      tags: this.getSelectedEditTags(),
+      notes: document.getElementById('editFoodNotes')?.value.trim() || '',
+      nutrition: {
+        protein:
+          document.getElementById('editNutritionProtein')?.value !== ''
+            ? parseFloat(document.getElementById('editNutritionProtein').value)
+            : null,
+        fat:
+          document.getElementById('editNutritionFat')?.value !== ''
+            ? parseFloat(document.getElementById('editNutritionFat').value)
+            : null,
+        carbs:
+          document.getElementById('editNutritionCarbs')?.value !== ''
+            ? parseFloat(document.getElementById('editNutritionCarbs').value)
+            : null,
+        fiber:
+          document.getElementById('editNutritionFiber')?.value !== ''
+            ? parseFloat(document.getElementById('editNutritionFiber').value)
+            : null,
+        sugar:
+          document.getElementById('editNutritionSugar')?.value !== ''
+            ? parseFloat(document.getElementById('editNutritionSugar').value)
+            : null,
+        sodium:
+          document.getElementById('editNutritionSodium')?.value !== ''
+            ? parseFloat(document.getElementById('editNutritionSodium').value)
+            : null,
+      },
+      specificData: document.getElementById('editFoodSpecificData')?.value.trim() || '',
+    }
+  }
+
+  getSelectedEditTags() {
+    const selectedTags = []
+    const checkboxes = document.querySelectorAll('.edit-tag-checkbox:checked')
+    checkboxes.forEach((cb) => {
+      selectedTags.push(parseInt(cb.value))
+    })
+    return selectedTags
   }
 
   getTagFormData() {

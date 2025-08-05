@@ -24,6 +24,10 @@ export class ModalManager {
         modal: document.getElementById('confirmationDropdown'),
         overlay: this.createOverlay('confirmationOverlay'),
       },
+      editFood: {
+        modal: document.getElementById('editFoodDropdown'),
+        overlay: this.createOverlay('editFoodOverlay'),
+      },
     }
 
     this.activeModal = null
@@ -467,5 +471,20 @@ export class ModalManager {
     document.body.style.overflow = 'auto'
 
     this.activeModal = null
+  }
+  // Show edit food modal
+  showEditFood() {
+    this.showModal('editFood')
+
+    // Focus on name input
+    setTimeout(() => {
+      const nameInput = document.getElementById('editFoodName')
+      if (nameInput) nameInput.focus()
+    }, 100)
+  }
+
+  // Hide edit food modal
+  hideEditFood() {
+    this.hideModal('editFood')
   }
 }

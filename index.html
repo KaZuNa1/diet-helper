@@ -38,6 +38,7 @@
     <div id="categoriesContainer"></div>
 
     <!-- Food Details Dropdown -->
+    <!-- Food Details Dropdown -->
     <div id="foodDetailsDropdown" class="dropdown">
       <h3>Food Details</h3>
       <div id="foodDetailsContent">
@@ -51,8 +52,52 @@
           <h3 id="detailsName" style="margin: 10px 0"></h3>
           <div id="detailsTags" style="color: #666; margin-bottom: 15px"></div>
         </div>
+
+        <!-- Notes Section -->
+        <div id="detailsNotesSection" class="details-section" style="display: none">
+          <h4>Notes</h4>
+          <p id="detailsNotes"></p>
+        </div>
+
+        <!-- Nutrition Section -->
+        <div id="detailsNutritionSection" class="details-section" style="display: none">
+          <h4>Nutrition Facts</h4>
+          <div class="nutrition-display">
+            <div class="nutrition-row">
+              <span>Protein:</span>
+              <span id="detailsProtein">-</span>
+            </div>
+            <div class="nutrition-row">
+              <span>Fat:</span>
+              <span id="detailsFat">-</span>
+            </div>
+            <div class="nutrition-row">
+              <span>Carbs:</span>
+              <span id="detailsCarbs">-</span>
+            </div>
+            <div class="nutrition-row">
+              <span>Fiber:</span>
+              <span id="detailsFiber">-</span>
+            </div>
+            <div class="nutrition-row">
+              <span>Sugar:</span>
+              <span id="detailsSugar">-</span>
+            </div>
+            <div class="nutrition-row">
+              <span>Sodium:</span>
+              <span id="detailsSodium">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Specific Data Section -->
+        <div id="detailsSpecificSection" class="details-section" style="display: none">
+          <h4>Specific Information</h4>
+          <p id="detailsSpecificData"></p>
+        </div>
       </div>
       <div class="modal-buttons">
+        <button id="editFoodBtn" class="btn-primary">Edit</button>
         <button id="deleteFoodBtn" class="btn-danger">Delete</button>
         <button id="closeFoodDetailsBtn" class="btn-secondary">Close</button>
       </div>
@@ -61,21 +106,161 @@
     <!-- Add Food Dropdown -->
     <div id="addFoodDropdown" class="dropdown">
       <h3>Add New Food</h3>
-      <div class="form-group">
-        <input type="text" id="foodName" placeholder="Enter food name" />
-        <div id="foodNameError" class="error-message hidden">Please enter food name</div>
+
+      <!-- Basic Info Section -->
+      <div class="form-section">
+        <h4>Basic Information</h4>
+        <div class="form-group">
+          <input type="text" id="foodName" placeholder="Enter food name" />
+          <div id="foodNameError" class="error-message hidden">Please enter food name</div>
+        </div>
+        <div class="form-group">
+          <label>Food Image:</label>
+          <input type="file" id="foodImage" accept="image/*" />
+        </div>
+        <div class="form-group">
+          <label>Notes:</label>
+          <textarea
+            id="foodNotes"
+            placeholder="Cooking tips, where to buy, etc."
+            rows="2"
+          ></textarea>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Food Image:</label>
-        <input type="file" id="foodImage" accept="image/*" />
+
+      <!-- Nutrition Section -->
+      <div class="form-section">
+        <h4>Nutrition Facts (per serving)</h4>
+        <div class="nutrition-grid">
+          <div class="nutrition-input">
+            <label>Protein (g)</label>
+            <input type="number" id="nutritionProtein" min="0" step="0.1" />
+          </div>
+          <div class="nutrition-input">
+            <label>Fat (g)</label>
+            <input type="number" id="nutritionFat" min="0" step="0.1" />
+          </div>
+          <div class="nutrition-input">
+            <label>Carbs (g)</label>
+            <input type="number" id="nutritionCarbs" min="0" step="0.1" />
+          </div>
+          <div class="nutrition-input">
+            <label>Fiber (g)</label>
+            <input type="number" id="nutritionFiber" min="0" step="0.1" />
+          </div>
+          <div class="nutrition-input">
+            <label>Sugar (g)</label>
+            <input type="number" id="nutritionSugar" min="0" step="0.1" />
+          </div>
+          <div class="nutrition-input">
+            <label>Sodium (mg)</label>
+            <input type="number" id="nutritionSodium" min="0" step="1" />
+          </div>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Select Tags:</label>
+
+      <!-- Specific Data Section -->
+      <div class="form-section">
+        <h4>Specific Information</h4>
+        <div class="form-group">
+          <textarea
+            id="foodSpecificData"
+            placeholder="e.g., Rich in B vitamins, High in antioxidants, Good source of omega-3..."
+            rows="2"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Tags Section -->
+      <div class="form-section">
+        <h4>Tags</h4>
         <div id="tagsList"></div>
       </div>
+
       <div class="modal-buttons">
         <button id="saveFoodBtn" class="btn-primary">Save Food</button>
         <button id="cancelFoodBtn" class="btn-secondary">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Edit Food Dropdown -->
+    <div id="editFoodDropdown" class="dropdown">
+      <h3>Edit Food</h3>
+
+      <!-- Basic Info Section -->
+      <div class="form-section">
+        <h4>Basic Information</h4>
+        <div class="form-group">
+          <input type="text" id="editFoodName" placeholder="Enter food name" />
+          <div id="editFoodNameError" class="error-message hidden">Please enter food name</div>
+        </div>
+        <div class="form-group">
+          <label>Food Image:</label>
+          <input type="file" id="editFoodImage" accept="image/*" />
+          <div id="currentImagePreview" style="margin-top: 10px"></div>
+        </div>
+        <div class="form-group">
+          <label>Notes:</label>
+          <textarea
+            id="editFoodNotes"
+            placeholder="Cooking tips, where to buy, etc."
+            rows="2"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Nutrition Section -->
+      <div class="form-section">
+        <h4>Nutrition Facts (per serving)</h4>
+        <div class="nutrition-grid">
+          <div class="nutrition-input">
+            <label>Protein (g)</label>
+            <input type="number" id="editNutritionProtein" min="0" step="0.1" />
+          </div>
+          <div class="nutrition-input">
+            <label>Fat (g)</label>
+            <input type="number" id="editNutritionFat" min="0" step="0.1" />
+          </div>
+          <div class="nutrition-input">
+            <label>Carbs (g)</label>
+            <input type="number" id="editNutritionCarbs" min="0" step="0.1" />
+          </div>
+          <div class="nutrition-input">
+            <label>Fiber (g)</label>
+            <input type="number" id="editNutritionFiber" min="0" step="0.1" />
+          </div>
+          <div class="nutrition-input">
+            <label>Sugar (g)</label>
+            <input type="number" id="editNutritionSugar" min="0" step="0.1" />
+          </div>
+          <div class="nutrition-input">
+            <label>Sodium (mg)</label>
+            <input type="number" id="editNutritionSodium" min="0" step="1" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Specific Data Section -->
+      <div class="form-section">
+        <h4>Specific Information</h4>
+        <div class="form-group">
+          <textarea
+            id="editFoodSpecificData"
+            placeholder="e.g., Rich in B vitamins, High in antioxidants, Good source of omega-3..."
+            rows="2"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Tags Section -->
+      <div class="form-section">
+        <h4>Tags</h4>
+        <div id="editTagsList"></div>
+      </div>
+
+      <div class="modal-buttons">
+        <button id="updateFoodBtn" class="btn-primary">Update Food</button>
+        <button id="cancelEditBtn" class="btn-secondary">Cancel</button>
       </div>
     </div>
 

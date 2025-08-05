@@ -95,6 +95,21 @@ class DietHelper {
     document.getElementById('bulkSelectBtn').addEventListener('click', () => {
       this.toggleBulkSelectMode()
     })
+    // Edit Food Button
+    // Edit Food Button
+    document.getElementById('editFoodBtn').addEventListener('click', () => {
+      this.editFood()
+    })
+
+    // Update Food Button
+    document.getElementById('updateFoodBtn').addEventListener('click', () => {
+      this.updateFood()
+    })
+
+    // Cancel Edit Button
+    document.getElementById('cancelEditBtn').addEventListener('click', () => {
+      this.hideEditFoodForm()
+    })
   }
 
   showAddFoodForm(categoryId = null) {
@@ -226,7 +241,6 @@ class DietHelper {
 
     this.uiManager.hideError('foodNameError')
 
-    // FIXED: Disable save button instead of overlay
     const saveBtn = document.getElementById('saveFoodBtn')
     const originalText = saveBtn.textContent
     saveBtn.disabled = true
@@ -236,7 +250,6 @@ class DietHelper {
     let imageUrl = ''
     if (formData.image) {
       const imageResult = await this.dataManager.saveImage(formData.image)
-
       if (imageResult.success) {
         imageUrl = imageResult.path
       }
@@ -246,11 +259,34 @@ class DietHelper {
     saveBtn.disabled = false
     saveBtn.textContent = originalText
 
-    this.createAndSaveFood(formData.name, imageUrl, formData.tags)
+    // Pass all the new data to createAndSaveFood
+    this.createAndSaveFood(
+      formData.name,
+      imageUrl,
+      formData.tags,
+      formData.notes,
+      formData.nutrition,
+      formData.specificData
+    )
   }
-
-  async createAndSaveFood(name, imageUrl, selectedTags) {
-    const newFood = new Food(Date.now(), name, imageUrl, false, selectedTags)
+  async createAndSaveFood(
+    name,
+    imageUrl,
+    selectedTags,
+    notes = '',
+    nutrition = null,
+    specificData = ''
+  ) {
+    const newFood = new Food(
+      Date.now(),
+      name,
+      imageUrl,
+      false,
+      selectedTags,
+      notes,
+      nutrition,
+      specificData
+    )
 
     // Validate food data
     const validation = this.dataManager.validateFood(newFood)
@@ -876,6 +912,160 @@ class DietHelper {
       this.uiManager.renderCategories(this.categories, this.isEditMode)
       this.toggleBulkSelectMode() // Exit bulk select mode
     })
+  }
+  editFood() {
+    if (!this.currentFoodId) return
+
+    let food = null
+    let categoryId = this.currentCategoryId
+
+    // Store these values before hiding the modal
+    this.editingFoodId = this.currentFoodId
+    this.editingCategoryId = this.currentCategoryId
+
+    if (categoryId) {
+      const category = this.categories.find((c) => c.id === categoryId)
+      food = category?.foods.find((f) => f.id === this.currentFoodId)
+    } else {
+      food = this.foods.find((f) => f.id === this.currentFoodId)
+    }
+
+    if (!food) return
+
+    // Hide food details modal
+    this.hideFoodDetails()
+
+    // Populate edit form with current values
+    this.populateEditForm(food)
+
+    // Show edit modal
+    this.modalManager.showEditFood()
+  }
+  populateEditForm(food) {
+    // Basic info
+    document.getElementById('editFoodName').value = food.name || ''
+    document.getElementById('editFoodNotes').value = food.notes || ''
+    document.getElementById('editFoodSpecificData').value = food.specificData || ''
+
+    // Show current image preview
+    const previewDiv = document.getElementById('currentImagePreview')
+    if (food.imageUrl) {
+      previewDiv.innerHTML = `
+      <img src="${food.imageUrl}" style="width: 100px; height: 100px; object-fit: cover; border: 1px solid #ddd; border-radius: 4px;">
+      <p style="font-size: 12px; color: #666; margin: 5px 0;">Current image (upload new to replace)</p>
+    `
+    } else {
+      previewDiv.innerHTML = ''
+    }
+
+    // Nutrition data
+    // Nutrition data
+    if (food.nutrition) {
+      document.getElementById('editNutritionProtein').value =
+        food.nutrition.protein !== null && food.nutrition.protein !== undefined
+          ? food.nutrition.protein
+          : ''
+      document.getElementById('editNutritionFat').value =
+        food.nutrition.fat !== null && food.nutrition.fat !== undefined ? food.nutrition.fat : ''
+      document.getElementById('editNutritionCarbs').value =
+        food.nutrition.carbs !== null && food.nutrition.carbs !== undefined
+          ? food.nutrition.carbs
+          : ''
+      document.getElementById('editNutritionFiber').value =
+        food.nutrition.fiber !== null && food.nutrition.fiber !== undefined
+          ? food.nutrition.fiber
+          : ''
+      document.getElementById('editNutritionSugar').value =
+        food.nutrition.sugar !== null && food.nutrition.sugar !== undefined
+          ? food.nutrition.sugar
+          : ''
+      document.getElementById('editNutritionSodium').value =
+        food.nutrition.sodium !== null && food.nutrition.sodium !== undefined
+          ? food.nutrition.sodium
+          : ''
+    }
+
+    // Tags
+    this.uiManager.renderTagsForEdit(this.tags, food.tags)
+  }
+
+  hideEditFoodForm() {
+    this.modalManager.hideEditFood()
+    // Clear the form
+    document.getElementById('editFoodImage').value = ''
+    document.getElementById('currentImagePreview').innerHTML = ''
+  }
+
+  async updateFood() {
+    console.log('Update food clicked')
+    const formData = this.uiManager.getEditFoodFormData()
+    console.log('Form data:', formData)
+
+    if (!formData.name) {
+      this.uiManager.showError('editFoodNameError', 'Please enter food name')
+      this.uiManager.focusElement('editFoodName')
+      return
+    }
+
+    this.uiManager.hideError('editFoodNameError')
+
+    // Use the stored editing IDs instead of current IDs
+    let food = null
+    let category = null
+
+    if (this.editingCategoryId) {
+      category = this.categories.find((c) => c.id === this.editingCategoryId)
+      food = category?.foods.find((f) => f.id === this.editingFoodId)
+    } else {
+      food = this.foods.find((f) => f.id === this.editingFoodId)
+    }
+
+    if (!food) {
+      console.error('Food not found!', this.editingFoodId, this.editingCategoryId)
+      return
+    }
+
+    console.log('Found food to update:', food)
+
+    const updateBtn = document.getElementById('updateFoodBtn')
+    const originalText = updateBtn.textContent
+    updateBtn.disabled = true
+    updateBtn.textContent = 'Updating...'
+
+    // Handle image update
+    let imageUrl = food.imageUrl // Keep existing by default
+    if (formData.image) {
+      // Delete old image if exists
+      if (food.imageUrl && !food.imageUrl.startsWith('data:')) {
+        await this.dataManager.deleteImage(food.imageUrl)
+      }
+      // Save new image
+      const imageResult = await this.dataManager.saveImage(formData.image)
+      if (imageResult.success) {
+        imageUrl = imageResult.path
+      }
+    }
+
+    // Update food properties
+    food.name = formData.name
+    food.imageUrl = imageUrl
+    food.notes = formData.notes
+    food.nutrition = formData.nutrition
+    food.specificData = formData.specificData
+    food.tags = formData.tags
+
+    // Re-enable button
+    updateBtn.disabled = false
+    updateBtn.textContent = originalText
+
+    // Save and refresh
+    await this.saveAllData()
+    this.uiManager.renderCategories(this.categories, this.isEditMode)
+    this.hideEditFoodForm()
+
+    // Clear the editing IDs
+    this.editingFoodId = null
+    this.editingCategoryId = null
   }
 }
 
