@@ -424,26 +424,75 @@ class DietHelper {
     // Disable food sorting
     this.disableFoodSorting()
   }
-
   enableFoodSorting() {
+    // Create a shared group for all categories to allow dragging between them
+    const sharedGroup = 'shared-foods'
+
     this.categories.forEach((category) => {
       const foodsContainer = document.getElementById(`foods-${category.id}`)
       if (foodsContainer) {
         this.foodSortables[category.id] = Sortable.create(foodsContainer, {
-          group: `foods-${category.id}`,
+          group: sharedGroup, // Changed from unique group to shared
           animation: 150,
           draggable: '.food-item',
-          scroll: true, // Enable auto-scrolling
+          scroll: true,
           scrollSensitivity: 30,
           scrollSpeed: 10,
+          ghostClass: 'sortable-ghost',
+          chosenClass: 'sortable-chosen',
           onEnd: (evt) => {
-            const movedFood = category.foods.splice(evt.oldIndex, 1)[0]
-            category.foods.splice(evt.newIndex, 0, movedFood)
+            // Get source and destination category IDs
+            const fromCategoryId = parseInt(evt.from.id.replace('foods-', ''))
+            const toCategoryId = parseInt(evt.to.id.replace('foods-', ''))
+
+            const sourceCategory = this.categories.find((c) => c.id === fromCategoryId)
+            const destCategory = this.categories.find((c) => c.id === toCategoryId)
+
+            if (!sourceCategory || !destCategory) return
+
+            if (fromCategoryId === toCategoryId) {
+              // Same category - just reorder
+              const movedFood = sourceCategory.foods.splice(evt.oldIndex, 1)[0]
+              sourceCategory.foods.splice(evt.newIndex, 0, movedFood)
+            } else {
+              // Different category - move food
+              const movedFood = sourceCategory.foods.splice(evt.oldIndex, 1)[0]
+              destCategory.foods.splice(evt.newIndex, 0, movedFood)
+
+              // Show a brief notification
+              this.showMoveNotification(movedFood.name, sourceCategory.name, destCategory.name)
+            }
+
             this.saveAllData()
           },
         })
       }
     })
+  }
+  showMoveNotification(foodName, fromCategory, toCategory) {
+    // Create notification element
+    const notification = document.createElement('div')
+    notification.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #28a745;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+  `
+    notification.textContent = `Moved "${foodName}" from ${fromCategory} to ${toCategory}`
+
+    document.body.appendChild(notification)
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+      notification.style.animation = 'slideOut 0.3s ease-in'
+      setTimeout(() => notification.remove(), 300)
+    }, 3000)
   }
 
   disableFoodSorting() {

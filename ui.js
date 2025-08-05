@@ -84,7 +84,7 @@ export class UIManager {
       foodsDiv.style.cssText = 'display: flex; flex-wrap: wrap;'
 
       if (category.foods.length === 0) {
-        foodsDiv.innerHTML = '<p style="color: #666;">No foods in this category</p>'
+        foodsDiv.innerHTML = '<p style="color: #666; margin: 40px 0;">No foods in this category</p>'
       } else {
         category.foods.forEach((food) => {
           const foodDiv = document.createElement('div')

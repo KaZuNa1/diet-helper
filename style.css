@@ -324,3 +324,48 @@ body {
   opacity: 0.3;
   pointer-events: none;
 }
+
+/* Enhanced drag feedback for cross-category moves */
+.edit-mode .food-item.sortable-chosen {
+  opacity: 0.4;
+  transform: scale(1.05);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Highlight drop zones when dragging */
+.edit-mode .category-container {
+  position: relative;
+}
+
+.edit-mode .foods-container {
+  min-height: 100px; /* Ensure empty categories have drop space */
+  border: 2px dashed transparent;
+  transition: all 0.3s ease;
+}
+
+.edit-mode .sortable-ghost {
+  opacity: 0.2;
+}
+
+/* Notification animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
