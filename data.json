@@ -36,66 +36,7 @@
     {
       "id": 1754302372235,
       "name": "dsaadsdas",
-      "foods": [
-        {
-          "id": 1754302390856,
-          "name": "dasasdda",
-          "imageUrl": "",
-          "selected": false,
-          "tags": [
-            1754302378090
-          ]
-        },
-        {
-          "id": 1754302405100,
-          "name": "adsdasadsdas",
-          "imageUrl": "",
-          "selected": false,
-          "tags": []
-        },
-        {
-          "id": 1754302395468,
-          "name": "dsaass",
-          "imageUrl": "",
-          "selected": false,
-          "tags": [
-            1754302377169,
-            1754302378090,
-            1754302379041
-          ]
-        },
-        {
-          "id": 1754302399307,
-          "name": "dsadasads",
-          "imageUrl": "",
-          "selected": false,
-          "tags": [
-            1754302377169,
-            1754302378090,
-            1754302379041,
-            1754302379906,
-            1754302380738
-          ]
-        },
-        {
-          "id": 1754302388540,
-          "name": "dsadas",
-          "imageUrl": "",
-          "selected": false,
-          "tags": [
-            1754302378090
-          ]
-        },
-        {
-          "id": 1754302385600,
-          "name": "dasadsads",
-          "imageUrl": "",
-          "selected": false,
-          "tags": [
-            1754302377169
-          ]
-        }
-      ]
+      "foods": []
     }
   ]
 }

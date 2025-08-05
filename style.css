@@ -369,3 +369,83 @@ body {
     opacity: 0;
   }
 }
+/* Bulk selection styles */
+.bulk-select-mode .food-item {
+  position: relative;
+  cursor: pointer;
+}
+
+.bulk-select-mode .food-item::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #007bff;
+  border-radius: 3px;
+  background: white;
+  z-index: 10;
+}
+
+.bulk-select-mode .food-item.selected::before {
+  background: #007bff;
+  content: '✓';
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.bulk-select-mode .food-item.selected {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* Bulk actions bar */
+.bulk-actions-bar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  z-index: 1000;
+  animation: slideUp 0.3s ease-out;
+}
+
+.bulk-actions-bar button {
+  background: transparent;
+  color: white;
+  border: 1px solid white;
+  padding: 5px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.bulk-actions-bar button:hover {
+  background: white;
+  color: #333;
+}
+
+.bulk-actions-bar .selected-count {
+  font-weight: bold;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}

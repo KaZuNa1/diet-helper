@@ -91,20 +91,32 @@ export class UIManager {
           foodDiv.className = 'food-item'
 
           foodDiv.innerHTML = `
-                   ${
-                     food.imageUrl
-                       ? `<img src="${food.imageUrl}" class="food-image" data-category-id="${category.id}" data-food-id="${food.id}">`
-                       : `<div class="food-image no-image" data-category-id="${category.id}" data-food-id="${food.id}">No Image</div>`
-                   }
-                    <div class="food-name">${this.escapeHtml(food.name)}</div>
-                `
+    ${
+      food.imageUrl
+        ? `<img src="${food.imageUrl}" class="food-image" data-category-id="${category.id}" data-food-id="${food.id}">`
+        : `<div class="food-image no-image" data-category-id="${category.id}" data-food-id="${food.id}">No Image</div>`
+    }
+    <div class="food-name">${this.escapeHtml(food.name)}</div>
+  `
 
           const imageElement = foodDiv.querySelector('.food-image')
-          const clickHandler = () => {
-            window.dietHelper.showCategoryFoodDetails(category.id, food.id)
+
+          // Define listenerId FIRST
+          const listenerId = `food-image-${category.id}-${food.id}`
+
+          // Then create the click handler
+          const clickHandler = (e) => {
+            console.log('Food clicked, bulk mode:', window.dietHelper.isBulkSelectMode)
+            if (window.dietHelper.isBulkSelectMode) {
+              e.preventDefault()
+              e.stopPropagation()
+              window.dietHelper.toggleFoodSelection(category.id, food.id)
+            } else {
+              window.dietHelper.showCategoryFoodDetails(category.id, food.id)
+            }
           }
 
-          const listenerId = `food-image-${category.id}-${food.id}`
+          // Now we can use listenerId
           this.addEventListenerWithCleanup(imageElement, 'click', clickHandler, listenerId)
           this.currentFoodElements.push(listenerId)
 
@@ -118,6 +130,22 @@ export class UIManager {
     // Apply filters after rendering
     if (window.dietHelper && window.dietHelper.applyFilters) {
       window.dietHelper.applyFilters()
+    }
+    // Restore bulk selection state if active
+    if (window.dietHelper && window.dietHelper.isBulkSelectMode) {
+      const container = document.getElementById('categoriesContainer')
+      container.classList.add('bulk-select-mode')
+
+      // Restore selected items
+      window.dietHelper.selectedFoods.forEach((key) => {
+        const [categoryId, foodId] = key.split('-')
+        const foodElement = document.querySelector(
+          `.food-image[data-category-id="${categoryId}"][data-food-id="${foodId}"]`
+        )?.parentElement
+        if (foodElement) {
+          foodElement.classList.add('selected')
+        }
+      })
     }
   }
 

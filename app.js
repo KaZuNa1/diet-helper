@@ -4,24 +4,6 @@ import { DataManager } from './data.js'
 import { UIManager } from './ui.js'
 import { ModalManager } from './modal.js'
 
-// Debug: Monitor what's setting tabIndex on body
-const originalSetAttribute = document.body.setAttribute
-document.body.setAttribute = function (name, value) {
-  if (name === 'tabindex' || name === 'tabIndex') {
-  }
-  return originalSetAttribute.call(this, name, value)
-}
-
-// Also monitor the property directly
-Object.defineProperty(document.body, 'tabIndex', {
-  set: function (value) {
-    this.setAttribute('tabindex', value)
-  },
-  get: function () {
-    return parseInt(this.getAttribute('tabindex') || '0')
-  },
-})
-
 class DietHelper {
   constructor() {
     this.foods = []
@@ -31,12 +13,14 @@ class DietHelper {
     this.isEditMode = false
     this.categorySortable = null
     this.foodSortables = {}
-    this.currentFoodId = null // Track currently viewed food for deletion
+    this.currentFoodId = null
     this.dataManager = new DataManager()
     this.uiManager = new UIManager()
     this.modalManager = new ModalManager()
-    this.selectedFilterTags = new Set() // Store selected tag IDs
+    this.selectedFilterTags = new Set()
     this.isFilterPanelOpen = false
+    this.selectedFoods = new Set()
+    this.isBulkSelectMode = false
     this.init()
   }
 
@@ -106,6 +90,10 @@ class DietHelper {
     // Close Tags Button
     document.getElementById('closeTagsBtn').addEventListener('click', () => {
       this.hideManageTagsForm()
+    })
+    // Bulk Select Button
+    document.getElementById('bulkSelectBtn').addEventListener('click', () => {
+      this.toggleBulkSelectMode()
     })
   }
 
@@ -369,25 +357,28 @@ class DietHelper {
   toggleEditMode() {
     this.isEditMode = !this.isEditMode
 
-    // Update button text
     const editBtn = document.getElementById('editModeBtn')
+    const bulkSelectBtn = document.getElementById('bulkSelectBtn')
+
     editBtn.textContent = this.isEditMode ? 'Done' : 'Edit'
     editBtn.style.backgroundColor = this.isEditMode ? '#28a745' : ''
 
-    // First, re-render with edit mode state
-    this.uiManager.renderCategories(this.categories, this.isEditMode)
+    // Show/hide bulk select button
+    bulkSelectBtn.style.display = this.isEditMode ? 'inline-block' : 'none'
 
-    // Then, update container classes and sorting
     const container = document.getElementById('categoriesContainer')
     if (this.isEditMode) {
       container.classList.add('edit-mode')
-      // Enable sorting AFTER rendering
       setTimeout(() => {
         this.enableCategorySorting()
-      }, 150) // Slightly longer delay
+      }, 150)
     } else {
       container.classList.remove('edit-mode')
       this.disableCategorySorting()
+      // Exit bulk select mode if active
+      if (this.isBulkSelectMode) {
+        this.toggleBulkSelectMode()
+      }
     }
   }
 
@@ -762,6 +753,128 @@ class DietHelper {
           foodItem.classList.add('filtered-out')
         }
       }
+    })
+  }
+  toggleBulkSelectMode() {
+    console.log('Toggling bulk select mode:', !this.isBulkSelectMode)
+    this.isBulkSelectMode = !this.isBulkSelectMode
+    const bulkSelectBtn = document.getElementById('bulkSelectBtn')
+    const container = document.getElementById('categoriesContainer')
+
+    if (this.isBulkSelectMode) {
+      bulkSelectBtn.textContent = 'Cancel Select'
+      bulkSelectBtn.style.backgroundColor = '#dc3545'
+      container.classList.add('bulk-select-mode')
+      this.selectedFoods.clear()
+      this.showBulkActionsBar()
+      // Disable sorting during bulk select
+      this.disableFoodSorting()
+    } else {
+      bulkSelectBtn.textContent = 'Select'
+      bulkSelectBtn.style.backgroundColor = ''
+      container.classList.remove('bulk-select-mode')
+      this.selectedFoods.clear()
+      this.hideBulkActionsBar()
+      // Re-enable sorting
+      if (this.isEditMode) {
+        this.enableFoodSorting()
+      }
+      // Remove selected class from all items
+      document.querySelectorAll('.food-item.selected').forEach((item) => {
+        item.classList.remove('selected')
+      })
+    }
+  }
+
+  showBulkActionsBar() {
+    // Remove existing bar if any
+    this.hideBulkActionsBar()
+
+    const bar = document.createElement('div')
+    bar.className = 'bulk-actions-bar'
+    bar.innerHTML = `
+    <span class="selected-count">0 selected</span>
+    <button onclick="dietHelper.selectAllVisible()">Select All</button>
+    <button onclick="dietHelper.bulkDelete()" style="background: #dc3545; border-color: #dc3545;">Delete Selected</button>
+  `
+    document.body.appendChild(bar)
+
+    this.updateBulkActionsBar()
+  }
+
+  hideBulkActionsBar() {
+    const bar = document.querySelector('.bulk-actions-bar')
+    if (bar) bar.remove()
+  }
+
+  updateBulkActionsBar() {
+    const bar = document.querySelector('.bulk-actions-bar')
+    if (bar) {
+      const count = this.selectedFoods.size
+      bar.querySelector('.selected-count').textContent = `${count} selected`
+    }
+  }
+
+  toggleFoodSelection(categoryId, foodId) {
+    const key = `${categoryId}-${foodId}`
+    const foodElement = document.querySelector(
+      `.food-image[data-category-id="${categoryId}"][data-food-id="${foodId}"]`
+    )?.parentElement
+
+    if (this.selectedFoods.has(key)) {
+      this.selectedFoods.delete(key)
+      foodElement?.classList.remove('selected')
+    } else {
+      this.selectedFoods.add(key)
+      foodElement?.classList.add('selected')
+    }
+
+    this.updateBulkActionsBar()
+  }
+
+  selectAllVisible() {
+    const allFoodItems = document.querySelectorAll('.food-item:not(.filtered-out)')
+
+    allFoodItems.forEach((item) => {
+      const img = item.querySelector('.food-image')
+      if (img) {
+        const categoryId = img.dataset.categoryId
+        const foodId = img.dataset.foodId
+        if (categoryId && foodId) {
+          const key = `${categoryId}-${foodId}`
+          this.selectedFoods.add(key)
+          item.classList.add('selected')
+        }
+      }
+    })
+
+    this.updateBulkActionsBar()
+  }
+
+  bulkDelete() {
+    const count = this.selectedFoods.size
+    if (count === 0) return
+
+    const message = `Are you sure you want to delete ${count} selected food${count > 1 ? 's' : ''}?`
+
+    this.modalManager.showConfirmation(message, async () => {
+      // Delete all selected foods
+      for (const key of this.selectedFoods) {
+        const [categoryId, foodId] = key.split('-').map(Number)
+        const category = this.categories.find((c) => c.id === categoryId)
+
+        if (category) {
+          const food = category.foods.find((f) => f.id === foodId)
+          if (food && food.imageUrl && !food.imageUrl.startsWith('data:')) {
+            await this.dataManager.deleteImage(food.imageUrl)
+          }
+          category.foods = category.foods.filter((f) => f.id !== foodId)
+        }
+      }
+
+      await this.saveAllData()
+      this.uiManager.renderCategories(this.categories, this.isEditMode)
+      this.toggleBulkSelectMode() // Exit bulk select mode
     })
   }
 }
