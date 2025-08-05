@@ -1,2 +1,6 @@
 
 Keyboard shortcuts - Already defined in config, just need implementation
+
+Image zoom on hover - Preview larger image without opening modal
+
+Dark mode - You already have the flag in config!
