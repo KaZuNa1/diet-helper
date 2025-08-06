@@ -34,6 +34,7 @@ class DietHelper {
     }
     this.initializeEventListeners()
     this.initializeFilterPanel()
+    this.initializeKeyboardShortcuts()
   }
 
   initializeEventListeners() {
@@ -110,6 +111,251 @@ class DietHelper {
     document.getElementById('cancelEditBtn').addEventListener('click', () => {
       this.hideEditFoodForm()
     })
+  }
+
+  initializeKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+      // Don't trigger shortcuts when typing in input fields
+      const isInputActive = ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
+
+      // Escape - Close modal (works even in input fields)
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        this.modalManager.closeActiveModal()
+        return
+      }
+
+      // Don't process other shortcuts if user is typing
+      if (isInputActive && e.key !== 'Escape') return
+
+      // Ctrl+N - Add new food
+      if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault()
+        if (this.categories.length === 0) {
+          this.showAddCategoryForm()
+        } else if (this.categories.length === 1) {
+          this.showAddFoodForm(this.categories[0].id)
+        } else {
+          // Multiple categories - show selector
+          this.showCategorySelector()
+        }
+      }
+
+      // Ctrl+T - Manage tags
+      if (e.ctrlKey && e.key === 't') {
+        e.preventDefault()
+        this.showManageTagsForm()
+      }
+
+      // Ctrl+S - Save current form
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault()
+        this.handleSaveShortcut()
+      }
+
+      // Ctrl+F - Focus on filter
+      if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault()
+        // Open filter panel if closed
+        if (!this.isFilterPanelOpen) {
+          this.toggleFilterPanel()
+        }
+        // Focus on first tag checkbox
+        setTimeout(() => {
+          const firstTag = document.querySelector('.filter-tag-item input')
+          if (firstTag) firstTag.focus()
+        }, 100)
+      }
+
+      // Delete - Delete selected items in bulk mode
+      if (e.key === 'Delete' && this.isBulkSelectMode && this.selectedFoods.size > 0) {
+        e.preventDefault()
+        this.bulkDelete()
+      }
+
+      // ? - Show help
+      if (e.key === '/' && !isInputActive) {
+        e.preventDefault()
+        this.showKeyboardShortcutsHelp()
+      }
+    })
+  }
+
+  showCategorySelector() {
+    // Create overlay
+    const overlay = document.createElement('div')
+    overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1999;
+  `
+
+    // Create modal
+    const selectorModal = document.createElement('div')
+    selectorModal.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 2000;
+    max-width: 400px;
+    min-width: 300px;
+  `
+
+    let categoriesHtml = this.categories
+      .map(
+        (cat, index) =>
+          `<button class="category-select-btn" data-id="${cat.id}" style="
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      text-align: left;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      background: white;
+    ">
+      ${index + 1}. ${cat.name}
+    </button>`
+      )
+      .join('')
+
+    selectorModal.innerHTML = `
+    <h3 style="margin-top: 0;">Select Category for New Food</h3>
+    <div style="max-height: 300px; overflow-y: auto;">
+      ${categoriesHtml}
+    </div>
+    <button id="cancelCategorySelect" style="margin-top: 15px; padding: 5px 15px;">Cancel</button>
+  `
+
+    // Add to body
+    document.body.appendChild(overlay)
+    document.body.appendChild(selectorModal)
+
+    // Setup handlers
+    const closeSelector = () => {
+      overlay.remove()
+      selectorModal.remove()
+    }
+
+    // Category button clicks
+    selectorModal.querySelectorAll('.category-select-btn').forEach((btn, index) => {
+      btn.onclick = () => {
+        const categoryId = parseInt(btn.dataset.id)
+        closeSelector()
+        this.showAddFoodForm(categoryId)
+      }
+
+      // Number key shortcuts (1-9)
+      if (index < 9) {
+        const handler = (e) => {
+          if (e.key === String(index + 1)) {
+            document.removeEventListener('keydown', handler)
+            btn.click()
+          }
+        }
+        document.addEventListener('keydown', handler)
+      }
+    })
+
+    overlay.onclick = closeSelector
+    document.getElementById('cancelCategorySelect').onclick = closeSelector
+  }
+  handleSaveShortcut() {
+    // Check which modal is active and trigger its save button
+    const activeModal = this.modalManager.getActiveModal()
+
+    switch (activeModal) {
+      case 'addFood':
+        this.saveFood()
+        break
+      case 'editFood':
+        this.updateFood()
+        break
+      case 'addCategory':
+        this.saveCategory()
+        break
+      case 'manageTags':
+        // Check if tag name input has value
+        const tagInput = document.getElementById('newTagName')
+        if (tagInput && tagInput.value.trim()) {
+          this.addTag()
+        }
+        break
+    }
+  }
+  showKeyboardShortcutsHelp() {
+    // Create overlay first
+    const overlay = document.createElement('div')
+    overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1999;
+  `
+
+    // Create modal
+    const helpModal = document.createElement('div')
+    helpModal.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 2000;
+    max-width: 400px;
+  `
+
+    helpModal.innerHTML = `
+    <h3 style="margin-top: 0;">Keyboard Shortcuts</h3>
+    <div style="line-height: 1.8;">
+      <div><kbd>Ctrl+N</kbd> - Add new food</div>
+      <div><kbd>Ctrl+T</kbd> - Manage tags</div>
+      <div><kbd>Ctrl+S</kbd> - Save current form</div>
+      <div><kbd>Ctrl+F</kbd> - Filter foods</div>
+      <div><kbd>Delete</kbd> - Delete selected (in bulk mode)</div>
+      <div><kbd>Escape</kbd> - Close modal</div>
+      <div><kbd>?</kbd> - Show this help</div>
+    </div>
+    <button id="closeHelpBtn" style="margin-top: 15px; padding: 5px 15px;">Close</button>
+  `
+
+    // Add to body
+    document.body.appendChild(overlay)
+    document.body.appendChild(helpModal)
+
+    // Setup close handlers
+    const closeHelp = () => {
+      overlay.remove()
+      helpModal.remove()
+    }
+
+    overlay.onclick = closeHelp
+    document.getElementById('closeHelpBtn').onclick = closeHelp
+
+    // Also close with Escape
+    const escapeHandler = (e) => {
+      if (e.key === 'Escape') {
+        closeHelp()
+        document.removeEventListener('keydown', escapeHandler)
+      }
+    }
+    document.addEventListener('keydown', escapeHandler)
   }
 
   showAddFoodForm(categoryId = null) {
@@ -932,9 +1178,6 @@ class DietHelper {
 
     if (!food) return
 
-    // Hide food details modal
-    this.hideFoodDetails()
-
     // Populate edit form with current values
     this.populateEditForm(food)
 
@@ -994,6 +1237,8 @@ class DietHelper {
     // Clear the form
     document.getElementById('editFoodImage').value = ''
     document.getElementById('currentImagePreview').innerHTML = ''
+
+    // Don't hide food details - it should stay open
   }
 
   async updateFood() {
@@ -1059,11 +1304,29 @@ class DietHelper {
     updateBtn.textContent = originalText
 
     // Save and refresh
+    // Save and refresh
     await this.saveAllData()
     this.uiManager.renderCategories(this.categories, this.isEditMode)
+
+    // Refresh the food details modal with updated data BEFORE clearing IDs
+    let updatedFood = null
+    if (this.editingCategoryId) {
+      const category = this.categories.find((c) => c.id === this.editingCategoryId)
+      updatedFood = category?.foods.find((f) => f.id === this.editingFoodId)
+    } else {
+      updatedFood = this.foods.find((f) => f.id === this.editingFoodId)
+    }
+
+    // Hide edit form
     this.hideEditFoodForm()
 
-    // Clear the editing IDs
+    // Now refresh the details if we found the food
+    if (updatedFood) {
+      console.log('Refreshing food details with:', updatedFood)
+      this.uiManager.showFoodDetails(updatedFood, this.tags)
+    }
+
+    // Clear the editing IDs after everything is done
     this.editingFoodId = null
     this.editingCategoryId = null
   }

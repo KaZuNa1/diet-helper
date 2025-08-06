@@ -26,31 +26,7 @@
     {
       "id": 1754302368287,
       "name": "dsadsdas",
-      "foods": [
-        {
-          "id": 1754401815907,
-          "name": "adsads",
-          "imageUrl": "images\\food_1754402120417.PNG",
-          "selected": false,
-          "tags": [
-            1754302377169,
-            1754302378090,
-            1754302379041,
-            1754302379906,
-            1754302380738
-          ],
-          "notes": "ghgh",
-          "nutrition": {
-            "protein": 0,
-            "fat": 0,
-            "carbs": null,
-            "fiber": 1,
-            "sugar": null,
-            "sodium": 0
-          },
-          "specificData": "hgfhgffg"
-        }
-      ]
+      "foods": []
     },
     {
       "id": 1754302370721,

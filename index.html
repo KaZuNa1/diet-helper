@@ -9,10 +9,14 @@
   <body>
     <h1>Diet Helper</h1>
 
-    <button id="addCategoryBtn">Add Category</button>
-    <button id="manageTagsBtn">Manage Tags</button>
-    <button id="editModeBtn">Edit</button>
+    <button id="addCategoryBtn" title="Add Category">Add Category</button>
+    <button id="manageTagsBtn" title="Manage Tags (Ctrl+T)">Manage Tags</button>
+    <button id="editModeBtn" title="Edit Mode">Edit</button>
     <button id="bulkSelectBtn" style="display: none">Select</button>
+
+    <div style="position: fixed; bottom: 10px; right: 10px; font-size: 12px; color: #666">
+      Press <kbd>?</kbd> for keyboard shortcuts
+    </div>
 
     <!-- Filter Panel -->
     <div id="filterPanel" class="filter-panel">

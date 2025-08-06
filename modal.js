@@ -104,10 +104,20 @@ export class ModalManager {
       `[MODAL] Active element before: ${document.activeElement?.tagName} (${document.activeElement?.id})`
     )
 
-    this.closeActiveModal() // Close any open modal first
+    // Special handling for edit modal - don't close food details
+    if (modalType === 'editFood' && this.activeModal === 'foodDetails') {
+      // Keep food details open, just show edit on top
+    } else {
+      this.closeActiveModal() // Close any open modal first
+    }
 
     const { modal, overlay } = this.modals[modalType]
     if (!modal || !overlay) return
+
+    // Store previous modal for stacking
+    if (modalType === 'editFood' && this.activeModal === 'foodDetails') {
+      this._previousModal = this.activeModal
+    }
 
     this.activeModal = modalType
 
@@ -168,21 +178,26 @@ export class ModalManager {
       modal.classList.remove('active')
 
       if (this.activeModal === modalType) {
-        this.activeModal = null
+        // If we have a previous modal (stacking), restore it
+        if (this._previousModal) {
+          this.activeModal = this._previousModal
+          this._previousModal = null
+        } else {
+          this.activeModal = null
+        }
       }
 
-      // ALWAYS reset body state when ANY modal closes
-      document.body.style.overflow = 'auto'
-      document.body.removeAttribute('tabIndex')
+      // Only reset body if no modals are active
+      if (!this.activeModal) {
+        document.body.style.overflow = 'auto'
+        document.body.removeAttribute('tabIndex')
+      }
 
       console.log('[MODAL] Body tabIndex after hide:', document.body.tabIndex)
     }
 
-    if (CONFIG.FEATURES.ANIMATIONS_ENABLED) {
-      this.animateOut(modalType, doHide)
-    } else {
-      doHide()
-    }
+    // Always instant close for better UX
+    doHide()
   }
   // Hide stacked modal and restore previous
   hideModalStacked(modalType) {
@@ -205,11 +220,7 @@ export class ModalManager {
       }
     }
 
-    if (CONFIG.FEATURES.ANIMATIONS_ENABLED) {
-      this.animateOut(modalType, doHide)
-    } else {
-      doHide()
-    }
+    doHide()
   }
 
   // FIXED: Close specific modal
@@ -410,25 +421,6 @@ export class ModalManager {
         modal.style.transform = 'translate(-50%, -50%) scale(1)'
         modal.style.opacity = '1'
       })
-    }
-  }
-
-  // Animate modal exit
-  animateOut(modalType, callback = null) {
-    const { modal } = this.modals[modalType]
-    if (modal) {
-      modal.style.transition = `all ${CONFIG.UI.MODAL_ANIMATION_DURATION * 0.75}ms ease-in`
-      modal.style.transform = 'translate(-50%, -60%) scale(0.9)'
-      modal.style.opacity = '0'
-
-      setTimeout(() => {
-        modal.style.transition = ''
-        modal.style.transform = ''
-        modal.style.opacity = ''
-        if (callback) callback()
-      }, CONFIG.UI.MODAL_ANIMATION_DURATION * 0.75)
-    } else if (callback) {
-      callback()
     }
   }
 

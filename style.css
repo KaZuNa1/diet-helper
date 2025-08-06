@@ -571,3 +571,19 @@ textarea {
 #editFoodDropdown {
   min-width: 500px;
 }
+/* Modal stacking z-index for proper layering */
+#foodDetailsOverlay {
+  z-index: 999;
+}
+
+#foodDetailsDropdown {
+  z-index: 1000;
+}
+
+#editFoodOverlay {
+  z-index: 1001;
+}
+
+#editFoodDropdown {
+  z-index: 1002;
+}
