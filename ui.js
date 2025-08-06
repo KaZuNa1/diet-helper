@@ -106,18 +106,20 @@ export class UIManager {
 
           // Then create the click handler
           const clickHandler = (e) => {
-            console.log('Food clicked, bulk mode:', window.dietHelper.isBulkSelectMode)
             if (window.dietHelper.isBulkSelectMode) {
               e.preventDefault()
               e.stopPropagation()
               window.dietHelper.toggleFoodSelection(category.id, food.id)
             } else {
-              window.dietHelper.showCategoryFoodDetails(category.id, food.id)
+              // Only respond to image clicks when not in bulk mode
+              if (e.target.classList.contains('food-image')) {
+                window.dietHelper.showCategoryFoodDetails(category.id, food.id)
+              }
             }
           }
 
-          // Now we can use listenerId
-          this.addEventListenerWithCleanup(imageElement, 'click', clickHandler, listenerId)
+          // Attach to the entire food item div, not just the image
+          this.addEventListenerWithCleanup(foodDiv, 'click', clickHandler, listenerId)
           this.currentFoodElements.push(listenerId)
 
           foodsDiv.appendChild(foodDiv)

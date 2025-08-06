@@ -1077,13 +1077,13 @@ class DietHelper {
     bar.innerHTML = `
     <span class="selected-count">0 selected</span>
     <button onclick="dietHelper.selectAllVisible()">Select All</button>
+    <button onclick="dietHelper.unselectAll()">Unselect All</button>
     <button onclick="dietHelper.bulkDelete()" style="background: #dc3545; border-color: #dc3545;">Delete Selected</button>
   `
     document.body.appendChild(bar)
 
     this.updateBulkActionsBar()
   }
-
   hideBulkActionsBar() {
     const bar = document.querySelector('.bulk-actions-bar')
     if (bar) bar.remove()
@@ -1128,6 +1128,18 @@ class DietHelper {
           item.classList.add('selected')
         }
       }
+    })
+
+    this.updateBulkActionsBar()
+  }
+
+  unselectAll() {
+    // Clear all selections
+    this.selectedFoods.clear()
+
+    // Remove selected class from all items
+    document.querySelectorAll('.food-item.selected').forEach((item) => {
+      item.classList.remove('selected')
     })
 
     this.updateBulkActionsBar()

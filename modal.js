@@ -355,15 +355,31 @@ export class ModalManager {
       cleanup()
     }
 
+    // Add Enter key handler
+    const handleKeydown = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        handleYes()
+      } else if (e.key === 'Escape') {
+        e.preventDefault()
+        handleNo()
+      }
+    }
+
     const cleanup = () => {
       yesBtn.removeEventListener('click', handleYes)
       noBtn.removeEventListener('click', handleNo)
+      document.removeEventListener('keydown', handleKeydown)
       this._confirmCallback = null
       this._cancelCallback = null
     }
 
     yesBtn.addEventListener('click', handleYes)
     noBtn.addEventListener('click', handleNo)
+    document.addEventListener('keydown', handleKeydown)
+
+    // Focus the yes button for better UX
+    setTimeout(() => yesBtn.focus(), 100)
   }
 
   // Show loading state in modal
