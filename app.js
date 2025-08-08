@@ -639,6 +639,7 @@ class DietHelper {
   toggleEditMode() {
     this.isEditMode = !this.isEditMode
 
+    // Update button text
     const editBtn = document.getElementById('editModeBtn')
     const bulkSelectBtn = document.getElementById('bulkSelectBtn')
 
@@ -649,18 +650,31 @@ class DietHelper {
     bulkSelectBtn.style.display = this.isEditMode ? 'inline-block' : 'none'
 
     const container = document.getElementById('categoriesContainer')
+
     if (this.isEditMode) {
       container.classList.add('edit-mode')
-      setTimeout(() => {
-        this.enableCategorySorting()
-      }, 150)
-    } else {
-      container.classList.remove('edit-mode')
-      this.disableCategorySorting()
       // Exit bulk select mode if active
       if (this.isBulkSelectMode) {
         this.toggleBulkSelectMode()
       }
+    } else {
+      container.classList.remove('edit-mode')
+      // Exit bulk select mode if active
+      if (this.isBulkSelectMode) {
+        this.toggleBulkSelectMode()
+      }
+    }
+
+    // Re-render AFTER setting all the states
+    this.uiManager.renderCategories(this.categories, this.isEditMode)
+
+    // Enable/disable sorting AFTER rendering
+    if (this.isEditMode) {
+      setTimeout(() => {
+        this.enableCategorySorting()
+      }, 150)
+    } else {
+      this.disableCategorySorting()
     }
   }
 
