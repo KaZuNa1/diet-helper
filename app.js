@@ -908,7 +908,6 @@ class DietHelper {
     })
   }
 
-  // Toggle filter panel open/closed
   toggleFilterPanel() {
     this.isFilterPanelOpen = !this.isFilterPanelOpen
 
@@ -916,9 +915,19 @@ class DietHelper {
     const filterToggle = document.getElementById('filterToggle')
 
     if (this.isFilterPanelOpen) {
+      // Opening - measure the content height
+      filterContent.style.height = 'auto'
+      const height = filterContent.scrollHeight
+      filterContent.style.height = '0'
+      filterContent.offsetHeight // Force reflow
+      filterContent.style.height = height + 'px'
       filterContent.classList.add('open')
       filterToggle.classList.add('open')
     } else {
+      // Closing - animate to 0
+      filterContent.style.height = filterContent.scrollHeight + 'px'
+      filterContent.offsetHeight // Force reflow
+      filterContent.style.height = '0'
       filterContent.classList.remove('open')
       filterToggle.classList.remove('open')
     }

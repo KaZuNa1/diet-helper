@@ -2,36 +2,38 @@
   "foods": [],
   "tags": [
     {
-      "id": 1754302377169,
-      "name": "1"
-    },
-    {
-      "id": 1754302378090,
-      "name": "2"
-    },
-    {
-      "id": 1754302379041,
-      "name": "3"
-    },
-    {
-      "id": 1754302379906,
-      "name": "4"
-    },
-    {
-      "id": 1754302380738,
-      "name": "5"
+      "id": 1754649668861,
+      "name": "adsads"
     }
   ],
   "categories": [
     {
-      "id": 1754302368287,
-      "name": "dsadsdas",
-      "foods": []
-    },
-    {
       "id": 1754302370721,
       "name": "dsaadsads",
-      "foods": []
+      "foods": [
+        {
+          "id": 1754637247054,
+          "name": "sda",
+          "imageUrl": "images\\food_1754637261468.jpg",
+          "selected": false,
+          "tags": [
+            1754302377169,
+            1754302378090,
+            1754302379041,
+            1754302379906
+          ],
+          "notes": "adsadsadsds",
+          "nutrition": {
+            "protein": 0,
+            "fat": 0,
+            "carbs": 1,
+            "fiber": 1,
+            "sugar": 1,
+            "sodium": 1
+          },
+          "specificData": "dccdcd"
+        }
+      ]
     },
     {
       "id": 1754302372235,
