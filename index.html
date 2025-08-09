@@ -45,63 +45,75 @@
 
     <!-- Food Details Dropdown -->
     <!-- Food Details Dropdown -->
+    <!-- Food Details Dropdown -->
     <div id="foodDetailsDropdown" class="dropdown">
-      <h3>Food Details</h3>
       <div id="foodDetailsContent">
-        <div style="text-align: center">
-          <img
-            id="detailsImage"
-            style="width: 200px; height: 200px; object-fit: cover; margin-bottom: 15px"
-            src=""
-            alt=""
-          />
-          <h3 id="detailsName" style="margin: 10px 0"></h3>
-          <div id="detailsTags" style="color: #666; margin-bottom: 15px"></div>
-        </div>
+        <!-- Food name as header -->
+        <h2 id="detailsName" style="margin: 0 0 15px 0; font-size: 24px"></h2>
 
-        <!-- Notes Section -->
-        <div id="detailsNotesSection" class="details-section" style="display: none">
-          <h4>Notes</h4>
-          <p id="detailsNotes"></p>
-        </div>
+        <!-- Main content area with image and nutrition side by side -->
+        <div style="display: flex; gap: 15px; margin-bottom: 20px">
+          <!-- Image section - 60% -->
+          <div style="flex: 0 0 60%">
+            <img
+              id="detailsImage"
+              style="width: 100%; height: auto; object-fit: cover; border-radius: 8px"
+              src=""
+              alt=""
+            />
+          </div>
 
-        <!-- Nutrition Section -->
-        <div id="detailsNutritionSection" class="details-section" style="display: none">
-          <h4>Nutrition Facts</h4>
-          <div class="nutrition-display">
-            <div class="nutrition-row">
-              <span>Protein:</span>
-              <span id="detailsProtein">-</span>
-            </div>
-            <div class="nutrition-row">
-              <span>Fat:</span>
-              <span id="detailsFat">-</span>
-            </div>
-            <div class="nutrition-row">
-              <span>Carbs:</span>
-              <span id="detailsCarbs">-</span>
-            </div>
-            <div class="nutrition-row">
-              <span>Fiber:</span>
-              <span id="detailsFiber">-</span>
-            </div>
-            <div class="nutrition-row">
-              <span>Sugar:</span>
-              <span id="detailsSugar">-</span>
-            </div>
-            <div class="nutrition-row">
-              <span>Sodium:</span>
-              <span id="detailsSodium">-</span>
+          <!-- Nutrition section - 40% (single column) -->
+          <div style="flex: 0 0 40%">
+            <h4 style="margin: 0 0 10px 0; font-size: 16px">Nutrition Facts</h4>
+            <div class="nutrition-display compact">
+              <div class="nutrition-row">
+                <span>Protein:</span>
+                <span id="detailsProtein">-</span>
+              </div>
+              <div class="nutrition-row">
+                <span>Fat:</span>
+                <span id="detailsFat">-</span>
+              </div>
+              <div class="nutrition-row">
+                <span>Carbs:</span>
+                <span id="detailsCarbs">-</span>
+              </div>
+              <div class="nutrition-row">
+                <span>Fiber:</span>
+                <span id="detailsFiber">-</span>
+              </div>
+              <div class="nutrition-row">
+                <span>Sugar:</span>
+                <span id="detailsSugar">-</span>
+              </div>
+              <div class="nutrition-row">
+                <span>Sodium:</span>
+                <span id="detailsSodium">-</span>
+              </div>
             </div>
           </div>
         </div>
 
+        <!-- Tags section -->
+        <div class="details-section" style="margin-bottom: 15px">
+          <h4 style="margin: 0 0 8px 0">Tags</h4>
+          <div id="detailsTags"></div>
+        </div>
+
+        <!-- Notes Section -->
+        <div id="detailsNotesSection" class="details-section">
+          <h4>Notes</h4>
+          <p id="detailsNotes"></p>
+        </div>
+
         <!-- Specific Data Section -->
-        <div id="detailsSpecificSection" class="details-section" style="display: none">
+        <div id="detailsSpecificSection" class="details-section">
           <h4>Specific Information</h4>
           <p id="detailsSpecificData"></p>
         </div>
       </div>
+
       <div class="modal-buttons">
         <button id="editFoodBtn" class="btn-primary">Edit</button>
         <button id="deleteFoodBtn" class="btn-danger">Delete</button>
@@ -190,71 +202,61 @@
     </div>
 
     <!-- Edit Food Dropdown -->
+    <!-- Edit Food Dropdown -->
     <div id="editFoodDropdown" class="dropdown">
-      <h3>Edit Food</h3>
-
-      <!-- Basic Info Section -->
+      <!-- Food name at the top -->
       <div class="form-section">
-        <h4>Basic Information</h4>
+        <h2 style="margin: 0 0 15px 0; font-size: 20px">Edit Food</h2>
         <div class="form-group">
-          <input type="text" id="editFoodName" placeholder="Enter food name" />
+          <label style="font-weight: bold; margin-bottom: 5px; display: block">Food Name</label>
+          <input
+            type="text"
+            id="editFoodName"
+            placeholder="Enter food name"
+            style="width: 100%; font-size: 16px"
+          />
           <div id="editFoodNameError" class="error-message hidden">Please enter food name</div>
         </div>
-        <div class="form-group">
-          <label>Food Image:</label>
-          <input type="file" id="editFoodImage" accept="image/*" />
+      </div>
+
+      <!-- Image and Nutrition side by side -->
+      <div style="display: flex; gap: 15px; margin-bottom: 20px">
+        <!-- Image section - 60% -->
+        <div style="flex: 0 0 60%">
+          <label style="font-weight: bold; margin-bottom: 5px; display: block">Food Image</label>
+          <input type="file" id="editFoodImage" accept="image/*" style="width: 100%" />
           <div id="currentImagePreview" style="margin-top: 10px"></div>
         </div>
-        <div class="form-group">
-          <label>Notes:</label>
-          <textarea
-            id="editFoodNotes"
-            placeholder="Cooking tips, where to buy, etc."
-            rows="2"
-          ></textarea>
-        </div>
-      </div>
 
-      <!-- Nutrition Section -->
-      <div class="form-section">
-        <h4>Nutrition Facts (per serving)</h4>
-        <div class="nutrition-grid">
-          <div class="nutrition-input">
-            <label>Protein (g)</label>
-            <input type="number" id="editNutritionProtein" min="0" step="0.1" />
+        <!-- Nutrition section - 40% -->
+        <div style="flex: 0 0 40%">
+          <h4 style="margin: 0 0 10px 0; font-size: 16px">Nutrition Facts</h4>
+          <div class="nutrition-edit-compact">
+            <div class="nutrition-input-row">
+              <label>Protein (g)</label>
+              <input type="number" id="editNutritionProtein" min="0" step="0.1" />
+            </div>
+            <div class="nutrition-input-row">
+              <label>Fat (g)</label>
+              <input type="number" id="editNutritionFat" min="0" step="0.1" />
+            </div>
+            <div class="nutrition-input-row">
+              <label>Carbs (g)</label>
+              <input type="number" id="editNutritionCarbs" min="0" step="0.1" />
+            </div>
+            <div class="nutrition-input-row">
+              <label>Fiber (g)</label>
+              <input type="number" id="editNutritionFiber" min="0" step="0.1" />
+            </div>
+            <div class="nutrition-input-row">
+              <label>Sugar (g)</label>
+              <input type="number" id="editNutritionSugar" min="0" step="0.1" />
+            </div>
+            <div class="nutrition-input-row">
+              <label>Sodium (mg)</label>
+              <input type="number" id="editNutritionSodium" min="0" step="1" />
+            </div>
           </div>
-          <div class="nutrition-input">
-            <label>Fat (g)</label>
-            <input type="number" id="editNutritionFat" min="0" step="0.1" />
-          </div>
-          <div class="nutrition-input">
-            <label>Carbs (g)</label>
-            <input type="number" id="editNutritionCarbs" min="0" step="0.1" />
-          </div>
-          <div class="nutrition-input">
-            <label>Fiber (g)</label>
-            <input type="number" id="editNutritionFiber" min="0" step="0.1" />
-          </div>
-          <div class="nutrition-input">
-            <label>Sugar (g)</label>
-            <input type="number" id="editNutritionSugar" min="0" step="0.1" />
-          </div>
-          <div class="nutrition-input">
-            <label>Sodium (mg)</label>
-            <input type="number" id="editNutritionSodium" min="0" step="1" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Specific Data Section -->
-      <div class="form-section">
-        <h4>Specific Information</h4>
-        <div class="form-group">
-          <textarea
-            id="editFoodSpecificData"
-            placeholder="e.g., Rich in B vitamins, High in antioxidants, Good source of omega-3..."
-            rows="2"
-          ></textarea>
         </div>
       </div>
 
@@ -262,6 +264,28 @@
       <div class="form-section">
         <h4>Tags</h4>
         <div id="editTagsList"></div>
+      </div>
+
+      <!-- Notes Section -->
+      <div class="form-section">
+        <h4>Notes</h4>
+        <textarea
+          id="editFoodNotes"
+          placeholder="Cooking tips, where to buy, etc."
+          rows="3"
+          style="width: 100%"
+        ></textarea>
+      </div>
+
+      <!-- Specific Data Section -->
+      <div class="form-section">
+        <h4>Specific Information</h4>
+        <textarea
+          id="editFoodSpecificData"
+          placeholder="e.g., Rich in B vitamins, High in antioxidants..."
+          rows="3"
+          style="width: 100%"
+        ></textarea>
       </div>
 
       <div class="modal-buttons">

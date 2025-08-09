@@ -33,25 +33,29 @@
   "categories": [
     {
       "id": 1754302370721,
-      "name": "dsaadsads",
+      "name": "s",
       "foods": [
         {
           "id": 1754700087251,
           "name": "SDA",
-          "imageUrl": "",
+          "imageUrl": "images\\food_1754702284737.jpg",
           "selected": false,
           "tags": [
             1754699854242,
+            1754699870648,
+            1754699878614,
+            1754699881182,
+            1754699893806,
             1754700078396
           ],
           "notes": "",
           "nutrition": {
-            "protein": null,
-            "fat": null,
-            "carbs": null,
+            "protein": 1,
+            "fat": 1,
+            "carbs": 1,
             "fiber": null,
-            "sugar": null,
-            "sodium": null
+            "sugar": 1,
+            "sodium": 1
           },
           "specificData": ""
         }
