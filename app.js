@@ -945,24 +945,11 @@ class DietHelper {
         tagDiv.classList.add('selected')
       }
 
-      const checkbox = document.createElement('input')
-      checkbox.type = 'checkbox'
-      checkbox.checked = this.selectedFilterTags.has(tag.id)
-      checkbox.id = `filter-tag-${tag.id}`
+      // Just the tag name, no checkbox
+      tagDiv.textContent = tag.name
+      tagDiv.dataset.tagId = tag.id
 
-      const label = document.createElement('label')
-      label.htmlFor = `filter-tag-${tag.id}`
-      label.textContent = tag.name
-      label.style.cursor = 'pointer'
-      label.style.marginBottom = '0'
-
-      tagDiv.appendChild(checkbox)
-      tagDiv.appendChild(label)
-
-      tagDiv.addEventListener('click', (e) => {
-        if (e.target.type !== 'checkbox') {
-          checkbox.checked = !checkbox.checked
-        }
+      tagDiv.addEventListener('click', () => {
         this.toggleFilterTag(tag.id)
       })
 

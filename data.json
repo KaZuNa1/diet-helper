@@ -2,8 +2,32 @@
   "foods": [],
   "tags": [
     {
-      "id": 1754649668861,
-      "name": "adsads"
+      "id": 1754699851693,
+      "name": "BREAKFAST"
+    },
+    {
+      "id": 1754699854242,
+      "name": "KETO"
+    },
+    {
+      "id": 1754699870648,
+      "name": "LUNCH"
+    },
+    {
+      "id": 1754699878614,
+      "name": "EVENING"
+    },
+    {
+      "id": 1754699881182,
+      "name": "DINNER"
+    },
+    {
+      "id": 1754699893806,
+      "name": "SNACK"
+    },
+    {
+      "id": 1754700078396,
+      "name": "🍖CARNIVORE"
     }
   ],
   "categories": [
@@ -12,26 +36,24 @@
       "name": "dsaadsads",
       "foods": [
         {
-          "id": 1754637247054,
-          "name": "sda",
-          "imageUrl": "images\\food_1754637261468.jpg",
+          "id": 1754700087251,
+          "name": "SDA",
+          "imageUrl": "",
           "selected": false,
           "tags": [
-            1754302377169,
-            1754302378090,
-            1754302379041,
-            1754302379906
+            1754699854242,
+            1754700078396
           ],
-          "notes": "adsadsadsds",
+          "notes": "",
           "nutrition": {
-            "protein": 0,
-            "fat": 0,
-            "carbs": 1,
-            "fiber": 1,
-            "sugar": 1,
-            "sodium": 1
+            "protein": null,
+            "fat": null,
+            "carbs": null,
+            "fiber": null,
+            "sugar": null,
+            "sodium": null
           },
-          "specificData": "dccdcd"
+          "specificData": ""
         }
       ]
     },

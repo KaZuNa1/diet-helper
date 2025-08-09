@@ -16,6 +16,7 @@ button {
   background: white;
   border: 2px solid #ccc;
   padding: 20px;
+  padding-bottom: 0; /* Remove bottom padding */
   z-index: 1000;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   border-radius: 8px;
@@ -114,10 +115,15 @@ button {
   justify-content: flex-end;
   margin-top: 20px;
   padding-top: 15px;
+  padding-bottom: 20px; /* Add padding here instead */
   border-top: 1px solid #eee;
   position: sticky;
   bottom: 0;
   background: white;
+  margin-left: -20px; /* Negative margin to extend to edges */
+  margin-right: -20px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 .btn-primary {
   background-color: #007bff;
@@ -276,23 +282,27 @@ body {
   margin-bottom: 15px;
   max-height: 300px;
   overflow-y: auto;
+  padding-top: 2px; /* Add small padding to prevent cutoff */
 }
 
 .filter-tag-item {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  padding: 6px 12px;
+  padding: 8px 16px;
   background: white;
   border: 1px solid #ddd;
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
+  font-size: 14px;
 }
 
 .filter-tag-item:hover {
   background: #f0f0f0;
   border-color: #007bff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .filter-tag-item.selected {
@@ -302,8 +312,7 @@ body {
 }
 
 .filter-tag-item input[type='checkbox'] {
-  margin-right: 6px;
-  cursor: pointer;
+  display: none;
 }
 
 .filter-actions {
