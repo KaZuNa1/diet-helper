@@ -195,16 +195,39 @@ export class UIManager {
       return
     }
 
+    // Create a grid container
+    const tagsGrid = document.createElement('div')
+    tagsGrid.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 10px;'
+
     tags.forEach((tag) => {
       const tagDiv = document.createElement('div')
       tagDiv.className = 'tag-item'
-      tagDiv.innerHTML = `
-                <span>${this.escapeHtml(tag.name)}</span>
-                <button class="delete-tag-btn" data-tag-id="${tag.id}" style="margin-left: 10px; padding: 2px 8px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">Delete</button>
-            `
+      tagDiv.style.cssText =
+        'display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border: 1px solid #ddd; border-radius: 5px;'
 
-      // FIXED: Add click event listener with cleanup tracking
-      const deleteBtn = tagDiv.querySelector('.delete-tag-btn')
+      const tagName = document.createElement('span')
+      tagName.textContent = this.escapeHtml(tag.name)
+      tagName.style.cssText =
+        'flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;'
+
+      const deleteBtn = document.createElement('button')
+      deleteBtn.className = 'delete-tag-btn'
+      deleteBtn.setAttribute('data-tag-id', tag.id)
+      deleteBtn.textContent = '−'
+      deleteBtn.style.cssText =
+        'width: 24px; height: 24px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 18px; line-height: 1; padding: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;'
+
+      // Add hover effect
+      deleteBtn.onmouseover = () => {
+        deleteBtn.style.background = '#c82333'
+      }
+      deleteBtn.onmouseout = () => {
+        deleteBtn.style.background = '#dc3545'
+      }
+
+      tagDiv.appendChild(tagName)
+      tagDiv.appendChild(deleteBtn)
+
       const clickHandler = () => {
         window.dietHelper.deleteTag(tag.id)
       }
@@ -213,10 +236,11 @@ export class UIManager {
       this.addEventListenerWithCleanup(deleteBtn, 'click', clickHandler, listenerId)
       this.currentTagElements.push(listenerId)
 
-      this.elements.existingTags.appendChild(tagDiv)
+      tagsGrid.appendChild(tagDiv)
     })
-  }
 
+    this.elements.existingTags.appendChild(tagsGrid)
+  }
   // Show food details in modal
   showFoodDetails(food, tags) {
     const tagNames = food.tags
