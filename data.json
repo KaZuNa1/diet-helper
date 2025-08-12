@@ -30,5 +30,81 @@
       "name": "🍖CARNIVORE"
     }
   ],
-  "categories": []
+  "categories": [
+    {
+      "id": 1754896988663,
+      "name": "PROTEINS",
+      "foods": []
+    },
+    {
+      "id": 1754896990424,
+      "name": "FATS",
+      "foods": []
+    },
+    {
+      "id": 1754905381824,
+      "name": "VEGGIES",
+      "foods": []
+    },
+    {
+      "id": 1754905389178,
+      "name": "FRUITS",
+      "foods": [
+        {
+          "id": 1754978572575,
+          "name": "sda",
+          "imageUrl": "images\\food_1754978572572.PNG",
+          "selected": false,
+          "tags": [],
+          "notes": "",
+          "nutrition": {
+            "protein": null,
+            "fat": null,
+            "carbs": null,
+            "fiber": null,
+            "sugar": null,
+            "sodium": null
+          },
+          "specificData": ""
+        },
+        {
+          "id": 1754978597152,
+          "name": "sda",
+          "imageUrl": "images\\food_1754978597151.PNG",
+          "selected": false,
+          "tags": [],
+          "notes": "",
+          "nutrition": {
+            "protein": null,
+            "fat": null,
+            "carbs": null,
+            "fiber": null,
+            "sugar": null,
+            "sodium": null
+          },
+          "specificData": ""
+        }
+      ]
+    },
+    {
+      "id": 1754905398533,
+      "name": "NUTS & SEEDS",
+      "foods": []
+    },
+    {
+      "id": 1754905426354,
+      "name": "POWDERS & ADDITIVES",
+      "foods": []
+    },
+    {
+      "id": 1754905450825,
+      "name": "BEVERAGES",
+      "foods": []
+    },
+    {
+      "id": 1754905897412,
+      "name": "VITAMIN & SUPPLEMENTS",
+      "foods": []
+    }
+  ]
 }

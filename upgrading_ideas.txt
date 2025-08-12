@@ -1,5 +1,4 @@
 
-Keyboard shortcuts - Already defined in config, just need implementation
 
 Image zoom on hover - Preview larger image without opening modal
 

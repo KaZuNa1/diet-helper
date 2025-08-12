@@ -165,15 +165,25 @@ export class UIManager {
       return
     }
 
+    // Create a container for inline tags
+    const tagsContainer = document.createElement('div')
+    tagsContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px;'
+
     tags.forEach((tag) => {
-      const tagDiv = document.createElement('div')
-      tagDiv.className = 'tag-item'
-      tagDiv.innerHTML = `
-                <input type="checkbox" class="tag-checkbox" value="${tag.id}" id="tag_${tag.id}">
-                <label for="tag_${tag.id}">${this.escapeHtml(tag.name)}</label>
-            `
-      this.elements.tagsList.appendChild(tagDiv)
+      const tagButton = document.createElement('div')
+      tagButton.className = 'selectable-tag'
+      tagButton.dataset.tagId = tag.id
+      tagButton.textContent = this.escapeHtml(tag.name)
+
+      // Add click handler
+      tagButton.addEventListener('click', () => {
+        tagButton.classList.toggle('selected')
+      })
+
+      tagsContainer.appendChild(tagButton)
     })
+
+    this.elements.tagsList.appendChild(tagsContainer)
   }
 
   // FIXED: Render existing tags in manage tags form with proper event management
@@ -375,9 +385,9 @@ export class UIManager {
       if (input) input.value = ''
     })
 
-    // Clear tag selections
-    const checkboxes = document.querySelectorAll('.tag-checkbox')
-    checkboxes.forEach((cb) => (cb.checked = false))
+    // Clear tag selections (updated for new system)
+    const selectedTags = document.querySelectorAll('.selectable-tag.selected')
+    selectedTags.forEach((tag) => tag.classList.remove('selected'))
   }
   rebuildFoodNameInput() {
     const container = document.querySelector('#addFoodDropdown .form-group')
@@ -436,21 +446,21 @@ export class UIManager {
   }
 
   // Get selected tags from checkboxes
-  getSelectedTags() {
+  getSelectedEditTags() {
     const selectedTags = []
-    const checkboxes = document.querySelectorAll('.tag-checkbox:checked')
-    checkboxes.forEach((cb) => {
-      selectedTags.push(parseInt(cb.value))
+    // Look for selected tags in the edit modal
+    const selectedElements = document.querySelectorAll('#editTagsList .selectable-tag.selected')
+    selectedElements.forEach((el) => {
+      selectedTags.push(parseInt(el.dataset.tagId))
     })
     return selectedTags
   }
-
   // Get form input values
   getFoodFormData() {
     return {
       name: document.getElementById('foodName')?.value.trim() || '',
       image: document.getElementById('foodImage')?.files[0] || null,
-      tags: this.getSelectedTags(),
+      tags: this.getSelectedFoodTags(),
       notes: document.getElementById('foodNotes')?.value.trim() || '',
       nutrition: {
         protein:
@@ -495,16 +505,30 @@ export class UIManager {
       return
     }
 
+    // Create a container for inline tags
+    const tagsContainer = document.createElement('div')
+    tagsContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px;'
+
     tags.forEach((tag) => {
-      const tagDiv = document.createElement('div')
-      tagDiv.className = 'tag-item'
-      const isChecked = selectedTagIds.includes(tag.id)
-      tagDiv.innerHTML = `
-      <input type="checkbox" class="edit-tag-checkbox" value="${tag.id}" id="edit_tag_${tag.id}" ${isChecked ? 'checked' : ''}>
-      <label for="edit_tag_${tag.id}">${this.escapeHtml(tag.name)}</label>
-    `
-      container.appendChild(tagDiv)
+      const tagButton = document.createElement('div')
+      tagButton.className = 'selectable-tag'
+      tagButton.dataset.tagId = tag.id
+      tagButton.textContent = this.escapeHtml(tag.name)
+
+      // Pre-select if it was already selected
+      if (selectedTagIds.includes(tag.id)) {
+        tagButton.classList.add('selected')
+      }
+
+      // Add click handler
+      tagButton.addEventListener('click', () => {
+        tagButton.classList.toggle('selected')
+      })
+
+      tagsContainer.appendChild(tagButton)
     })
+
+    container.appendChild(tagsContainer)
   }
 
   getEditFoodFormData() {
@@ -579,6 +603,14 @@ export class UIManager {
     if (element) {
       setTimeout(() => element.focus(), 100)
     }
+  }
+  getSelectedFoodTags() {
+    const selectedTags = []
+    const selectedElements = document.querySelectorAll('#tagsList .selectable-tag.selected')
+    selectedElements.forEach((el) => {
+      selectedTags.push(parseInt(el.dataset.tagId))
+    })
+    return selectedTags
   }
 
   // FIXED: Cleanup method to be called when UIManager is destroyed
