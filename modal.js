@@ -28,6 +28,10 @@ export class ModalManager {
         modal: document.getElementById('editFoodDropdown'),
         overlay: this.createOverlay('editFoodOverlay'),
       },
+      addSubgroup: {
+        modal: document.getElementById('addSubgroupDropdown'),
+        overlay: this.createOverlay('addSubgroupOverlay'),
+      },
     }
 
     this.activeModal = null
@@ -311,6 +315,22 @@ export class ModalManager {
   // Check if any modal is open
   isModalOpen() {
     return this.activeModal !== null
+  }
+
+  // Show add subgroup modal
+  showAddSubgroup() {
+    this.showModal('addSubgroup')
+
+    // Focus on input
+    setTimeout(() => {
+      const input = document.getElementById('subgroupNameInput')
+      if (input) input.focus()
+    }, 100)
+  }
+
+  // Hide add subgroup modal
+  hideAddSubgroup() {
+    this.hideModal('addSubgroup')
   }
 
   // Get currently active modal

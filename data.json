@@ -33,8 +33,56 @@
   "categories": [
     {
       "id": 1754896988663,
-      "name": "PROTEINS",
-      "foods": []
+      "name": "sda",
+      "foods": [],
+      "subgroups": [
+        {
+          "id": 1754979739865,
+          "name": "sda we",
+          "foods": [
+            {
+              "id": 1754979764174,
+              "name": "sda",
+              "imageUrl": "images\\food_1754979764173.PNG",
+              "selected": false,
+              "tags": [],
+              "notes": "",
+              "nutrition": {
+                "protein": null,
+                "fat": null,
+                "carbs": null,
+                "fiber": null,
+                "sugar": null,
+                "sodium": null
+              },
+              "specificData": ""
+            }
+          ]
+        },
+        {
+          "id": 1754981617375,
+          "name": "sda",
+          "foods": [
+            {
+              "id": 1754979748354,
+              "name": "sdaads",
+              "imageUrl": "images\\food_1754979748352.PNG",
+              "selected": false,
+              "tags": [],
+              "notes": "",
+              "nutrition": {
+                "protein": null,
+                "fat": null,
+                "carbs": null,
+                "fiber": null,
+                "sugar": null,
+                "sodium": null
+              },
+              "specificData": ""
+            }
+          ]
+        }
+      ]
     },
     {
       "id": 1754896990424,
@@ -49,42 +97,7 @@
     {
       "id": 1754905389178,
       "name": "FRUITS",
-      "foods": [
-        {
-          "id": 1754978572575,
-          "name": "sda",
-          "imageUrl": "images\\food_1754978572572.PNG",
-          "selected": false,
-          "tags": [],
-          "notes": "",
-          "nutrition": {
-            "protein": null,
-            "fat": null,
-            "carbs": null,
-            "fiber": null,
-            "sugar": null,
-            "sodium": null
-          },
-          "specificData": ""
-        },
-        {
-          "id": 1754978597152,
-          "name": "sda",
-          "imageUrl": "images\\food_1754978597151.PNG",
-          "selected": false,
-          "tags": [],
-          "notes": "",
-          "nutrition": {
-            "protein": null,
-            "fat": null,
-            "carbs": null,
-            "fiber": null,
-            "sugar": null,
-            "sodium": null
-          },
-          "specificData": ""
-        }
-      ]
+      "foods": []
     },
     {
       "id": 1754905398533,

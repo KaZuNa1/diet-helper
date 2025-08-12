@@ -111,6 +111,15 @@ class DietHelper {
     document.getElementById('cancelEditBtn').addEventListener('click', () => {
       this.hideEditFoodForm()
     })
+    // Save Subgroup Button
+    document.getElementById('saveSubgroupBtn').addEventListener('click', () => {
+      this.saveSubgroup()
+    })
+
+    // Cancel Subgroup Button
+    document.getElementById('cancelSubgroupBtn').addEventListener('click', () => {
+      this.hideAddSubgroupForm()
+    })
   }
 
   initializeKeyboardShortcuts() {
@@ -541,14 +550,28 @@ class DietHelper {
       return
     }
 
-    if (this.currentCategoryId) {
+    if (this.currentSubgroupId) {
+      // Adding to subgroup
+      const category = this.categories.find((c) => c.id === this.currentCategoryId)
+      if (category) {
+        const subgroup = category.subgroups.find((s) => s.id === this.currentSubgroupId)
+        if (subgroup) {
+          subgroup.foods.push(newFood)
+        }
+      }
+    } else if (this.currentCategoryId) {
+      // Adding to category directly
       const category = this.categories.find((c) => c.id === this.currentCategoryId)
       if (category) {
         category.foods.push(newFood)
       }
     } else {
+      // Adding to uncategorized
       this.foods.push(newFood)
     }
+
+    // Clear the subgroup ID
+    this.currentSubgroupId = null
 
     await this.saveAllData()
     this.uiManager.renderCategories(this.categories, this.isEditMode)
@@ -635,7 +658,145 @@ class DietHelper {
     this.uiManager.renderCategories(this.categories, this.isEditMode)
     this.hideAddCategoryForm()
   }
+  // Show add subgroup form
+  showAddSubgroupForm(categoryId) {
+    this.currentCategoryId = categoryId
+    document.getElementById('subgroupNameInput').value = ''
+    this.uiManager.hideError('subgroupNameError')
+    this.modalManager.showAddSubgroup()
+  }
 
+  hideAddSubgroupForm() {
+    this.modalManager.hideAddSubgroup()
+  }
+
+  saveSubgroup() {
+    const subgroupName = document.getElementById('subgroupNameInput').value.trim()
+
+    if (!subgroupName) {
+      this.uiManager.showError('subgroupNameError', 'Please enter subgroup name')
+      return
+    }
+
+    this.addSubgroup(this.currentCategoryId, subgroupName)
+    this.hideAddSubgroupForm()
+  }
+
+  // Add subgroup to category
+  addSubgroup(categoryId, name) {
+    const category = this.categories.find((c) => c.id === categoryId)
+    if (!category) return
+
+    const newSubgroup = {
+      id: Date.now(),
+      name: name,
+      foods: [],
+    }
+
+    if (!category.subgroups) {
+      category.subgroups = []
+    }
+
+    category.subgroups.push(newSubgroup)
+    this.saveAllData()
+    this.uiManager.renderCategories(this.categories, this.isEditMode)
+  }
+
+  // Delete subgroup
+  deleteSubgroup(categoryId, subgroupId) {
+    const category = this.categories.find((c) => c.id === categoryId)
+    if (!category) return
+
+    const subgroup = category.subgroups.find((s) => s.id === subgroupId)
+    if (!subgroup) return
+
+    const message =
+      subgroup.foods.length > 0
+        ? `Delete "${subgroup.name}" and move its ${subgroup.foods.length} foods to main category?`
+        : `Delete empty subgroup "${subgroup.name}"?`
+
+    this.modalManager.showConfirmation(message, () => {
+      // Move foods to main category before deleting
+      if (subgroup.foods.length > 0) {
+        category.foods.push(...subgroup.foods)
+      }
+
+      category.subgroups = category.subgroups.filter((s) => s.id !== subgroupId)
+      this.saveAllData()
+      this.uiManager.renderCategories(this.categories, this.isEditMode)
+    })
+  }
+
+  // Rename subgroup
+  startRenameSubgroup(categoryId, subgroupId) {
+    const category = this.categories.find((c) => c.id === categoryId)
+    if (!category) return
+
+    const subgroup = category.subgroups.find((s) => s.id === subgroupId)
+    if (!subgroup) return
+
+    const nameSpan = document.getElementById(`subgroupName-${subgroupId}`)
+    if (!nameSpan) return
+
+    const originalName = subgroup.name
+
+    const input = document.createElement('input')
+    input.type = 'text'
+    input.value = subgroup.name
+    input.style.cssText = 'font-weight: bold; padding: 2px 5px; font-size: 14px;'
+
+    nameSpan.parentNode.replaceChild(input, nameSpan)
+    input.focus()
+    input.select()
+
+    const saveRename = () => {
+      const newName = input.value.trim()
+      if (newName && newName !== originalName) {
+        subgroup.name = newName
+        this.saveAllData()
+      }
+      this.uiManager.renderCategories(this.categories, this.isEditMode)
+    }
+
+    input.addEventListener('blur', saveRename)
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        saveRename()
+      } else if (e.key === 'Escape') {
+        this.uiManager.renderCategories(this.categories, this.isEditMode)
+      }
+    })
+  }
+
+  // Show food details from subgroup
+  showSubgroupFoodDetails(categoryId, subgroupId, foodId) {
+    const category = this.categories.find((c) => c.id === categoryId)
+    if (!category) return
+
+    const subgroup = category.subgroups.find((s) => s.id === subgroupId)
+    if (!subgroup) return
+
+    const food = subgroup.foods.find((f) => f.id === foodId)
+    if (!food) return
+
+    this.currentFoodId = foodId
+    this.currentCategoryId = categoryId
+    this.currentSubgroupId = subgroupId
+
+    this.uiManager.showFoodDetails(food, this.tags)
+    this.modalManager.showFoodDetails()
+  }
+
+  // Add food to subgroup
+  showAddFoodToSubgroup(categoryId, subgroupId) {
+    this.modalManager.closeActiveModal()
+
+    this.currentCategoryId = categoryId
+    this.currentSubgroupId = subgroupId
+    this.uiManager.renderTagsForSelection(this.tags)
+    this.modalManager.showAddFood()
+  }
   toggleEditMode() {
     this.isEditMode = !this.isEditMode
 
@@ -712,14 +873,154 @@ class DietHelper {
     this.disableFoodSorting()
   }
   enableFoodSorting() {
-    // Create a shared group for all categories to allow dragging between them
     const sharedGroup = 'shared-foods'
 
+    // Handler for when dragging starts
+    const handleDragStart = (evt) => {
+      // Hide all empty messages when dragging starts
+      document.querySelectorAll('.empty-category-message').forEach((msg) => {
+        msg.style.display = 'none'
+      })
+      document.querySelectorAll('.empty-subgroup-message').forEach((msg) => {
+        msg.style.display = 'none'
+      })
+    }
+
+    // Handler for when dragging ends
+    // Handler for when dragging ends
+    // Handler for when dragging ends
+    const handleDragEnd = (evt) => {
+      // Show empty messages for all empty containers
+      this.categories.forEach((category) => {
+        const foodsContainer = document.getElementById(`foods-${category.id}`)
+        if (foodsContainer) {
+          const foodItems = foodsContainer.querySelectorAll('.food-item')
+          const emptyMsg = foodsContainer.querySelector('.empty-category-message')
+
+          if (foodItems.length === 0) {
+            // Container is empty - ensure empty message is shown
+            if (!emptyMsg) {
+              const msg = document.createElement('p')
+              msg.className = 'empty-category-message'
+              msg.style.cssText =
+                'color: #666; margin: 40px 0; position: absolute; width: 100%; text-align: center; pointer-events: none;'
+              msg.textContent = 'No foods in this category'
+              foodsContainer.appendChild(msg)
+            } else {
+              // Make sure it's visible
+              emptyMsg.style.display = 'block'
+            }
+          }
+        }
+
+        // Same for subgroups
+        if (category.subgroups) {
+          category.subgroups.forEach((subgroup) => {
+            const subgroupContainer = document.getElementById(`subgroup-foods-${subgroup.id}`)
+            if (subgroupContainer) {
+              const foodItems = subgroupContainer.querySelectorAll('.food-item')
+              const emptyMsg = subgroupContainer.querySelector('.empty-subgroup-message')
+
+              if (foodItems.length === 0) {
+                if (!emptyMsg) {
+                  const msg = document.createElement('p')
+                  msg.className = 'empty-subgroup-message'
+                  msg.style.cssText =
+                    'color: #999; font-size: 12px; margin: 10px; position: absolute; width: 100%; text-align: center; pointer-events: none;'
+                  msg.textContent = 'No foods in this subgroup'
+                  subgroupContainer.appendChild(msg)
+                } else {
+                  // Make sure it's visible
+                  emptyMsg.style.display = 'block'
+                }
+              }
+            }
+          })
+        }
+      })
+    }
+
+    // Create one unified onEnd handler
+    const handleFoodMove = (evt) => {
+      // Don't do anything if it's the same container
+      if (evt.from === evt.to && evt.oldIndex === evt.newIndex) return
+
+      const fromId = evt.from.id
+      const toId = evt.to.id
+
+      // Get the moved element's data
+      const movedElement = evt.item
+      const foodImage = movedElement.querySelector('.food-image')
+      if (!foodImage) return
+
+      const foodId = parseInt(foodImage.dataset.foodId)
+
+      // Find and remove food from source
+      let movedFood = null
+      const fromParts = fromId.split('-')
+
+      if (fromParts[0] === 'foods') {
+        // From category direct foods
+        const fromCategoryId = parseInt(fromParts[1])
+        const sourceCategory = this.categories.find((c) => c.id === fromCategoryId)
+        if (sourceCategory) {
+          const foodIndex = sourceCategory.foods.findIndex((f) => f.id === foodId)
+          if (foodIndex !== -1) {
+            movedFood = sourceCategory.foods.splice(foodIndex, 1)[0]
+          }
+        }
+      } else if (fromParts[0] === 'subgroup' && fromParts[1] === 'foods') {
+        // From subgroup
+        const subgroupId = parseInt(fromParts[2])
+        this.categories.forEach((category) => {
+          if (category.subgroups) {
+            const subgroup = category.subgroups.find((s) => s.id === subgroupId)
+            if (subgroup) {
+              const foodIndex = subgroup.foods.findIndex((f) => f.id === foodId)
+              if (foodIndex !== -1) {
+                movedFood = subgroup.foods.splice(foodIndex, 1)[0]
+              }
+            }
+          }
+        })
+      }
+
+      // Add food to destination
+      if (movedFood) {
+        const toParts = toId.split('-')
+
+        if (toParts[0] === 'foods') {
+          // To category direct foods
+          const toCategoryId = parseInt(toParts[1])
+          const destCategory = this.categories.find((c) => c.id === toCategoryId)
+          if (destCategory) {
+            // Insert at the new position
+            destCategory.foods.splice(evt.newIndex, 0, movedFood)
+          }
+        } else if (toParts[0] === 'subgroup' && toParts[1] === 'foods') {
+          // To subgroup
+          const subgroupId = parseInt(toParts[2])
+          this.categories.forEach((category) => {
+            if (category.subgroups) {
+              const subgroup = category.subgroups.find((s) => s.id === subgroupId)
+              if (subgroup) {
+                // Insert at the new position
+                subgroup.foods.splice(evt.newIndex, 0, movedFood)
+              }
+            }
+          })
+        }
+
+        this.saveAllData()
+      }
+    }
+
+    // Enable sorting for direct category foods
     this.categories.forEach((category) => {
       const foodsContainer = document.getElementById(`foods-${category.id}`)
       if (foodsContainer) {
-        this.foodSortables[category.id] = Sortable.create(foodsContainer, {
-          group: sharedGroup, // Changed from unique group to shared
+        this.foodSortables[`category-${category.id}`] = Sortable.create(foodsContainer, {
+          group: sharedGroup,
           animation: 150,
           draggable: '.food-item',
           scroll: true,
@@ -727,31 +1028,38 @@ class DietHelper {
           scrollSpeed: 10,
           ghostClass: 'sortable-ghost',
           chosenClass: 'sortable-chosen',
+          onStart: handleDragStart,
           onEnd: (evt) => {
-            // Get source and destination category IDs
-            const fromCategoryId = parseInt(evt.from.id.replace('foods-', ''))
-            const toCategoryId = parseInt(evt.to.id.replace('foods-', ''))
-
-            const sourceCategory = this.categories.find((c) => c.id === fromCategoryId)
-            const destCategory = this.categories.find((c) => c.id === toCategoryId)
-
-            if (!sourceCategory || !destCategory) return
-
-            if (fromCategoryId === toCategoryId) {
-              // Same category - just reorder
-              const movedFood = sourceCategory.foods.splice(evt.oldIndex, 1)[0]
-              sourceCategory.foods.splice(evt.newIndex, 0, movedFood)
-            } else {
-              // Different category - move food
-              const movedFood = sourceCategory.foods.splice(evt.oldIndex, 1)[0]
-              destCategory.foods.splice(evt.newIndex, 0, movedFood)
-
-              // Show a brief notification
-              this.showMoveNotification(movedFood.name, sourceCategory.name, destCategory.name)
-            }
-
-            this.saveAllData()
+            handleFoodMove(evt)
+            handleDragEnd(evt)
           },
+        })
+      }
+
+      // Enable sorting for subgroups
+      if (category.subgroups) {
+        category.subgroups.forEach((subgroup) => {
+          const subgroupFoodsContainer = document.getElementById(`subgroup-foods-${subgroup.id}`)
+          if (subgroupFoodsContainer) {
+            this.foodSortables[`subgroup-${subgroup.id}`] = Sortable.create(
+              subgroupFoodsContainer,
+              {
+                group: sharedGroup,
+                animation: 150,
+                draggable: '.food-item',
+                scroll: true,
+                scrollSensitivity: 30,
+                scrollSpeed: 10,
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                onStart: handleDragStart,
+                onEnd: (evt) => {
+                  handleFoodMove(evt)
+                  handleDragEnd(evt)
+                },
+              }
+            )
+          }
         })
       }
     })

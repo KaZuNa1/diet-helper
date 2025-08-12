@@ -871,3 +871,40 @@ textarea {
   background: #f0f0f0;
   transform: scale(1.2);
 }
+
+/* Subgroup styles */
+.subgroup-container {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  margin: 10px;
+  padding: 8px;
+  transform: scale(0.95);
+  transform-origin: top left;
+}
+
+.subgroup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 3px 5px;
+  background: #e9ecef;
+  border-radius: 4px;
+}
+
+.subgroup-foods {
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 60px;
+}
+
+.edit-mode .subgroup-header {
+  cursor: move;
+}
+
+/* Adjust food items in subgroups */
+.subgroup-container .food-item {
+  transform: scale(0.9);
+  margin: 3px;
+}

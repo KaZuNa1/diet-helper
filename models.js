@@ -19,6 +19,14 @@ export class Food {
 }
 
 export class Category {
+  constructor(id, name, foods, subgroups) {
+    this.id = id
+    this.name = name
+    this.foods = foods || []
+    this.subgroups = subgroups || []
+  }
+}
+export class Subgroup {
   constructor(id, name, foods) {
     this.id = id
     this.name = name

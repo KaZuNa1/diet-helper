@@ -64,62 +64,152 @@ export class UIManager {
         'border: 1px solid #ccc; margin: 10px; padding: 10px; padding-top:2px'
 
       const headerDiv = document.createElement('div')
-      headerDiv.className = 'category-header' // Add class for drag handle
+      headerDiv.className = 'category-header'
+      headerDiv.style.cssText = 'display: flex; justify-content: space-between; margin-bottom: 3px;'
 
       const actualEditMode = window.dietHelper ? window.dietHelper.isEditMode : isEditMode
 
       headerDiv.innerHTML = `
-  <span id="categoryName-${category.id}" 
-    style="font-weight: bold; font-size: 16px;">${this.escapeHtml(category.name)}</span>
-  <div style="display: flex; gap: 5px; align-items: center;">
-    <button onclick="window.dietHelper.startRenameCategory(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">Rename</button>
-    <button onclick="window.dietHelper.deleteCategory(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">Delete</button>
-    <button onclick="window.dietHelper.showAddFoodForm(${category.id})" style="padding: 5px 15px; font-size: 16px; font-weight: bold;">+</button>
-  </div>
-`
+      <span id="categoryName-${category.id}" 
+        style="font-weight: bold; font-size: 16px;">${this.escapeHtml(category.name)}</span>
+      <div style="display: flex; gap: 5px; align-items: center;">
+        <button onclick="window.dietHelper.startRenameCategory(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">Rename</button>
+        <button onclick="window.dietHelper.deleteCategory(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">Delete</button>
+        <button onclick="window.dietHelper.showAddFoodForm(${category.id})" style="padding: 5px 15px; font-size: 16px; font-weight: bold;">+</button>
+      </div>
+    `
 
       categoryDiv.appendChild(headerDiv)
 
-      const foodsDiv = document.createElement('div')
-      foodsDiv.id = `foods-${category.id}` // Add ID for sortable
-      foodsDiv.style.cssText = 'display: flex; flex-wrap: wrap;'
+      // Render subgroups if any
+      if (category.subgroups && category.subgroups.length > 0) {
+        category.subgroups.forEach((subgroup) => {
+          const subgroupDiv = document.createElement('div')
+          subgroupDiv.className = 'subgroup-container'
+          subgroupDiv.id = `subgroup-${subgroup.id}`
 
-      if (category.foods.length === 0) {
-        foodsDiv.innerHTML = '<p style="color: #666; margin: 40px 0;">No foods in this category</p>'
-      } else {
+          const subgroupHeader = document.createElement('div')
+          subgroupHeader.className = 'subgroup-header'
+
+          subgroupHeader.innerHTML = `
+          <span id="subgroupName-${subgroup.id}" style="font-weight: bold; font-size: 14px;">${this.escapeHtml(subgroup.name)}</span>
+          <div style="display: flex; gap: 5px; align-items: center;">
+            <button onclick="window.dietHelper.startRenameSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 8px; font-size: 12px; display: ${actualEditMode ? 'inline-block' : 'none'};">Rename</button>
+            <button onclick="window.dietHelper.deleteSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 8px; font-size: 12px; display: ${actualEditMode ? 'inline-block' : 'none'};">Delete</button>
+            <button onclick="window.dietHelper.showAddFoodToSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 10px; font-size: 14px; font-weight: bold;">+</button>
+          </div>
+        `
+
+          subgroupDiv.appendChild(subgroupHeader)
+
+          // Render subgroup foods
+          const subgroupFoodsDiv = document.createElement('div')
+          subgroupFoodsDiv.className = 'subgroup-foods'
+          subgroupFoodsDiv.id = `subgroup-foods-${subgroup.id}`
+          subgroupFoodsDiv.style.cssText =
+            'display: flex; flex-wrap: wrap; position: relative; min-height: 60px;'
+
+          if (subgroup.foods.length === 0) {
+            subgroupFoodsDiv.innerHTML =
+              '<p class="empty-subgroup-message" style="color: #999; font-size: 12px; margin: 10px; position: absolute; width: 100%; text-align: center; pointer-events: none;">No foods in this subgroup</p>'
+          } else {
+            subgroup.foods.forEach((food) => {
+              const foodDiv = document.createElement('div')
+              foodDiv.className = 'food-item'
+
+              foodDiv.innerHTML = `
+              ${
+                food.imageUrl
+                  ? `<img src="${food.imageUrl}" class="food-image" data-category-id="${category.id}" data-subgroup-id="${subgroup.id}" data-food-id="${food.id}">`
+                  : `<div class="food-image no-image" data-category-id="${category.id}" data-subgroup-id="${subgroup.id}" data-food-id="${food.id}">No Image</div>`
+              }
+              <div class="food-name">${this.escapeHtml(food.name)}</div>
+            `
+
+              const imageElement = foodDiv.querySelector('.food-image')
+              const listenerId = `food-image-${category.id}-${subgroup.id}-${food.id}`
+
+              const clickHandler = (e) => {
+                if (window.dietHelper.isBulkSelectMode) {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  // Need to update bulk select for subgroups
+                } else {
+                  window.dietHelper.showSubgroupFoodDetails(category.id, subgroup.id, food.id)
+                }
+              }
+
+              this.addEventListenerWithCleanup(foodDiv, 'click', clickHandler, listenerId)
+              this.currentFoodElements.push(listenerId)
+
+              subgroupFoodsDiv.appendChild(foodDiv)
+            })
+          }
+
+          subgroupDiv.appendChild(subgroupFoodsDiv)
+          categoryDiv.appendChild(subgroupDiv)
+        })
+      }
+
+      // Add "Add Subgroup" button if in edit mode
+      if (actualEditMode) {
+        const addSubgroupBtn = document.createElement('button')
+        addSubgroupBtn.textContent = '+ Add Subgroup'
+        addSubgroupBtn.style.cssText =
+          'margin: 10px; padding: 5px 15px; background: #e9ecef; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;'
+        addSubgroupBtn.onclick = () => window.dietHelper.showAddSubgroupForm(category.id)
+        categoryDiv.appendChild(addSubgroupBtn)
+      }
+
+      // Render direct category foods
+      const foodsDiv = document.createElement('div')
+      foodsDiv.id = `foods-${category.id}`
+      foodsDiv.style.cssText =
+        'display: flex; flex-wrap: wrap; margin: 10px 0; position: relative; min-height: 80px;'
+
+      if (category.foods.length === 0 && (!category.subgroups || category.subgroups.length === 0)) {
+        foodsDiv.innerHTML =
+          '<p class="empty-category-message" style="color: #666; margin: 40px 0; position: absolute; width: 100%; text-align: center; pointer-events: none;">No foods in this category</p>'
+      } else if (
+        category.foods.length === 0 &&
+        category.subgroups &&
+        category.subgroups.length > 0
+      ) {
+        // Don't show anything if there are subgroups but no direct foods
+      } else if (category.foods.length > 0) {
+        const directFoodsLabel = document.createElement('div')
+        directFoodsLabel.style.cssText = 'width: 100%; font-size: 12px; color: #666; margin: 5px 0;'
+        directFoodsLabel.textContent = 'Direct foods:'
+        foodsDiv.appendChild(directFoodsLabel)
+
         category.foods.forEach((food) => {
           const foodDiv = document.createElement('div')
           foodDiv.className = 'food-item'
 
           foodDiv.innerHTML = `
-    ${
-      food.imageUrl
-        ? `<img src="${food.imageUrl}" class="food-image" data-category-id="${category.id}" data-food-id="${food.id}">`
-        : `<div class="food-image no-image" data-category-id="${category.id}" data-food-id="${food.id}">No Image</div>`
-    }
-    <div class="food-name">${this.escapeHtml(food.name)}</div>
-  `
+          ${
+            food.imageUrl
+              ? `<img src="${food.imageUrl}" class="food-image" data-category-id="${category.id}" data-food-id="${food.id}">`
+              : `<div class="food-image no-image" data-category-id="${category.id}" data-food-id="${food.id}">No Image</div>`
+          }
+          <div class="food-name">${this.escapeHtml(food.name)}</div>
+        `
 
           const imageElement = foodDiv.querySelector('.food-image')
-
-          // Define listenerId FIRST
           const listenerId = `food-image-${category.id}-${food.id}`
 
-          // Then create the click handler
           const clickHandler = (e) => {
             if (window.dietHelper.isBulkSelectMode) {
               e.preventDefault()
               e.stopPropagation()
               window.dietHelper.toggleFoodSelection(category.id, food.id)
             } else {
-              // Only respond to image clicks when not in bulk mode
               if (e.target.classList.contains('food-image')) {
                 window.dietHelper.showCategoryFoodDetails(category.id, food.id)
               }
             }
           }
 
-          // Attach to the entire food item div, not just the image
           this.addEventListenerWithCleanup(foodDiv, 'click', clickHandler, listenerId)
           this.currentFoodElements.push(listenerId)
 
@@ -130,16 +220,17 @@ export class UIManager {
       categoryDiv.appendChild(foodsDiv)
       this.elements.categoriesContainer.appendChild(categoryDiv)
     })
+
     // Apply filters after rendering
     if (window.dietHelper && window.dietHelper.applyFilters) {
       window.dietHelper.applyFilters()
     }
+
     // Restore bulk selection state if active
     if (window.dietHelper && window.dietHelper.isBulkSelectMode) {
       const container = document.getElementById('categoriesContainer')
       container.classList.add('bulk-select-mode')
 
-      // Restore selected items
       window.dietHelper.selectedFoods.forEach((key) => {
         const [categoryId, foodId] = key.split('-')
         const foodElement = document.querySelector(
