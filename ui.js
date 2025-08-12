@@ -83,6 +83,10 @@ export class UIManager {
 
       // Render subgroups if any
       if (category.subgroups && category.subgroups.length > 0) {
+        const subgroupsGrid = document.createElement('div')
+        subgroupsGrid.style.cssText =
+          'display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;'
+
         category.subgroups.forEach((subgroup) => {
           const subgroupDiv = document.createElement('div')
           subgroupDiv.className = 'subgroup-container'
@@ -92,13 +96,13 @@ export class UIManager {
           subgroupHeader.className = 'subgroup-header'
 
           subgroupHeader.innerHTML = `
-          <span id="subgroupName-${subgroup.id}" style="font-weight: bold; font-size: 14px;">${this.escapeHtml(subgroup.name)}</span>
-          <div style="display: flex; gap: 5px; align-items: center;">
-            <button onclick="window.dietHelper.startRenameSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 8px; font-size: 12px; display: ${actualEditMode ? 'inline-block' : 'none'};">Rename</button>
-            <button onclick="window.dietHelper.deleteSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 8px; font-size: 12px; display: ${actualEditMode ? 'inline-block' : 'none'};">Delete</button>
-            <button onclick="window.dietHelper.showAddFoodToSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 10px; font-size: 14px; font-weight: bold;">+</button>
-          </div>
-        `
+      <span id="subgroupName-${subgroup.id}" style="font-weight: bold; font-size: 14px;">${this.escapeHtml(subgroup.name)}</span>
+      <div style="display: flex; gap: 5px; align-items: center;">
+        <button onclick="window.dietHelper.startRenameSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 8px; font-size: 12px; display: ${actualEditMode ? 'inline-block' : 'none'};">Rename</button>
+        <button onclick="window.dietHelper.deleteSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 8px; font-size: 12px; display: ${actualEditMode ? 'inline-block' : 'none'};">Delete</button>
+        <button onclick="window.dietHelper.showAddFoodToSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 10px; font-size: 14px; font-weight: bold;">+</button>
+      </div>
+    `
 
           subgroupDiv.appendChild(subgroupHeader)
 
@@ -147,8 +151,9 @@ export class UIManager {
           }
 
           subgroupDiv.appendChild(subgroupFoodsDiv)
-          categoryDiv.appendChild(subgroupDiv)
+          subgroupsGrid.appendChild(subgroupDiv)
         })
+        categoryDiv.appendChild(subgroupsGrid)
       }
 
       // Add "Add Subgroup" button if in edit mode
@@ -164,8 +169,10 @@ export class UIManager {
       // Render direct category foods
       const foodsDiv = document.createElement('div')
       foodsDiv.id = `foods-${category.id}`
-      foodsDiv.style.cssText =
-        'display: flex; flex-wrap: wrap; margin: 10px 0; position: relative; min-height: 80px;'
+      // Only add min-height if there are no subgroups or if there are direct foods
+      const needsMinHeight =
+        !category.subgroups || category.subgroups.length === 0 || category.foods.length > 0
+      foodsDiv.style.cssText = `display: flex; flex-wrap: wrap; margin: 10px 0; position: relative; ${needsMinHeight ? 'min-height: 80px;' : ''}`
 
       if (category.foods.length === 0 && (!category.subgroups || category.subgroups.length === 0)) {
         foodsDiv.innerHTML =
@@ -175,7 +182,8 @@ export class UIManager {
         category.subgroups &&
         category.subgroups.length > 0
       ) {
-        // Don't show anything if there are subgroups but no direct foods
+        // Don't add any content or height for empty direct foods when subgroups exist
+        foodsDiv.style.display = 'none'
       } else if (category.foods.length > 0) {
         const directFoodsLabel = document.createElement('div')
         directFoodsLabel.style.cssText = 'width: 100%; font-size: 12px; color: #666; margin: 5px 0;'
