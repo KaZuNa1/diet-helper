@@ -362,6 +362,7 @@ class DietHelper {
   hideFoodDetails() {
     this.currentFoodId = null
     this.currentCategoryId = null
+    this.currentSubgroupId = null // Add this line
     this.modalManager.hideFoodDetails()
 
     setTimeout(() => {
@@ -373,7 +374,6 @@ class DietHelper {
       document.body.offsetHeight
     }, 50)
   }
-
   async deleteFood() {
     if (!this.currentFoodId) return
 
@@ -397,7 +397,17 @@ class DietHelper {
     try {
       let food = null
 
-      if (this.currentCategoryId) {
+      // Check if we're deleting from a subgroup
+      if (this.currentSubgroupId) {
+        const category = this.categories.find((c) => c.id === this.currentCategoryId)
+        if (category && category.subgroups) {
+          const subgroup = category.subgroups.find((s) => s.id === this.currentSubgroupId)
+          if (subgroup) {
+            food = subgroup.foods.find((f) => f.id === foodId)
+            subgroup.foods = subgroup.foods.filter((f) => f.id !== foodId)
+          }
+        }
+      } else if (this.currentCategoryId) {
         const category = this.categories.find((c) => c.id === this.currentCategoryId)
         if (category) {
           food = category.foods.find((f) => f.id === foodId)
@@ -411,6 +421,11 @@ class DietHelper {
       if (food && food.imageUrl && !food.imageUrl.startsWith('data:')) {
         await this.dataManager.deleteImage(food.imageUrl)
       }
+
+      // Reset all current IDs
+      this.currentFoodId = null
+      this.currentCategoryId = null
+      this.currentSubgroupId = null
 
       await this.saveAllData()
       this.uiManager.renderCategories(this.categories, this.isEditMode)
@@ -1032,6 +1047,7 @@ class DietHelper {
 
     this.currentFoodId = foodId
     this.currentCategoryId = categoryId
+    this.currentSubgroupId = null // Make sure this is null for direct foods
 
     this.uiManager.showFoodDetails(food, this.tags)
     this.modalManager.showFoodDetails()
@@ -1247,11 +1263,16 @@ class DietHelper {
     }
   }
 
-  toggleFoodSelection(categoryId, foodId) {
-    const key = `${categoryId}-${foodId}`
-    const foodElement = document.querySelector(
-      `.food-image[data-category-id="${categoryId}"][data-food-id="${foodId}"]`
-    )?.parentElement
+  toggleFoodSelection(categoryId, foodId, subgroupId = null) {
+    const key = subgroupId ? `${categoryId}-${subgroupId}-${foodId}` : `${categoryId}-${foodId}`
+
+    const foodElement = subgroupId
+      ? document.querySelector(
+          `.food-image[data-category-id="${categoryId}"][data-subgroup-id="${subgroupId}"][data-food-id="${foodId}"]`
+        )?.parentElement
+      : document.querySelector(
+          `.food-image[data-category-id="${categoryId}"][data-food-id="${foodId}"]`
+        )?.parentElement
 
     if (this.selectedFoods.has(key)) {
       this.selectedFoods.delete(key)
@@ -1272,8 +1293,12 @@ class DietHelper {
       if (img) {
         const categoryId = img.dataset.categoryId
         const foodId = img.dataset.foodId
+        const subgroupId = img.dataset.subgroupId
+
         if (categoryId && foodId) {
-          const key = `${categoryId}-${foodId}`
+          const key = subgroupId
+            ? `${categoryId}-${subgroupId}-${foodId}`
+            : `${categoryId}-${foodId}`
           this.selectedFoods.add(key)
           item.classList.add('selected')
         }
@@ -1299,15 +1324,35 @@ class DietHelper {
 
     this.modalManager.showConfirmation(message, async () => {
       for (const key of this.selectedFoods) {
-        const [categoryId, foodId] = key.split('-').map(Number)
-        const category = this.categories.find((c) => c.id === categoryId)
+        const parts = key.split('-')
 
-        if (category) {
-          const food = category.foods.find((f) => f.id === foodId)
-          if (food && food.imageUrl && !food.imageUrl.startsWith('data:')) {
-            await this.dataManager.deleteImage(food.imageUrl)
+        if (parts.length === 3) {
+          // Format: categoryId-subgroupId-foodId
+          const [categoryId, subgroupId, foodId] = parts.map(Number)
+          const category = this.categories.find((c) => c.id === categoryId)
+
+          if (category && category.subgroups) {
+            const subgroup = category.subgroups.find((s) => s.id === subgroupId)
+            if (subgroup) {
+              const food = subgroup.foods.find((f) => f.id === foodId)
+              if (food && food.imageUrl && !food.imageUrl.startsWith('data:')) {
+                await this.dataManager.deleteImage(food.imageUrl)
+              }
+              subgroup.foods = subgroup.foods.filter((f) => f.id !== foodId)
+            }
           }
-          category.foods = category.foods.filter((f) => f.id !== foodId)
+        } else if (parts.length === 2) {
+          // Format: categoryId-foodId (direct foods)
+          const [categoryId, foodId] = parts.map(Number)
+          const category = this.categories.find((c) => c.id === categoryId)
+
+          if (category) {
+            const food = category.foods.find((f) => f.id === foodId)
+            if (food && food.imageUrl && !food.imageUrl.startsWith('data:')) {
+              await this.dataManager.deleteImage(food.imageUrl)
+            }
+            category.foods = category.foods.filter((f) => f.id !== foodId)
+          }
         }
       }
 
