@@ -31,7 +31,6 @@ app.on('activate', () => {
   }
 })
 
-// IPC handlers for file operations
 ipcMain.handle('save-data', async (event, data) => {
   try {
     const dataPath = path.join(__dirname, 'data.json')
@@ -66,7 +65,6 @@ ipcMain.handle('save-image', async (event, imageData, fileName) => {
     const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '')
     fs.writeFileSync(imagePath, base64Data, 'base64')
 
-    // Return relative path instead of absolute path
     return { success: true, path: path.join('images', fileName) }
   } catch (error) {
     return { success: false, error: error.message }
@@ -78,17 +76,13 @@ ipcMain.handle('delete-image', async (event, imagePath) => {
     const fs = require('fs').promises
     const path = require('path')
 
-    // Construct full path
     const fullPath = path.join(__dirname, imagePath)
 
-    // Check if file exists
     try {
       await fs.access(fullPath)
-      // Delete the file
       await fs.unlink(fullPath)
       return { success: true }
     } catch (err) {
-      // File doesn't exist, that's okay
       return { success: true }
     }
   } catch (error) {
@@ -96,6 +90,7 @@ ipcMain.handle('delete-image', async (event, imagePath) => {
     return { success: false, error: error.message }
   }
 })
+
 ipcMain.handle('force-focus', async () => {
   mainWindow.focus()
   mainWindow.webContents.focus()

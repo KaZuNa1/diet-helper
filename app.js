@@ -38,85 +38,70 @@ class DietHelper {
   }
 
   initializeEventListeners() {
-    // Manage Tags Button
     document.getElementById('manageTagsBtn').addEventListener('click', () => {
       this.showManageTagsForm()
     })
 
-    // Edit Mode Button
     document.getElementById('editModeBtn').addEventListener('click', () => {
       this.toggleEditMode()
     })
 
-    // Add Category Button
     document.getElementById('addCategoryBtn').addEventListener('click', () => {
       this.showAddCategoryForm()
     })
 
-    // Save Category Button
     document.getElementById('saveCategoryBtn').addEventListener('click', () => {
       this.saveCategory()
     })
 
-    // Cancel Category Button
     document.getElementById('cancelCategoryBtn').addEventListener('click', () => {
       this.hideAddCategoryForm()
     })
 
-    // Save Food Button
     document.getElementById('saveFoodBtn').addEventListener('click', () => {
       this.saveFood()
     })
 
-    // Cancel Food Button
     document.getElementById('cancelFoodBtn').addEventListener('click', () => {
       this.hideAddFoodForm()
     })
 
-    // Add Tag Button
     document.getElementById('addTagBtn').addEventListener('click', () => {
       this.addTag()
     })
 
-    // Close Food Details Button
     document.getElementById('closeFoodDetailsBtn').addEventListener('click', () => {
       this.hideFoodDetails()
     })
 
-    // Delete Food Button - NEW
     document.getElementById('deleteFoodBtn').addEventListener('click', () => {
       this.deleteFood()
     })
 
-    // Close Tags Button
     document.getElementById('closeTagsBtn').addEventListener('click', () => {
       this.hideManageTagsForm()
     })
-    // Bulk Select Button
+
     document.getElementById('bulkSelectBtn').addEventListener('click', () => {
       this.toggleBulkSelectMode()
     })
-    // Edit Food Button
-    // Edit Food Button
+
     document.getElementById('editFoodBtn').addEventListener('click', () => {
       this.editFood()
     })
 
-    // Update Food Button
     document.getElementById('updateFoodBtn').addEventListener('click', () => {
       this.updateFood()
     })
 
-    // Cancel Edit Button
     document.getElementById('cancelEditBtn').addEventListener('click', () => {
       this.hideEditFoodForm()
     })
-    // Save Subgroup Button
+
     document.getElementById('saveSubgroupBtn').addEventListener('click', () => {
       this.saveSubgroup()
     })
 
-    // Cancel Subgroup Button
     document.getElementById('cancelSubgroupBtn').addEventListener('click', () => {
       this.hideAddSubgroupForm()
     })
@@ -124,20 +109,16 @@ class DietHelper {
 
   initializeKeyboardShortcuts() {
     document.addEventListener('keydown', (e) => {
-      // Don't trigger shortcuts when typing in input fields
       const isInputActive = ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
 
-      // Escape - Close modal (works even in input fields)
       if (e.key === 'Escape') {
         e.preventDefault()
         this.modalManager.closeActiveModal()
         return
       }
 
-      // Don't process other shortcuts if user is typing
       if (isInputActive && e.key !== 'Escape') return
 
-      // Ctrl+N - Add new food
       if (e.ctrlKey && e.key === 'n') {
         e.preventDefault()
         if (this.categories.length === 0) {
@@ -145,44 +126,36 @@ class DietHelper {
         } else if (this.categories.length === 1) {
           this.showAddFoodForm(this.categories[0].id)
         } else {
-          // Multiple categories - show selector
           this.showCategorySelector()
         }
       }
 
-      // Ctrl+T - Manage tags
       if (e.ctrlKey && e.key === 't') {
         e.preventDefault()
         this.showManageTagsForm()
       }
 
-      // Ctrl+S - Save current form
       if (e.ctrlKey && e.key === 's') {
         e.preventDefault()
         this.handleSaveShortcut()
       }
 
-      // Ctrl+F - Focus on filter
       if (e.ctrlKey && e.key === 'f') {
         e.preventDefault()
-        // Open filter panel if closed
         if (!this.isFilterPanelOpen) {
           this.toggleFilterPanel()
         }
-        // Focus on first tag checkbox
         setTimeout(() => {
           const firstTag = document.querySelector('.filter-tag-item input')
           if (firstTag) firstTag.focus()
         }, 100)
       }
 
-      // Delete - Delete selected items in bulk mode
       if (e.key === 'Delete' && this.isBulkSelectMode && this.selectedFoods.size > 0) {
         e.preventDefault()
         this.bulkDelete()
       }
 
-      // ? - Show help
       if (e.key === '/' && !isInputActive) {
         e.preventDefault()
         this.showKeyboardShortcutsHelp()
@@ -191,7 +164,6 @@ class DietHelper {
   }
 
   showCategorySelector() {
-    // Create overlay
     const overlay = document.createElement('div')
     overlay.style.cssText = `
     position: fixed;
@@ -203,7 +175,6 @@ class DietHelper {
     z-index: 1999;
   `
 
-    // Create modal
     const selectorModal = document.createElement('div')
     selectorModal.style.cssText = `
     position: fixed;
@@ -246,17 +217,14 @@ class DietHelper {
     <button id="cancelCategorySelect" style="margin-top: 15px; padding: 5px 15px;">Cancel</button>
   `
 
-    // Add to body
     document.body.appendChild(overlay)
     document.body.appendChild(selectorModal)
 
-    // Setup handlers
     const closeSelector = () => {
       overlay.remove()
       selectorModal.remove()
     }
 
-    // Category button clicks
     selectorModal.querySelectorAll('.category-select-btn').forEach((btn, index) => {
       btn.onclick = () => {
         const categoryId = parseInt(btn.dataset.id)
@@ -264,7 +232,6 @@ class DietHelper {
         this.showAddFoodForm(categoryId)
       }
 
-      // Number key shortcuts (1-9)
       if (index < 9) {
         const handler = (e) => {
           if (e.key === String(index + 1)) {
@@ -279,8 +246,8 @@ class DietHelper {
     overlay.onclick = closeSelector
     document.getElementById('cancelCategorySelect').onclick = closeSelector
   }
+
   handleSaveShortcut() {
-    // Check which modal is active and trigger its save button
     const activeModal = this.modalManager.getActiveModal()
 
     switch (activeModal) {
@@ -294,7 +261,6 @@ class DietHelper {
         this.saveCategory()
         break
       case 'manageTags':
-        // Check if tag name input has value
         const tagInput = document.getElementById('newTagName')
         if (tagInput && tagInput.value.trim()) {
           this.addTag()
@@ -302,8 +268,8 @@ class DietHelper {
         break
     }
   }
+
   showKeyboardShortcutsHelp() {
-    // Create overlay first
     const overlay = document.createElement('div')
     overlay.style.cssText = `
     position: fixed;
@@ -315,7 +281,6 @@ class DietHelper {
     z-index: 1999;
   `
 
-    // Create modal
     const helpModal = document.createElement('div')
     helpModal.style.cssText = `
     position: fixed;
@@ -344,11 +309,9 @@ class DietHelper {
     <button id="closeHelpBtn" style="margin-top: 15px; padding: 5px 15px;">Close</button>
   `
 
-    // Add to body
     document.body.appendChild(overlay)
     document.body.appendChild(helpModal)
 
-    // Setup close handlers
     const closeHelp = () => {
       overlay.remove()
       helpModal.remove()
@@ -357,7 +320,6 @@ class DietHelper {
     overlay.onclick = closeHelp
     document.getElementById('closeHelpBtn').onclick = closeHelp
 
-    // Also close with Escape
     const escapeHandler = (e) => {
       if (e.key === 'Escape') {
         closeHelp()
@@ -369,7 +331,6 @@ class DietHelper {
 
   showAddFoodForm(categoryId = null) {
     this.modalManager.closeActiveModal()
-
     this.currentCategoryId = categoryId
     this.uiManager.renderTagsForSelection(this.tags)
     this.modalManager.showAddFood()
@@ -393,9 +354,7 @@ class DietHelper {
     const food = this.foods.find((f) => f.id === foodId)
     if (!food) return
 
-    // Store the current food ID for deletion
     this.currentFoodId = foodId
-
     this.uiManager.showFoodDetails(food, this.tags)
     this.modalManager.showFoodDetails()
   }
@@ -403,27 +362,18 @@ class DietHelper {
   hideFoodDetails() {
     this.currentFoodId = null
     this.currentCategoryId = null
-
-    // Force complete modal cleanup
     this.modalManager.hideFoodDetails()
 
-    // Reset all focus-related states
     setTimeout(() => {
-      // Remove any lingering focus from body
       if (document.activeElement === document.body) {
         document.activeElement.blur()
       }
-
-      // Ensure body is not focusable
       document.body.removeAttribute('tabIndex')
       document.body.style.overflow = 'auto'
-
-      // Force browser to recalculate
       document.body.offsetHeight
     }, 50)
   }
 
-  // NEW: Delete food functionality
   async deleteFood() {
     if (!this.currentFoodId) return
 
@@ -443,7 +393,6 @@ class DietHelper {
     })
   }
 
-  // NEW: Perform the actual food deletion
   async performDeleteFood(foodId) {
     try {
       let food = null
@@ -459,21 +408,16 @@ class DietHelper {
         this.foods = this.foods.filter((f) => f.id !== foodId)
       }
 
-      // Delete the image file if it exists and is not base64
       if (food && food.imageUrl && !food.imageUrl.startsWith('data:')) {
-        const deleteResult = await this.dataManager.deleteImage(food.imageUrl)
+        await this.dataManager.deleteImage(food.imageUrl)
       }
 
       await this.saveAllData()
       this.uiManager.renderCategories(this.categories, this.isEditMode)
-
       this.hideFoodDetails()
 
-      // Electron-specific: Force webContents to refocus after deletion
       if (typeof require !== 'undefined') {
-        // We're in Electron
         setTimeout(() => {
-          // Force the webContents to blur and refocus
           const currentWindow = window
           currentWindow.blur()
           setTimeout(() => {
@@ -485,6 +429,7 @@ class DietHelper {
       alert('Failed to delete food. Please try again.')
     }
   }
+
   async saveFood() {
     const formData = this.uiManager.getFoodFormData()
 
@@ -501,7 +446,6 @@ class DietHelper {
     saveBtn.disabled = true
     saveBtn.textContent = 'Saving...'
 
-    // Handle image
     let imageUrl = ''
     if (formData.image) {
       const imageResult = await this.dataManager.saveImage(formData.image)
@@ -510,11 +454,9 @@ class DietHelper {
       }
     }
 
-    // Re-enable button
     saveBtn.disabled = false
     saveBtn.textContent = originalText
 
-    // Pass all the new data to createAndSaveFood
     this.createAndSaveFood(
       formData.name,
       imageUrl,
@@ -524,6 +466,7 @@ class DietHelper {
       formData.specificData
     )
   }
+
   async createAndSaveFood(
     name,
     imageUrl,
@@ -543,7 +486,6 @@ class DietHelper {
       specificData
     )
 
-    // Validate food data
     const validation = this.dataManager.validateFood(newFood)
     if (!validation.isValid) {
       alert('Invalid food data: ' + validation.errors.join(', '))
@@ -551,7 +493,6 @@ class DietHelper {
     }
 
     if (this.currentSubgroupId) {
-      // Adding to subgroup
       const category = this.categories.find((c) => c.id === this.currentCategoryId)
       if (category) {
         const subgroup = category.subgroups.find((s) => s.id === this.currentSubgroupId)
@@ -560,19 +501,15 @@ class DietHelper {
         }
       }
     } else if (this.currentCategoryId) {
-      // Adding to category directly
       const category = this.categories.find((c) => c.id === this.currentCategoryId)
       if (category) {
         category.foods.push(newFood)
       }
     } else {
-      // Adding to uncategorized
       this.foods.push(newFood)
     }
 
-    // Clear the subgroup ID
     this.currentSubgroupId = null
-
     await this.saveAllData()
     this.uiManager.renderCategories(this.categories, this.isEditMode)
     this.hideAddFoodForm()
@@ -594,7 +531,6 @@ class DietHelper {
       name: formData.name,
     }
 
-    // Validate tag data
     const validation = this.dataManager.validateTag(newTag)
     if (!validation.isValid) {
       alert('Invalid tag data: ' + validation.errors.join(', '))
@@ -609,27 +545,21 @@ class DietHelper {
   }
 
   async deleteTag(tagId) {
-    const confirmed = this.modalManager.showConfirmation(
-      CONFIG.MESSAGES.CONFIRMATIONS.DELETE_TAG,
-      () => {
-        this.performDeleteTag(tagId)
-      }
-    )
+    this.modalManager.showConfirmation(CONFIG.MESSAGES.CONFIRMATIONS.DELETE_TAG, () => {
+      this.performDeleteTag(tagId)
+    })
   }
 
   async performDeleteTag(tagId) {
     this.tags = this.tags.filter((tag) => tag.id !== tagId)
-    // Remove tag from all foods
     this.foods.forEach((food) => {
       food.tags = food.tags.filter((id) => id !== tagId)
     })
     await this.saveAllData()
     this.uiManager.renderExistingTags(this.tags)
-    // Update filter panel
     this.selectedFilterTags.delete(tagId)
     this.renderFilterTags()
     this.applyFilters()
-    // Re-render foods in case any displayed foods had this tag
     this.uiManager.renderFoods(this.foods, this.tags)
   }
 
@@ -652,13 +582,12 @@ class DietHelper {
     }
 
     const newCategory = new Category(Date.now(), categoryName, [])
-
     this.categories.push(newCategory)
     this.saveAllData()
     this.uiManager.renderCategories(this.categories, this.isEditMode)
     this.hideAddCategoryForm()
   }
-  // Show add subgroup form
+
   showAddSubgroupForm(categoryId) {
     this.currentCategoryId = categoryId
     document.getElementById('subgroupNameInput').value = ''
@@ -682,7 +611,6 @@ class DietHelper {
     this.hideAddSubgroupForm()
   }
 
-  // Add subgroup to category
   addSubgroup(categoryId, name) {
     const category = this.categories.find((c) => c.id === categoryId)
     if (!category) return
@@ -702,7 +630,6 @@ class DietHelper {
     this.uiManager.renderCategories(this.categories, this.isEditMode)
   }
 
-  // Delete subgroup
   deleteSubgroup(categoryId, subgroupId) {
     const category = this.categories.find((c) => c.id === categoryId)
     if (!category) return
@@ -716,18 +643,15 @@ class DietHelper {
         : `Delete empty subgroup "${subgroup.name}"?`
 
     this.modalManager.showConfirmation(message, () => {
-      // Move foods to main category before deleting
       if (subgroup.foods.length > 0) {
         category.foods.push(...subgroup.foods)
       }
-
       category.subgroups = category.subgroups.filter((s) => s.id !== subgroupId)
       this.saveAllData()
       this.uiManager.renderCategories(this.categories, this.isEditMode)
     })
   }
 
-  // Rename subgroup
   startRenameSubgroup(categoryId, subgroupId) {
     const category = this.categories.find((c) => c.id === categoryId)
     if (!category) return
@@ -769,7 +693,6 @@ class DietHelper {
     })
   }
 
-  // Show food details from subgroup
   showSubgroupFoodDetails(categoryId, subgroupId, foodId) {
     const category = this.categories.find((c) => c.id === categoryId)
     if (!category) return
@@ -788,48 +711,40 @@ class DietHelper {
     this.modalManager.showFoodDetails()
   }
 
-  // Add food to subgroup
   showAddFoodToSubgroup(categoryId, subgroupId) {
     this.modalManager.closeActiveModal()
-
     this.currentCategoryId = categoryId
     this.currentSubgroupId = subgroupId
     this.uiManager.renderTagsForSelection(this.tags)
     this.modalManager.showAddFood()
   }
+
   toggleEditMode() {
     this.isEditMode = !this.isEditMode
 
-    // Update button text
     const editBtn = document.getElementById('editModeBtn')
     const bulkSelectBtn = document.getElementById('bulkSelectBtn')
 
     editBtn.textContent = this.isEditMode ? 'Done' : 'Edit'
     editBtn.style.backgroundColor = this.isEditMode ? '#28a745' : ''
-
-    // Show/hide bulk select button
     bulkSelectBtn.style.display = this.isEditMode ? 'inline-block' : 'none'
 
     const container = document.getElementById('categoriesContainer')
 
     if (this.isEditMode) {
       container.classList.add('edit-mode')
-      // Exit bulk select mode if active
       if (this.isBulkSelectMode) {
         this.toggleBulkSelectMode()
       }
     } else {
       container.classList.remove('edit-mode')
-      // Exit bulk select mode if active
       if (this.isBulkSelectMode) {
         this.toggleBulkSelectMode()
       }
     }
 
-    // Re-render AFTER setting all the states
     this.uiManager.renderCategories(this.categories, this.isEditMode)
 
-    // Enable/disable sorting AFTER rendering
     if (this.isEditMode) {
       setTimeout(() => {
         this.enableCategorySorting()
@@ -842,15 +757,14 @@ class DietHelper {
   enableCategorySorting() {
     const container = document.getElementById('categoriesContainer')
 
-    // Enable category sorting with better scroll config
     this.categorySortable = Sortable.create(container, {
       animation: 150,
       handle: '.category-header',
       draggable: '.category-container',
       scroll: true,
-      forceAutoScrollFallback: true, // Force the auto-scroll
-      scrollSensitivity: 100, // Increased sensitivity
-      scrollSpeed: 20, // Faster scrolling
+      forceAutoScrollFallback: true,
+      scrollSensitivity: 100,
+      scrollSpeed: 20,
       onEnd: (evt) => {
         const movedCategory = this.categories.splice(evt.oldIndex, 1)[0]
         this.categories.splice(evt.newIndex, 0, movedCategory)
@@ -858,26 +772,21 @@ class DietHelper {
       },
     })
 
-    // Enable food sorting within each category
     this.enableFoodSorting()
   }
 
   disableCategorySorting() {
-    // Disable category sorting
     if (this.categorySortable) {
       this.categorySortable.destroy()
       this.categorySortable = null
     }
-
-    // Disable food sorting
     this.disableFoodSorting()
   }
+
   enableFoodSorting() {
     const sharedGroup = 'shared-foods'
 
-    // Handler for when dragging starts
     const handleDragStart = (evt) => {
-      // Hide all empty messages when dragging starts
       document.querySelectorAll('.empty-category-message').forEach((msg) => {
         msg.style.display = 'none'
       })
@@ -886,11 +795,7 @@ class DietHelper {
       })
     }
 
-    // Handler for when dragging ends
-    // Handler for when dragging ends
-    // Handler for when dragging ends
     const handleDragEnd = (evt) => {
-      // Show empty messages for all empty containers
       this.categories.forEach((category) => {
         const foodsContainer = document.getElementById(`foods-${category.id}`)
         if (foodsContainer) {
@@ -898,7 +803,6 @@ class DietHelper {
           const emptyMsg = foodsContainer.querySelector('.empty-category-message')
 
           if (foodItems.length === 0) {
-            // Container is empty - ensure empty message is shown
             if (!emptyMsg) {
               const msg = document.createElement('p')
               msg.className = 'empty-category-message'
@@ -907,13 +811,11 @@ class DietHelper {
               msg.textContent = 'No foods in this category'
               foodsContainer.appendChild(msg)
             } else {
-              // Make sure it's visible
               emptyMsg.style.display = 'block'
             }
           }
         }
 
-        // Same for subgroups
         if (category.subgroups) {
           category.subgroups.forEach((subgroup) => {
             const subgroupContainer = document.getElementById(`subgroup-foods-${subgroup.id}`)
@@ -930,7 +832,6 @@ class DietHelper {
                   msg.textContent = 'No foods in this subgroup'
                   subgroupContainer.appendChild(msg)
                 } else {
-                  // Make sure it's visible
                   emptyMsg.style.display = 'block'
                 }
               }
@@ -940,27 +841,22 @@ class DietHelper {
       })
     }
 
-    // Create one unified onEnd handler
     const handleFoodMove = (evt) => {
-      // Don't do anything if it's the same container
       if (evt.from === evt.to && evt.oldIndex === evt.newIndex) return
 
       const fromId = evt.from.id
       const toId = evt.to.id
 
-      // Get the moved element's data
       const movedElement = evt.item
       const foodImage = movedElement.querySelector('.food-image')
       if (!foodImage) return
 
       const foodId = parseInt(foodImage.dataset.foodId)
 
-      // Find and remove food from source
       let movedFood = null
       const fromParts = fromId.split('-')
 
       if (fromParts[0] === 'foods') {
-        // From category direct foods
         const fromCategoryId = parseInt(fromParts[1])
         const sourceCategory = this.categories.find((c) => c.id === fromCategoryId)
         if (sourceCategory) {
@@ -970,7 +866,6 @@ class DietHelper {
           }
         }
       } else if (fromParts[0] === 'subgroup' && fromParts[1] === 'foods') {
-        // From subgroup
         const subgroupId = parseInt(fromParts[2])
         this.categories.forEach((category) => {
           if (category.subgroups) {
@@ -985,26 +880,21 @@ class DietHelper {
         })
       }
 
-      // Add food to destination
       if (movedFood) {
         const toParts = toId.split('-')
 
         if (toParts[0] === 'foods') {
-          // To category direct foods
           const toCategoryId = parseInt(toParts[1])
           const destCategory = this.categories.find((c) => c.id === toCategoryId)
           if (destCategory) {
-            // Insert at the new position
             destCategory.foods.splice(evt.newIndex, 0, movedFood)
           }
         } else if (toParts[0] === 'subgroup' && toParts[1] === 'foods') {
-          // To subgroup
           const subgroupId = parseInt(toParts[2])
           this.categories.forEach((category) => {
             if (category.subgroups) {
               const subgroup = category.subgroups.find((s) => s.id === subgroupId)
               if (subgroup) {
-                // Insert at the new position
                 subgroup.foods.splice(evt.newIndex, 0, movedFood)
               }
             }
@@ -1015,7 +905,6 @@ class DietHelper {
       }
     }
 
-    // Enable sorting for direct category foods
     this.categories.forEach((category) => {
       const foodsContainer = document.getElementById(`foods-${category.id}`)
       if (foodsContainer) {
@@ -1036,7 +925,6 @@ class DietHelper {
         })
       }
 
-      // Enable sorting for subgroups
       if (category.subgroups) {
         category.subgroups.forEach((subgroup) => {
           const subgroupFoodsContainer = document.getElementById(`subgroup-foods-${subgroup.id}`)
@@ -1064,31 +952,6 @@ class DietHelper {
       }
     })
   }
-  showMoveNotification(foodName, fromCategory, toCategory) {
-    // Create notification element
-    const notification = document.createElement('div')
-    notification.style.cssText = `
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #28a745;
-    color: white;
-    padding: 12px 20px;
-    border-radius: 4px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    z-index: 1000;
-    animation: slideIn 0.3s ease-out;
-  `
-    notification.textContent = `Moved "${foodName}" from ${fromCategory} to ${toCategory}`
-
-    document.body.appendChild(notification)
-
-    // Remove after 3 seconds
-    setTimeout(() => {
-      notification.style.animation = 'slideOut 0.3s ease-in'
-      setTimeout(() => notification.remove(), 300)
-    }, 3000)
-  }
 
   disableFoodSorting() {
     Object.values(this.foodSortables).forEach((sortable) => {
@@ -1106,21 +969,17 @@ class DietHelper {
     const nameSpan = document.getElementById(`categoryName-${categoryId}`)
     if (!nameSpan) return
 
-    // Store original name in case of cancel
     const originalName = category.name
 
-    // Create input element
     const input = document.createElement('input')
     input.type = 'text'
     input.value = category.name
     input.style.cssText = 'font-weight: bold; padding: 2px 5px; margin-right: 10px;'
 
-    // Replace span with input
     nameSpan.parentNode.replaceChild(input, nameSpan)
     input.focus()
     input.select()
 
-    // Handle save on Enter or blur
     const saveRename = () => {
       const newName = input.value.trim()
       if (newName && newName !== originalName) {
@@ -1130,7 +989,6 @@ class DietHelper {
       this.uiManager.renderCategories(this.categories, this.isEditMode)
     }
 
-    // Handle cancel on Escape
     const cancelRename = (e) => {
       if (e.key === 'Escape') {
         this.uiManager.renderCategories(this.categories, this.isEditMode)
@@ -1146,11 +1004,6 @@ class DietHelper {
         cancelRename(e)
       }
     })
-  }
-
-  renameCategory(categoryId) {
-    // This is now just an alias for startRenameCategory
-    this.startRenameCategory(categoryId)
   }
 
   deleteCategory(categoryId) {
@@ -1197,19 +1050,16 @@ class DietHelper {
       alert(CONFIG.MESSAGES.ERRORS.SAVE_FAILED)
     }
   }
-  // Initialize filter panel
+
   initializeFilterPanel() {
-    // Set up filter panel toggle
     const filterHeader = document.getElementById('filterHeader')
     filterHeader.addEventListener('click', () => this.toggleFilterPanel())
 
-    // Set up clear filters button
     const clearBtn = document.getElementById('clearFiltersBtn')
     clearBtn.addEventListener('click', () => this.clearAllFilters())
 
-    // Render filter tags
     this.renderFilterTags()
-    // Set up filter mode toggle
+
     const filterModeToggle = document.getElementById('filterModeToggle')
     filterModeToggle.addEventListener('change', () => {
       this.applyFilters()
@@ -1223,25 +1073,22 @@ class DietHelper {
     const filterToggle = document.getElementById('filterToggle')
 
     if (this.isFilterPanelOpen) {
-      // Opening - measure the content height
       filterContent.style.height = 'auto'
       const height = filterContent.scrollHeight
       filterContent.style.height = '0'
-      filterContent.offsetHeight // Force reflow
+      filterContent.offsetHeight
       filterContent.style.height = height + 'px'
       filterContent.classList.add('open')
       filterToggle.classList.add('open')
     } else {
-      // Closing - animate to 0
       filterContent.style.height = filterContent.scrollHeight + 'px'
-      filterContent.offsetHeight // Force reflow
+      filterContent.offsetHeight
       filterContent.style.height = '0'
       filterContent.classList.remove('open')
       filterToggle.classList.remove('open')
     }
   }
 
-  // Render filter tags in the panel
   renderFilterTags() {
     const filterTagsContainer = document.getElementById('filterTags')
     filterTagsContainer.innerHTML = ''
@@ -1253,7 +1100,6 @@ class DietHelper {
         tagDiv.classList.add('selected')
       }
 
-      // Just the tag name, no checkbox
       tagDiv.textContent = tag.name
       tagDiv.dataset.tagId = tag.id
 
@@ -1267,7 +1113,6 @@ class DietHelper {
     this.updateFilterCount()
   }
 
-  // Toggle a tag filter
   toggleFilterTag(tagId) {
     if (this.selectedFilterTags.has(tagId)) {
       this.selectedFilterTags.delete(tagId)
@@ -1275,19 +1120,16 @@ class DietHelper {
       this.selectedFilterTags.add(tagId)
     }
 
-    // Update UI
     this.renderFilterTags()
     this.applyFilters()
   }
 
-  // Clear all filters
   clearAllFilters() {
     this.selectedFilterTags.clear()
     this.renderFilterTags()
     this.applyFilters()
   }
 
-  // Update filter count display
   updateFilterCount() {
     const filterCount = document.getElementById('filterCount')
     const count = this.selectedFilterTags.size
@@ -1300,22 +1142,17 @@ class DietHelper {
     }
   }
 
-  // Apply filters to food items
-  // Apply filters to food items
-  // Apply filters to food items
   applyFilters() {
     const allFoodItems = document.querySelectorAll('.food-item')
     const useOrLogic = document.getElementById('filterModeToggle').checked
 
     if (this.selectedFilterTags.size === 0) {
-      // No filters - show all foods normally
       allFoodItems.forEach((item) => {
         item.classList.remove('filtered-out')
       })
       return
     }
 
-    // Apply filters
     allFoodItems.forEach((foodItem) => {
       const foodImage = foodItem.querySelector('.food-image')
       if (!foodImage) return
@@ -1338,10 +1175,8 @@ class DietHelper {
         let shouldShow = false
 
         if (useOrLogic) {
-          // OR logic - has ANY of the selected tags
           shouldShow = food.tags.some((tagId) => this.selectedFilterTags.has(tagId))
         } else {
-          // AND logic (default) - has ALL selected tags
           shouldShow = Array.from(this.selectedFilterTags).every((tagId) =>
             food.tags.includes(tagId)
           )
@@ -1355,8 +1190,8 @@ class DietHelper {
       }
     })
   }
+
   toggleBulkSelectMode() {
-    console.log('Toggling bulk select mode:', !this.isBulkSelectMode)
     this.isBulkSelectMode = !this.isBulkSelectMode
     const bulkSelectBtn = document.getElementById('bulkSelectBtn')
     const container = document.getElementById('categoriesContainer')
@@ -1367,7 +1202,6 @@ class DietHelper {
       container.classList.add('bulk-select-mode')
       this.selectedFoods.clear()
       this.showBulkActionsBar()
-      // Disable sorting during bulk select
       this.disableFoodSorting()
     } else {
       bulkSelectBtn.textContent = 'Select'
@@ -1375,11 +1209,9 @@ class DietHelper {
       container.classList.remove('bulk-select-mode')
       this.selectedFoods.clear()
       this.hideBulkActionsBar()
-      // Re-enable sorting
       if (this.isEditMode) {
         this.enableFoodSorting()
       }
-      // Remove selected class from all items
       document.querySelectorAll('.food-item.selected').forEach((item) => {
         item.classList.remove('selected')
       })
@@ -1387,7 +1219,6 @@ class DietHelper {
   }
 
   showBulkActionsBar() {
-    // Remove existing bar if any
     this.hideBulkActionsBar()
 
     const bar = document.createElement('div')
@@ -1402,6 +1233,7 @@ class DietHelper {
 
     this.updateBulkActionsBar()
   }
+
   hideBulkActionsBar() {
     const bar = document.querySelector('.bulk-actions-bar')
     if (bar) bar.remove()
@@ -1452,14 +1284,10 @@ class DietHelper {
   }
 
   unselectAll() {
-    // Clear all selections
     this.selectedFoods.clear()
-
-    // Remove selected class from all items
     document.querySelectorAll('.food-item.selected').forEach((item) => {
       item.classList.remove('selected')
     })
-
     this.updateBulkActionsBar()
   }
 
@@ -1470,7 +1298,6 @@ class DietHelper {
     const message = `Are you sure you want to delete ${count} selected food${count > 1 ? 's' : ''}?`
 
     this.modalManager.showConfirmation(message, async () => {
-      // Delete all selected foods
       for (const key of this.selectedFoods) {
         const [categoryId, foodId] = key.split('-').map(Number)
         const category = this.categories.find((c) => c.id === categoryId)
@@ -1486,16 +1313,16 @@ class DietHelper {
 
       await this.saveAllData()
       this.uiManager.renderCategories(this.categories, this.isEditMode)
-      this.toggleBulkSelectMode() // Exit bulk select mode
+      this.toggleBulkSelectMode()
     })
   }
+
   editFood() {
     if (!this.currentFoodId) return
 
     let food = null
     let categoryId = this.currentCategoryId
 
-    // Store these values before hiding the modal
     this.editingFoodId = this.currentFoodId
     this.editingCategoryId = this.currentCategoryId
 
@@ -1508,19 +1335,15 @@ class DietHelper {
 
     if (!food) return
 
-    // Populate edit form with current values
     this.populateEditForm(food)
-
-    // Show edit modal
     this.modalManager.showEditFood()
   }
+
   populateEditForm(food) {
-    // Basic info
     document.getElementById('editFoodName').value = food.name || ''
     document.getElementById('editFoodNotes').value = food.notes || ''
     document.getElementById('editFoodSpecificData').value = food.specificData || ''
 
-    // Show current image preview
     const previewDiv = document.getElementById('currentImagePreview')
     if (food.imageUrl) {
       previewDiv.innerHTML = `
@@ -1531,8 +1354,6 @@ class DietHelper {
       previewDiv.innerHTML = ''
     }
 
-    // Nutrition data
-    // Nutrition data
     if (food.nutrition) {
       document.getElementById('editNutritionProtein').value =
         food.nutrition.protein !== null && food.nutrition.protein !== undefined
@@ -1558,23 +1379,17 @@ class DietHelper {
           : ''
     }
 
-    // Tags
     this.uiManager.renderTagsForEdit(this.tags, food.tags)
   }
 
   hideEditFoodForm() {
     this.modalManager.hideEditFood()
-    // Clear the form
     document.getElementById('editFoodImage').value = ''
     document.getElementById('currentImagePreview').innerHTML = ''
-
-    // Don't hide food details - it should stay open
   }
 
   async updateFood() {
-    console.log('Update food clicked')
     const formData = this.uiManager.getEditFoodFormData()
-    console.log('Form data:', formData)
 
     if (!formData.name) {
       this.uiManager.showError('editFoodNameError', 'Please enter food name')
@@ -1584,7 +1399,6 @@ class DietHelper {
 
     this.uiManager.hideError('editFoodNameError')
 
-    // Use the stored editing IDs instead of current IDs
     let food = null
     let category = null
 
@@ -1596,32 +1410,25 @@ class DietHelper {
     }
 
     if (!food) {
-      console.error('Food not found!', this.editingFoodId, this.editingCategoryId)
       return
     }
-
-    console.log('Found food to update:', food)
 
     const updateBtn = document.getElementById('updateFoodBtn')
     const originalText = updateBtn.textContent
     updateBtn.disabled = true
     updateBtn.textContent = 'Updating...'
 
-    // Handle image update
-    let imageUrl = food.imageUrl // Keep existing by default
+    let imageUrl = food.imageUrl
     if (formData.image) {
-      // Delete old image if exists
       if (food.imageUrl && !food.imageUrl.startsWith('data:')) {
         await this.dataManager.deleteImage(food.imageUrl)
       }
-      // Save new image
       const imageResult = await this.dataManager.saveImage(formData.image)
       if (imageResult.success) {
         imageUrl = imageResult.path
       }
     }
 
-    // Update food properties
     food.name = formData.name
     food.imageUrl = imageUrl
     food.notes = formData.notes
@@ -1629,16 +1436,12 @@ class DietHelper {
     food.specificData = formData.specificData
     food.tags = formData.tags
 
-    // Re-enable button
     updateBtn.disabled = false
     updateBtn.textContent = originalText
 
-    // Save and refresh
-    // Save and refresh
     await this.saveAllData()
     this.uiManager.renderCategories(this.categories, this.isEditMode)
 
-    // Refresh the food details modal with updated data BEFORE clearing IDs
     let updatedFood = null
     if (this.editingCategoryId) {
       const category = this.categories.find((c) => c.id === this.editingCategoryId)
@@ -1647,23 +1450,16 @@ class DietHelper {
       updatedFood = this.foods.find((f) => f.id === this.editingFoodId)
     }
 
-    // Hide edit form
     this.hideEditFoodForm()
 
-    // Now refresh the details if we found the food
     if (updatedFood) {
-      console.log('Refreshing food details with:', updatedFood)
       this.uiManager.showFoodDetails(updatedFood, this.tags)
     }
 
-    // Clear the editing IDs after everything is done
     this.editingFoodId = null
     this.editingCategoryId = null
   }
 }
 
-// Initialize the app
 const dietHelper = new DietHelper()
-
-// Make available for HTML onclick handlers (only this instance)
 window.dietHelper = dietHelper

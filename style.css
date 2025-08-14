@@ -73,7 +73,7 @@ button {
   margin-right: 10px;
 }
 
-/* Food item container */
+/* Food item styles */
 .food-item {
   border: 1px solid #ccc;
   margin: 5px;
@@ -92,7 +92,6 @@ button {
   z-index: 100;
 }
 
-/* Food image styles */
 .food-image {
   width: 100px;
   height: 100px;
@@ -113,7 +112,6 @@ button {
   color: #999;
 }
 
-/* Zoom preview on hover */
 .food-item:hover .food-image {
   transform: scale(1.8);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
@@ -122,7 +120,7 @@ button {
   position: relative;
 }
 
-/* Edit mode hover */
+/* Edit mode styles */
 .edit-mode .food-item {
   cursor: move;
   transition: transform 0.2s;
@@ -137,7 +135,6 @@ button {
   transform: scale(1.6);
 }
 
-/* Backdrop effect on hover */
 .food-item::after {
   content: '';
   position: absolute;
@@ -180,7 +177,7 @@ button {
   display: none;
 }
 
-/* Button styles for modal actions */
+/* Modal buttons */
 .modal-buttons {
   display: flex;
   gap: 10px;
@@ -249,13 +246,11 @@ input[type='text'] {
   padding: 8px 10px 10px 10px;
 }
 
-/* Edit mode styles */
 .edit-mode .category-container {
   border: 2px solid #007bff !important;
   position: relative;
 }
 
-/* Category header */
 .category-header {
   display: flex;
   justify-content: space-between;
@@ -302,7 +297,6 @@ input[type='text'] {
   padding-bottom: 50px;
 }
 
-/* Confirmation modal */
 #confirmationOverlay {
   z-index: 1010;
 }
@@ -311,7 +305,7 @@ input[type='text'] {
   z-index: 1011;
 }
 
-/* Filter Panel Styles */
+/* Filter Panel */
 .filter-panel {
   margin: 20px 5px;
   border: 1px solid #ddd;
@@ -426,7 +420,7 @@ input[type='text'] {
   pointer-events: none;
 }
 
-/* Notification animations */
+/* Animations */
 @keyframes slideIn {
   from {
     transform: translateX(100%);
@@ -449,7 +443,40 @@ input[type='text'] {
   }
 }
 
-/* Bulk selection styles */
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* Bulk selection */
 .bulk-select-mode .food-item {
   position: relative;
   cursor: pointer;
@@ -483,7 +510,6 @@ input[type='text'] {
   outline-offset: 2px;
 }
 
-/* Bulk actions bar */
 .bulk-actions-bar {
   position: fixed;
   bottom: 20px;
@@ -519,18 +545,7 @@ input[type='text'] {
   font-weight: bold;
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateX(-50%) translateY(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-  }
-}
-
-/* Form sections in modals */
+/* Form sections */
 .form-section {
   margin-bottom: 20px;
   padding-bottom: 15px;
@@ -584,28 +599,21 @@ textarea {
   font-size: 14px;
 }
 
-/* Modal widths */
-#addFoodDropdown {
-  min-width: 500px;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-#foodDetailsDropdown {
-  min-width: 500px;
-  max-width: 600px;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
+/* Modal specific widths */
+#addFoodDropdown,
+#foodDetailsDropdown,
 #editFoodDropdown {
   min-width: 500px;
-  max-width: 600px;
   max-height: 80vh;
   overflow-y: auto;
 }
 
-/* Food details sections */
+#foodDetailsDropdown,
+#editFoodDropdown {
+  max-width: 600px;
+}
+
+/* Details sections */
 .details-section {
   margin: 15px 0;
   padding: 15px;
@@ -675,7 +683,7 @@ textarea {
   font-weight: bold;
 }
 
-/* Compact nutrition inputs for edit modal */
+/* Compact nutrition edit */
 .nutrition-edit-compact {
   display: flex;
   flex-direction: column;
@@ -703,7 +711,7 @@ textarea {
   font-size: 12px;
 }
 
-/* Adjust form sections in edit modal */
+/* Edit modal sections */
 #editFoodDropdown .form-section {
   margin-bottom: 15px;
   padding-bottom: 15px;
@@ -720,7 +728,7 @@ textarea {
   color: #333;
 }
 
-/* Modal stacking z-index */
+/* Modal z-index stacking */
 #foodDetailsOverlay {
   z-index: 999;
 }
@@ -769,7 +777,7 @@ textarea {
   border-color: #0056b3;
 }
 
-/* Tag display in details */
+/* Tag display */
 #detailsTags .tag-badge {
   background: #e9ecef;
   padding: 4px 12px;
@@ -777,99 +785,6 @@ textarea {
   font-size: 13px;
   color: #495057;
   border: 1px solid #dee2e6;
-}
-
-/* Emoji picker styles */
-.emoji-option {
-  font-size: 24px;
-  cursor: pointer;
-  padding: 5px;
-  display: inline-block;
-}
-
-.emoji-option:hover {
-  background: #f0f0f0;
-  border-radius: 4px;
-}
-
-.emoji-hint-btn {
-  padding: 5px 10px;
-  background: #f0f0f0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 18px;
-}
-
-.emoji-hint-btn:hover {
-  background: #e0e0e0;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-}
-
-/* Custom emoji picker */
-.custom-emoji-picker {
-  position: fixed;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  padding: 10px;
-  z-index: 10000;
-  max-width: 280px;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.emoji-category {
-  margin-bottom: 10px;
-}
-
-.emoji-category-title {
-  font-size: 12px;
-  font-weight: bold;
-  color: #666;
-  margin-bottom: 5px;
-}
-
-.emoji-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 5px;
-}
-
-.emoji-item {
-  font-size: 24px;
-  padding: 5px;
-  cursor: pointer;
-  text-align: center;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.emoji-item:hover {
-  background: #f0f0f0;
-  transform: scale(1.2);
 }
 
 /* Subgroup styles */
@@ -903,7 +818,6 @@ textarea {
   cursor: move;
 }
 
-/* Adjust food items in subgroups */
 .subgroup-container .food-item {
   transform: scale(0.9);
   margin: 3px;

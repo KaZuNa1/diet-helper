@@ -26,6 +26,7 @@ export class Category {
     this.subgroups = subgroups || []
   }
 }
+
 export class Subgroup {
   constructor(id, name, foods) {
     this.id = id

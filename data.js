@@ -4,19 +4,16 @@ export class DataManager {
   constructor() {
     this.dataFile = CONFIG.FILES.DATA_FILE
     this.imagesDir = CONFIG.FILES.IMAGES_DIR
-    this.hiddenCanvas = null // ADD THIS LINE
+    this.hiddenCanvas = null
   }
 
-  // Save data to JSON file
   async saveData(data) {
     try {
       if (typeof require !== 'undefined') {
-        // Electron environment
         const { ipcRenderer } = require('electron')
         const result = await ipcRenderer.invoke('save-data', data)
         return result
       } else {
-        // Browser fallback
         localStorage.setItem(CONFIG.STORAGE.MAIN_DATA, JSON.stringify(data))
         return { success: true }
       }
@@ -26,11 +23,9 @@ export class DataManager {
     }
   }
 
-  // Load data from JSON file
   async loadData() {
     try {
       if (typeof require !== 'undefined') {
-        // Electron environment
         const { ipcRenderer } = require('electron')
         const data = await ipcRenderer.invoke('load-data')
         return {
@@ -42,7 +37,6 @@ export class DataManager {
           },
         }
       } else {
-        // Browser fallback
         const data = JSON.parse(localStorage.getItem(CONFIG.STORAGE.MAIN_DATA) || '{}')
         return {
           success: true,
@@ -63,21 +57,18 @@ export class DataManager {
     }
   }
 
-  // Save image file - FIXED: Now converts to base64 for persistence
   async saveImage(imageFile) {
     try {
       if (!imageFile) {
         return { success: false, error: 'No image file provided' }
       }
 
-      // Validate image using ConfigUtils
       const validation = ConfigUtils.validateImage(imageFile)
       if (!validation.valid) {
         return { success: false, error: validation.error }
       }
 
       if (typeof require !== 'undefined') {
-        // Electron environment - save image to file system
         const reader = new FileReader()
 
         return new Promise((resolve) => {
@@ -94,15 +85,12 @@ export class DataManager {
           reader.readAsDataURL(imageFile)
         })
       } else {
-        // Browser fallback - convert to base64 for localStorage persistence
         return new Promise((resolve) => {
           const reader = new FileReader()
           reader.onload = (e) => {
             try {
-              // Optionally compress image if it's too large
               const base64Data = e.target.result
               if (CONFIG.FEATURES.IMAGE_COMPRESSION && base64Data.length > 500000) {
-                // ~375KB
                 this.compressImage(base64Data, imageFile.type)
                   .then((compressedData) => {
                     resolve({ success: true, path: compressedData })
@@ -135,31 +123,25 @@ export class DataManager {
       if (!imagePath) return { success: true }
 
       if (typeof require !== 'undefined') {
-        // Electron environment - delete actual file
         try {
           const { ipcRenderer } = require('electron')
           const result = await ipcRenderer.invoke('delete-image', imagePath)
           return result
         } catch (electronError) {
-          // If handler not registered, just log warning
           console.warn('Image deletion not implemented in Electron main process')
           return { success: true, warning: 'Image handler not registered' }
         }
       } else {
-        // Browser environment - no file to delete (base64 stored in localStorage)
         return { success: true }
       }
     } catch (error) {
       console.error('Error deleting image:', error)
-      // Don't fail the food deletion if image deletion fails
       return { success: true, warning: 'Image file could not be deleted' }
     }
   }
 
-  // Compress image to reduce storage size
   async compressImage(base64Data, mimeType) {
     return new Promise((resolve, reject) => {
-      // FIXED: Create hidden canvas to prevent visual glitches
       if (!this.hiddenCanvas) {
         this.hiddenCanvas = document.createElement('canvas')
         this.hiddenCanvas.style.cssText = `
@@ -171,12 +153,11 @@ export class DataManager {
         document.body.appendChild(this.hiddenCanvas)
       }
 
-      const canvas = this.hiddenCanvas // Use hidden canvas instead of creating new one
+      const canvas = this.hiddenCanvas
       const ctx = canvas.getContext('2d')
       const img = new Image()
 
       img.onload = () => {
-        // Calculate new dimensions while maintaining aspect ratio
         const maxWidth = 800
         const maxHeight = 600
         let { width, height } = img
@@ -196,7 +177,6 @@ export class DataManager {
         canvas.width = width
         canvas.height = height
 
-        // Draw and compress
         ctx.drawImage(img, 0, 0, width, height)
         const compressedData = canvas.toDataURL(mimeType || 'image/jpeg', CONFIG.IMAGES.QUALITY)
         resolve(compressedData)
@@ -207,7 +187,6 @@ export class DataManager {
     })
   }
 
-  // Validate food data
   validateFood(foodData) {
     const errors = []
 
@@ -234,7 +213,6 @@ export class DataManager {
     }
   }
 
-  // Validate tag data
   validateTag(tagData) {
     const errors = []
 
@@ -253,7 +231,6 @@ export class DataManager {
     }
   }
 
-  // Create backup of current data
   async createBackup() {
     try {
       const loadResult = await this.loadData()
@@ -269,11 +246,6 @@ export class DataManager {
       if (typeof require !== 'undefined') {
         const { ipcRenderer } = require('electron')
         const backupFileName = `backup_${Date.now()}.json`
-        // You'd need to add a backup IPC handler in main.js
-        // const result = await ipcRenderer.invoke('create-backup', backupData, backupFileName);
-        // return result;
-
-        // For now, just return success
         return { success: true, message: 'Backup feature needs IPC handler implementation' }
       } else {
         localStorage.setItem(
@@ -289,7 +261,6 @@ export class DataManager {
   }
 }
 
-// Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = DataManager
 } else {

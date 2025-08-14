@@ -11,21 +11,14 @@ export class UIManager {
       detailsTags: document.getElementById('detailsTags'),
     }
 
-    // FIXED: Track event listeners for cleanup
     this.eventListeners = new Map()
     this.currentFoodElements = []
     this.currentTagElements = []
   }
 
-  // FIXED: Add event listener with cleanup tracking
   addEventListenerWithCleanup(element, event, handler, identifier) {
-    // Remove existing listener if it exists
     this.removeEventListener(identifier)
-
-    // Add new listener
     element.addEventListener(event, handler)
-
-    // Store for cleanup
     this.eventListeners.set(identifier, {
       element,
       event,
@@ -33,7 +26,6 @@ export class UIManager {
     })
   }
 
-  // FIXED: Remove specific event listener
   removeEventListener(identifier) {
     const listener = this.eventListeners.get(identifier)
     if (listener) {
@@ -42,7 +34,6 @@ export class UIManager {
     }
   }
 
-  // FIXED: Clean up all event listeners
   cleanup() {
     this.eventListeners.forEach((listener, identifier) => {
       listener.element.removeEventListener(listener.event, listener.handler)
@@ -52,7 +43,6 @@ export class UIManager {
     this.currentTagElements = []
   }
 
-  // FIXED: Render all foods in grid layout with proper event management
   renderCategories(categories, isEditMode = false) {
     this.cleanup()
     this.elements.categoriesContainer.innerHTML = ''
@@ -81,7 +71,6 @@ export class UIManager {
 
       categoryDiv.appendChild(headerDiv)
 
-      // Render subgroups if any
       if (category.subgroups && category.subgroups.length > 0) {
         const subgroupsGrid = document.createElement('div')
         subgroupsGrid.style.cssText =
@@ -106,7 +95,6 @@ export class UIManager {
 
           subgroupDiv.appendChild(subgroupHeader)
 
-          // Render subgroup foods
           const subgroupFoodsDiv = document.createElement('div')
           subgroupFoodsDiv.className = 'subgroup-foods'
           subgroupFoodsDiv.id = `subgroup-foods-${subgroup.id}`
@@ -137,7 +125,6 @@ export class UIManager {
                 if (window.dietHelper.isBulkSelectMode) {
                   e.preventDefault()
                   e.stopPropagation()
-                  // Need to update bulk select for subgroups
                 } else {
                   window.dietHelper.showSubgroupFoodDetails(category.id, subgroup.id, food.id)
                 }
@@ -156,7 +143,6 @@ export class UIManager {
         categoryDiv.appendChild(subgroupsGrid)
       }
 
-      // Add "Add Subgroup" button if in edit mode
       if (actualEditMode) {
         const addSubgroupBtn = document.createElement('button')
         addSubgroupBtn.textContent = '+ Add Subgroup'
@@ -166,10 +152,8 @@ export class UIManager {
         categoryDiv.appendChild(addSubgroupBtn)
       }
 
-      // Render direct category foods
       const foodsDiv = document.createElement('div')
       foodsDiv.id = `foods-${category.id}`
-      // Only add min-height if there are no subgroups or if there are direct foods
       const needsMinHeight =
         !category.subgroups || category.subgroups.length === 0 || category.foods.length > 0
       foodsDiv.style.cssText = `display: flex; flex-wrap: wrap; margin: 10px 0; position: relative; ${needsMinHeight ? 'min-height: 80px;' : ''}`
@@ -182,7 +166,6 @@ export class UIManager {
         category.subgroups &&
         category.subgroups.length > 0
       ) {
-        // Don't add any content or height for empty direct foods when subgroups exist
         foodsDiv.style.display = 'none'
       } else if (category.foods.length > 0) {
         const directFoodsLabel = document.createElement('div')
@@ -229,12 +212,10 @@ export class UIManager {
       this.elements.categoriesContainer.appendChild(categoryDiv)
     })
 
-    // Apply filters after rendering
     if (window.dietHelper && window.dietHelper.applyFilters) {
       window.dietHelper.applyFilters()
     }
 
-    // Restore bulk selection state if active
     if (window.dietHelper && window.dietHelper.isBulkSelectMode) {
       const container = document.getElementById('categoriesContainer')
       container.classList.add('bulk-select-mode')
@@ -251,7 +232,6 @@ export class UIManager {
     }
   }
 
-  // Render tags for selection in food form
   renderTagsForSelection(tags) {
     this.elements.tagsList.innerHTML = ''
 
@@ -264,7 +244,6 @@ export class UIManager {
       return
     }
 
-    // Create a container for inline tags
     const tagsContainer = document.createElement('div')
     tagsContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px;'
 
@@ -274,7 +253,6 @@ export class UIManager {
       tagButton.dataset.tagId = tag.id
       tagButton.textContent = this.escapeHtml(tag.name)
 
-      // Add click handler
       tagButton.addEventListener('click', () => {
         tagButton.classList.toggle('selected')
       })
@@ -285,9 +263,7 @@ export class UIManager {
     this.elements.tagsList.appendChild(tagsContainer)
   }
 
-  // FIXED: Render existing tags in manage tags form with proper event management
   renderExistingTags(tags) {
-    // Clean up existing tag event listeners
     this.currentTagElements.forEach((identifier) => {
       this.removeEventListener(identifier)
     })
@@ -304,7 +280,6 @@ export class UIManager {
       return
     }
 
-    // Create a grid container
     const tagsGrid = document.createElement('div')
     tagsGrid.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 10px;'
 
@@ -326,7 +301,6 @@ export class UIManager {
       deleteBtn.style.cssText =
         'width: 24px; height: 24px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 18px; line-height: 1; padding: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;'
 
-      // Add hover effect
       deleteBtn.onmouseover = () => {
         deleteBtn.style.background = '#c82333'
       }
@@ -350,7 +324,7 @@ export class UIManager {
 
     this.elements.existingTags.appendChild(tagsGrid)
   }
-  // Show food details in modal
+
   showFoodDetails(food, tags) {
     const tagNames = food.tags
       .map((tagId) => {
@@ -359,10 +333,8 @@ export class UIManager {
       })
       .filter((name) => name)
 
-    // Set food name as header
     this.elements.detailsName.textContent = food.name
 
-    // Set image
     this.elements.detailsImage.src = food.imageUrl || ''
     this.elements.detailsImage.style.display = food.imageUrl ? 'block' : 'none'
 
@@ -372,8 +344,6 @@ export class UIManager {
         'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='
     }
 
-    // Display tags as badges
-    // Display tags with commas
     const tagsContainer = document.getElementById('detailsTags')
     if (tagNames.length > 0) {
       tagsContainer.textContent = tagNames.join(', ')
@@ -382,7 +352,6 @@ export class UIManager {
       tagsContainer.innerHTML = '<span style="color: #999; font-style: italic;">No tags</span>'
     }
 
-    // Show notes
     const notesElement = document.getElementById('detailsNotes')
     if (food.notes) {
       notesElement.textContent = food.notes
@@ -394,7 +363,6 @@ export class UIManager {
       notesElement.style.color = '#999'
     }
 
-    // Show nutrition
     const hasNutrition = food.nutrition && typeof food.nutrition === 'object'
 
     if (hasNutrition) {
@@ -450,7 +418,6 @@ export class UIManager {
       })
     }
 
-    // Show specific data
     const specificElement = document.getElementById('detailsSpecificData')
     if (food.specificData) {
       specificElement.textContent = food.specificData
@@ -463,7 +430,6 @@ export class UIManager {
     }
   }
 
-  // Clear food form
   clearFoodForm() {
     const nameField = document.getElementById('foodName')
     const imageField = document.getElementById('foodImage')
@@ -477,47 +443,16 @@ export class UIManager {
     if (notesField) notesField.value = ''
     if (specificDataField) specificDataField.value = ''
 
-    // Clear nutrition fields
     const nutritionFields = ['Protein', 'Fat', 'Carbs', 'Fiber', 'Sugar', 'Sodium']
     nutritionFields.forEach((field) => {
       const input = document.getElementById(`nutrition${field}`)
       if (input) input.value = ''
     })
 
-    // Clear tag selections (updated for new system)
     const selectedTags = document.querySelectorAll('.selectable-tag.selected')
     selectedTags.forEach((tag) => tag.classList.remove('selected'))
   }
-  rebuildFoodNameInput() {
-    const container = document.querySelector('#addFoodDropdown .form-group')
-    if (!container) return
 
-    // Remove old input and error div
-    const oldInput = document.getElementById('foodName')
-    const oldError = document.getElementById('foodNameError')
-
-    if (oldInput) oldInput.remove()
-    if (oldError) oldError.remove()
-
-    // Create fresh input
-    const newInput = document.createElement('input')
-    newInput.type = 'text'
-    newInput.id = 'foodName'
-    newInput.placeholder = 'Enter food name'
-
-    const newError = document.createElement('div')
-    newError.id = 'foodNameError'
-    newError.className = 'error-message hidden'
-    newError.textContent = 'Please enter food name'
-
-    // Insert at beginning of container
-    container.insertBefore(newInput, container.firstChild)
-    container.insertBefore(newError, newInput.nextSibling)
-
-    // Focus the new input
-    newInput.focus()
-  }
-  // Clear tag form
   clearTagForm() {
     const tagField = document.getElementById('newTagName')
     const errorDiv = document.getElementById('tagNameError')
@@ -526,11 +461,9 @@ export class UIManager {
     if (errorDiv) errorDiv.classList.add('hidden')
   }
 
-  // Show/hide error messages
   showError(elementId, message = null) {
     const errorDiv = document.getElementById(elementId)
     if (errorDiv) {
-      // Use provided message or default from config
       const errorMessage = message || CONFIG.MESSAGES.ERRORS.FOOD_NAME_REQUIRED
       errorDiv.textContent = errorMessage
       errorDiv.classList.remove('hidden')
@@ -544,17 +477,15 @@ export class UIManager {
     }
   }
 
-  // Get selected tags from checkboxes
   getSelectedEditTags() {
     const selectedTags = []
-    // Look for selected tags in the edit modal
     const selectedElements = document.querySelectorAll('#editTagsList .selectable-tag.selected')
     selectedElements.forEach((el) => {
       selectedTags.push(parseInt(el.dataset.tagId))
     })
     return selectedTags
   }
-  // Get form input values
+
   getFoodFormData() {
     return {
       name: document.getElementById('foodName')?.value.trim() || '',
@@ -604,7 +535,6 @@ export class UIManager {
       return
     }
 
-    // Create a container for inline tags
     const tagsContainer = document.createElement('div')
     tagsContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px;'
 
@@ -614,12 +544,10 @@ export class UIManager {
       tagButton.dataset.tagId = tag.id
       tagButton.textContent = this.escapeHtml(tag.name)
 
-      // Pre-select if it was already selected
       if (selectedTagIds.includes(tag.id)) {
         tagButton.classList.add('selected')
       }
 
-      // Add click handler
       tagButton.addEventListener('click', () => {
         tagButton.classList.toggle('selected')
       })
@@ -666,29 +594,18 @@ export class UIManager {
     }
   }
 
-  getSelectedEditTags() {
-    const selectedTags = []
-    const checkboxes = document.querySelectorAll('.edit-tag-checkbox:checked')
-    checkboxes.forEach((cb) => {
-      selectedTags.push(parseInt(cb.value))
-    })
-    return selectedTags
-  }
-
   getTagFormData() {
     return {
       name: document.getElementById('newTagName')?.value.trim() || '',
     }
   }
 
-  // Utility function to escape HTML
   escapeHtml(text) {
     const div = document.createElement('div')
     div.textContent = text
     return div.innerHTML
   }
 
-  // Show loading state
   showLoading(elementId, message = 'Loading...') {
     const element = document.getElementById(elementId)
     if (element) {
@@ -696,13 +613,13 @@ export class UIManager {
     }
   }
 
-  // Focus on element
   focusElement(elementId) {
     const element = document.getElementById(elementId)
     if (element) {
       setTimeout(() => element.focus(), 100)
     }
   }
+
   getSelectedFoodTags() {
     const selectedTags = []
     const selectedElements = document.querySelectorAll('#tagsList .selectable-tag.selected')
@@ -712,7 +629,6 @@ export class UIManager {
     return selectedTags
   }
 
-  // FIXED: Cleanup method to be called when UIManager is destroyed
   destroy() {
     this.cleanup()
   }

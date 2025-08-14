@@ -1,5 +1,4 @@
 const CONFIG = {
-  // File paths and directories
   FILES: {
     DATA_FILE: 'data.json',
     BACKUP_DIR: 'backups',
@@ -7,14 +6,12 @@ const CONFIG = {
     LOGS_DIR: 'logs',
   },
 
-  // Storage keys for browser fallback
   STORAGE: {
     MAIN_DATA: 'dietHelperData',
     BACKUP_PREFIX: 'dietHelperBackup_',
     SETTINGS: 'dietHelperSettings',
   },
 
-  // UI Configuration
   UI: {
     FOOD_IMAGE_SIZE: {
       GRID: { width: 75, height: 75 },
@@ -25,7 +22,6 @@ const CONFIG = {
     MIN_CARD_WIDTH: 120,
   },
 
-  // Validation rules
   VALIDATION: {
     FOOD_NAME: {
       MIN_LENGTH: 1,
@@ -42,15 +38,13 @@ const CONFIG = {
     MAX_TOTAL_FOODS: 1000,
   },
 
-  // Image handling
   IMAGES: {
     SUPPORTED_FORMATS: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-    MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
+    MAX_FILE_SIZE: 5 * 1024 * 1024,
     QUALITY: 0.8,
     THUMBNAIL_SIZE: { width: 100, height: 100 },
   },
 
-  // Default data structure
   DEFAULTS: {
     EMPTY_DATA: {
       foods: [],
@@ -69,7 +63,6 @@ const CONFIG = {
     },
   },
 
-  // Error messages
   MESSAGES: {
     ERRORS: {
       FOOD_NAME_REQUIRED: 'Please enter food name',
@@ -100,7 +93,6 @@ const CONFIG = {
     },
   },
 
-  // Feature flags
   FEATURES: {
     ANIMATIONS_ENABLED: true,
     BACKUP_ENABLED: true,
@@ -111,7 +103,6 @@ const CONFIG = {
     STATISTICS: false,
   },
 
-  // Keyboard shortcuts
   SHORTCUTS: {
     ADD_FOOD: 'Ctrl+N',
     MANAGE_TAGS: 'Ctrl+T',
@@ -121,14 +112,12 @@ const CONFIG = {
     DELETE: 'Delete',
   },
 
-  // Development settings
   DEBUG: {
     ENABLED: false,
-    LOG_LEVEL: 'info', // 'debug', 'info', 'warn', 'error'
+    LOG_LEVEL: 'info',
     SHOW_PERFORMANCE: false,
   },
 
-  // App metadata
   APP: {
     NAME: 'Diet Helper',
     VERSION: '1.0.0',
@@ -136,16 +125,13 @@ const CONFIG = {
     DESCRIPTION: 'A simple diet management application',
   },
 
-  // Environment detection
   ENV: {
     IS_ELECTRON: typeof require !== 'undefined',
-    IS_DEVELOPMENT: false, // Will be set based on environment
+    IS_DEVELOPMENT: false,
   },
 }
 
-// Utility functions for config
 const ConfigUtils = {
-  // Get nested config value safely
   get(path, defaultValue = null) {
     const keys = path.split('.')
     let current = CONFIG
@@ -161,7 +147,6 @@ const ConfigUtils = {
     return current
   },
 
-  // Set nested config value
   set(path, value) {
     const keys = path.split('.')
     const lastKey = keys.pop()
@@ -177,7 +162,6 @@ const ConfigUtils = {
     current[lastKey] = value
   },
 
-  // Validate image file
   validateImage(file) {
     if (!file) return { valid: false, error: 'No file provided' }
 
@@ -199,7 +183,6 @@ const ConfigUtils = {
     return { valid: true }
   },
 
-  // Validate food name
   validateFoodName(name) {
     if (!name || name.trim().length === 0) {
       return {
@@ -218,7 +201,6 @@ const ConfigUtils = {
     return { valid: true }
   },
 
-  // Validate tag name
   validateTagName(name) {
     if (!name || name.trim().length === 0) {
       return {
@@ -237,22 +219,18 @@ const ConfigUtils = {
     return { valid: true }
   },
 
-  // Check if feature is enabled
   isFeatureEnabled(feature) {
     return CONFIG.FEATURES[feature] === true
   },
 
-  // Get file path
   getFilePath(fileKey) {
     return CONFIG.FILES[fileKey] || ''
   },
 
-  // Get storage key
   getStorageKey(keyName) {
     return CONFIG.STORAGE[keyName] || ''
   },
 
-  // Debug logging
   log(level, message, data = null) {
     if (!CONFIG.DEBUG.ENABLED) return
 
@@ -269,8 +247,6 @@ const ConfigUtils = {
   },
 }
 
-// Set environment
 ConfigUtils.set('ENV.IS_DEVELOPMENT', window.location.hostname === 'localhost')
 
-// Export using ES6 modules
 export { CONFIG, ConfigUtils }
