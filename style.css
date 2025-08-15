@@ -842,3 +842,18 @@ textarea {
   width: 100px;
   justify-self: start; /* Changed from center to start */
 }
+.edit-mode .subgroups-drop-zone:empty {
+  border: 2px dashed #dee2e6 !important;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.edit-mode .subgroups-drop-zone:empty::after {
+  content: 'Drop subgroups here';
+  display: block;
+  text-align: center;
+  width: 100%;
+  color: #999;
+  font-size: 12px;
+  padding: 40px 0;
+  grid-column: 1 / -1; /* Span across all columns */
+}

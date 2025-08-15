@@ -13,6 +13,7 @@ class DietHelper {
     this.isEditMode = false
     this.categorySortable = null
     this.foodSortables = {}
+    this.subgroupSortables = {}
     this.currentFoodId = null
     this.editingSubgroupId = null
     this.dataManager = new DataManager()
@@ -823,6 +824,102 @@ class DietHelper {
       },
     })
 
+    // Enable subgroup sorting between categories
+    const sharedSubgroupGroup = 'shared-subgroups'
+
+    document.querySelectorAll('.category-container').forEach((categoryDiv) => {
+      const categoryNameEl = categoryDiv.querySelector('[id^="categoryName-"]')
+      if (!categoryNameEl) return
+
+      const categoryId = parseInt(categoryNameEl.id.split('-')[1])
+      const category = this.categories.find((c) => c.id === categoryId)
+      if (!category) return
+
+      // Find or create subgroups container
+      let subgroupsGrid = null
+
+      // Look for existing subgroup containers
+      const subgroupContainers = categoryDiv.querySelectorAll('.subgroup-container')
+      if (subgroupContainers.length > 0) {
+        subgroupsGrid = subgroupContainers[0].parentElement
+      }
+
+      // If no subgroups container exists, create one for receiving
+      if (!subgroupsGrid) {
+        const foodsDiv = document.getElementById(`foods-${categoryId}`)
+        if (foodsDiv) {
+          subgroupsGrid = document.createElement('div')
+          subgroupsGrid.style.cssText =
+            'display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; padding: 0 10px; min-height: 100px; border: 2px dashed transparent;'
+          subgroupsGrid.className = 'subgroups-drop-zone'
+          categoryDiv.insertBefore(subgroupsGrid, foodsDiv)
+        }
+      }
+
+      if (subgroupsGrid) {
+        this.subgroupSortables = this.subgroupSortables || {}
+        this.subgroupSortables[`category-${categoryId}`] = Sortable.create(subgroupsGrid, {
+          group: sharedSubgroupGroup,
+          animation: 150,
+          draggable: '.subgroup-container',
+          handle: '.subgroup-header',
+          scroll: true,
+          ghostClass: 'sortable-ghost',
+          chosenClass: 'sortable-chosen',
+          onEnd: (evt) => {
+            if (evt.from === evt.to && evt.oldIndex === evt.newIndex) return
+
+            const fromCategoryDiv = evt.from.closest('.category-container')
+            const toCategoryDiv = evt.to.closest('.category-container')
+
+            const fromCategoryId = parseInt(
+              fromCategoryDiv.querySelector('[id^="categoryName-"]').id.split('-')[1]
+            )
+            const toCategoryId = parseInt(
+              toCategoryDiv.querySelector('[id^="categoryName-"]').id.split('-')[1]
+            )
+
+            const fromCategory = this.categories.find((c) => c.id === fromCategoryId)
+            const toCategory = this.categories.find((c) => c.id === toCategoryId)
+
+            if (fromCategory && toCategory) {
+              const movedElement = evt.item
+              const subgroupId = parseInt(movedElement.id.split('-')[1])
+
+              // Find the subgroup in source category
+              let movedSubgroup = null
+              let subgroupIndex = -1
+
+              if (fromCategory.subgroups) {
+                subgroupIndex = fromCategory.subgroups.findIndex((s) => s.id === subgroupId)
+                if (subgroupIndex !== -1) {
+                  movedSubgroup = fromCategory.subgroups.splice(subgroupIndex, 1)[0]
+                }
+              }
+
+              if (movedSubgroup) {
+                // Initialize subgroups array if needed
+                if (!toCategory.subgroups) {
+                  toCategory.subgroups = []
+                }
+
+                // Add to new category
+                toCategory.subgroups.splice(evt.newIndex, 0, movedSubgroup)
+
+                this.saveAllData()
+                this.uiManager.renderCategories(this.categories, this.isEditMode)
+
+                // Re-enable sorting after render
+                setTimeout(() => {
+                  this.enableCategorySorting()
+                }, 150)
+              }
+            }
+          },
+        })
+      }
+    })
+
     this.enableFoodSorting()
   }
 
@@ -830,6 +927,15 @@ class DietHelper {
     if (this.categorySortable) {
       this.categorySortable.destroy()
       this.categorySortable = null
+    }
+    // Disable subgroup sorting
+    if (this.subgroupSortables) {
+      Object.values(this.subgroupSortables).forEach((sortable) => {
+        if (sortable) {
+          sortable.destroy()
+        }
+      })
+      this.subgroupSortables = {}
     }
     this.disableFoodSorting()
   }
