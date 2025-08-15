@@ -74,7 +74,7 @@ export class UIManager {
       if (category.subgroups && category.subgroups.length > 0) {
         const subgroupsGrid = document.createElement('div')
         subgroupsGrid.style.cssText =
-          'display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;'
+          'display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 10px 5px;'
 
         category.subgroups.forEach((subgroup) => {
           const subgroupDiv = document.createElement('div')
@@ -125,7 +125,9 @@ export class UIManager {
                 if (window.dietHelper.isBulkSelectMode) {
                   e.preventDefault()
                   e.stopPropagation()
-                } else {
+                  window.dietHelper.toggleFoodSelection(category.id, food.id, subgroup.id)
+                } else if (!window.dietHelper.isEditMode) {
+                  // Only show details if not in edit mode
                   window.dietHelper.showSubgroupFoodDetails(category.id, subgroup.id, food.id)
                 }
               }

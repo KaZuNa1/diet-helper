@@ -134,7 +134,23 @@ button {
 .edit-mode .food-item:hover .food-image {
   transform: scale(1.6);
 }
+/* Disable image hover in edit mode and bulk select mode */
+.edit-mode .food-item:hover .food-image,
+.bulk-select-mode .food-item:hover .food-image {
+  transform: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  z-index: 1 !important;
+}
 
+/* Also disable the background effect in these modes */
+.edit-mode .food-item:hover::after,
+.bulk-select-mode .food-item:hover::after {
+  width: 100% !important;
+  height: 100% !important;
+  background: none !important;
+  box-shadow: none !important;
+}
 .food-item::after {
   content: '';
   position: absolute;
@@ -786,18 +802,6 @@ textarea {
   color: #495057;
   border: 1px solid #dee2e6;
 }
-
-/* Subgroup styles */
-.subgroup-container {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-  margin: 10px;
-  padding: 8px;
-  transform: scale(0.95);
-  transform-origin: top left;
-}
-
 .subgroup-header {
   display: flex;
   justify-content: space-between;
@@ -808,17 +812,33 @@ textarea {
   border-radius: 4px;
 }
 
-.subgroup-foods {
-  display: flex;
-  flex-wrap: wrap;
-  min-height: 60px;
-}
-
 .edit-mode .subgroup-header {
   cursor: move;
 }
 
+.subgroup-container {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  margin: 8px;
+  padding: 6px;
+  transform: scale(0.95);
+  transform-origin: top left;
+  overflow: hidden;
+}
+
+.subgroup-foods {
+  display: grid;
+  grid-template-columns: repeat(4, 100px);
+  min-height: 60px;
+  gap: 2px;
+  justify-content: start; /* Changed from center to start */
+  padding: 0;
+}
+
 .subgroup-container .food-item {
-  transform: scale(0.9);
-  margin: 3px;
+  transform: scale(0.88);
+  margin: 2px;
+  width: 100px;
+  justify-self: start; /* Changed from center to start */
 }

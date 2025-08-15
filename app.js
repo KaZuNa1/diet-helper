@@ -14,6 +14,7 @@ class DietHelper {
     this.categorySortable = null
     this.foodSortables = {}
     this.currentFoodId = null
+    this.editingSubgroupId = null
     this.dataManager = new DataManager()
     this.uiManager = new UIManager()
     this.modalManager = new ModalManager()
@@ -528,6 +529,14 @@ class DietHelper {
     await this.saveAllData()
     this.uiManager.renderCategories(this.categories, this.isEditMode)
     this.hideAddFoodForm()
+
+    // Re-enable sorting if in edit mode
+    if (this.isEditMode) {
+      this.disableFoodSorting()
+      setTimeout(() => {
+        this.enableCategorySorting()
+      }, 150)
+    }
   }
 
   async addTag() {
@@ -643,8 +652,17 @@ class DietHelper {
     category.subgroups.push(newSubgroup)
     this.saveAllData()
     this.uiManager.renderCategories(this.categories, this.isEditMode)
-  }
 
+    // Re-enable sorting if in edit mode
+    if (this.isEditMode) {
+      // First disable existing sorting to clean up
+      this.disableFoodSorting()
+      // Then re-enable after a short delay to ensure DOM is updated
+      setTimeout(() => {
+        this.enableCategorySorting()
+      }, 150)
+    }
+  }
   deleteSubgroup(categoryId, subgroupId) {
     const category = this.categories.find((c) => c.id === categoryId)
     if (!category) return
@@ -664,6 +682,16 @@ class DietHelper {
       category.subgroups = category.subgroups.filter((s) => s.id !== subgroupId)
       this.saveAllData()
       this.uiManager.renderCategories(this.categories, this.isEditMode)
+
+      // Re-enable sorting if in edit mode
+      if (this.isEditMode) {
+        // First disable existing sorting to clean up
+        this.disableFoodSorting()
+        // Then re-enable after a short delay to ensure DOM is updated
+        setTimeout(() => {
+          this.enableCategorySorting()
+        }, 150)
+      }
     })
   }
 
@@ -695,6 +723,14 @@ class DietHelper {
         this.saveAllData()
       }
       this.uiManager.renderCategories(this.categories, this.isEditMode)
+
+      // Re-enable sorting if in edit mode
+      if (this.isEditMode) {
+        this.disableFoodSorting()
+        setTimeout(() => {
+          this.enableCategorySorting()
+        }, 150)
+      }
     }
 
     input.addEventListener('blur', saveRename)
@@ -998,10 +1034,18 @@ class DietHelper {
     const saveRename = () => {
       const newName = input.value.trim()
       if (newName && newName !== originalName) {
-        category.name = newName
+        subgroup.name = newName
         this.saveAllData()
       }
       this.uiManager.renderCategories(this.categories, this.isEditMode)
+
+      // Re-enable sorting if in edit mode
+      if (this.isEditMode) {
+        this.disableFoodSorting()
+        setTimeout(() => {
+          this.enableCategorySorting()
+        }, 150)
+      }
     }
 
     const cancelRename = (e) => {
@@ -1035,6 +1079,14 @@ class DietHelper {
       this.categories = this.categories.filter((c) => c.id !== categoryId)
       this.saveAllData()
       this.uiManager.renderCategories(this.categories, this.isEditMode)
+
+      // Re-enable sorting if in edit mode
+      if (this.isEditMode) {
+        this.disableFoodSorting()
+        setTimeout(() => {
+          this.enableCategorySorting()
+        }, 150)
+      }
     })
   }
 
@@ -1177,13 +1229,25 @@ class DietHelper {
       const categoryId = foodImage.dataset.categoryId
         ? parseInt(foodImage.dataset.categoryId)
         : null
+      const subgroupId = foodImage.dataset.subgroupId
+        ? parseInt(foodImage.dataset.subgroupId)
+        : null
 
       let food = null
 
-      if (categoryId) {
+      if (subgroupId && categoryId) {
+        // Food is in a subgroup
+        const category = this.categories.find((c) => c.id === categoryId)
+        if (category && category.subgroups) {
+          const subgroup = category.subgroups.find((s) => s.id === subgroupId)
+          food = subgroup?.foods.find((f) => f.id === foodId)
+        }
+      } else if (categoryId) {
+        // Food is in direct category
         const category = this.categories.find((c) => c.id === categoryId)
         food = category?.foods.find((f) => f.id === foodId)
       } else {
+        // Food is at root level
         food = this.foods.find((f) => f.id === foodId)
       }
 
@@ -1206,7 +1270,6 @@ class DietHelper {
       }
     })
   }
-
   toggleBulkSelectMode() {
     this.isBulkSelectMode = !this.isBulkSelectMode
     const bulkSelectBtn = document.getElementById('bulkSelectBtn')
@@ -1367,14 +1430,25 @@ class DietHelper {
 
     let food = null
     let categoryId = this.currentCategoryId
+    let subgroupId = this.currentSubgroupId
 
     this.editingFoodId = this.currentFoodId
     this.editingCategoryId = this.currentCategoryId
+    this.editingSubgroupId = this.currentSubgroupId
 
-    if (categoryId) {
+    if (subgroupId && categoryId) {
+      // Food is in a subgroup
+      const category = this.categories.find((c) => c.id === categoryId)
+      if (category && category.subgroups) {
+        const subgroup = category.subgroups.find((s) => s.id === subgroupId)
+        food = subgroup?.foods.find((f) => f.id === this.currentFoodId)
+      }
+    } else if (categoryId) {
+      // Food is in direct category
       const category = this.categories.find((c) => c.id === categoryId)
       food = category?.foods.find((f) => f.id === this.currentFoodId)
     } else {
+      // Food is in root level
       food = this.foods.find((f) => f.id === this.currentFoodId)
     }
 
@@ -1431,6 +1505,7 @@ class DietHelper {
     this.modalManager.hideEditFood()
     document.getElementById('editFoodImage').value = ''
     document.getElementById('currentImagePreview').innerHTML = ''
+    this.editingSubgroupId = null
   }
 
   async updateFood() {
@@ -1446,11 +1521,21 @@ class DietHelper {
 
     let food = null
     let category = null
+    let subgroup = null
 
-    if (this.editingCategoryId) {
+    if (this.editingSubgroupId && this.editingCategoryId) {
+      // Food is in a subgroup
+      category = this.categories.find((c) => c.id === this.editingCategoryId)
+      if (category && category.subgroups) {
+        subgroup = category.subgroups.find((s) => s.id === this.editingSubgroupId)
+        food = subgroup?.foods.find((f) => f.id === this.editingFoodId)
+      }
+    } else if (this.editingCategoryId) {
+      // Food is in direct category
       category = this.categories.find((c) => c.id === this.editingCategoryId)
       food = category?.foods.find((f) => f.id === this.editingFoodId)
     } else {
+      // Food is in root level
       food = this.foods.find((f) => f.id === this.editingFoodId)
     }
 
@@ -1488,7 +1573,13 @@ class DietHelper {
     this.uiManager.renderCategories(this.categories, this.isEditMode)
 
     let updatedFood = null
-    if (this.editingCategoryId) {
+    if (this.editingSubgroupId && this.editingCategoryId) {
+      const category = this.categories.find((c) => c.id === this.editingCategoryId)
+      if (category && category.subgroups) {
+        const subgroup = category.subgroups.find((s) => s.id === this.editingSubgroupId)
+        updatedFood = subgroup?.foods.find((f) => f.id === this.editingFoodId)
+      }
+    } else if (this.editingCategoryId) {
       const category = this.categories.find((c) => c.id === this.editingCategoryId)
       updatedFood = category?.foods.find((f) => f.id === this.editingFoodId)
     } else {
@@ -1503,6 +1594,7 @@ class DietHelper {
 
     this.editingFoodId = null
     this.editingCategoryId = null
+    this.editingSubgroupId = null
   }
 }
 
