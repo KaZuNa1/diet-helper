@@ -1,12 +1,14 @@
 
 okay so here is my current project that named diet helper and helps me to organize my diet:
 it consists of index html style css and those js files:
-models,app,config,modal,ui,data
+app,ui,data,modal,models,config 
 
 i will give you every files:
 
 first of all just get familiar with my code
-index html:
+index.html:
+
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -18,28 +20,107 @@ index html:
   <body>
     <h1>Diet Helper</h1>
 
-    <button id="addCategoryBtn">Add Category</button>
-    <button id="manageTagsBtn">Manage Tags</button>
-    <button id="editModeBtn">Edit</button>
+    <button id="addCategoryBtn" title="Add Category">Add Category</button>
+    <button id="manageTagsBtn" title="Manage Tags (Ctrl+T)">Manage Tags</button>
+    <button id="editModeBtn" title="Edit Mode">Edit</button>
+    <button id="bulkSelectBtn" style="display: none">Select</button>
+
+    <div style="position: fixed; bottom: 10px; right: 10px; font-size: 12px; color: #666">
+      Press <kbd>?</kbd> for keyboard shortcuts
+    </div>
+
+    <!-- Filter Panel -->
+    <div id="filterPanel" class="filter-panel">
+      <div class="filter-header" id="filterHeader">
+        <span>🏷️ Filter by Tags</span>
+        <span id="filterCount" class="filter-count"></span>
+        <span class="filter-toggle" id="filterToggle">▼</span>
+      </div>
+      <div id="filterContent" class="filter-content">
+        <div class="filter-content-inner">
+          <div id="filterTags" class="filter-tags"></div>
+          <div class="filter-actions">
+            <label style="float: left; font-size: 14px">
+              <input type="checkbox" id="filterModeToggle" style="margin-right: 5px" />
+              Match ANY tag (instead of ALL)
+            </label>
+            <button id="clearFiltersBtn" class="btn-secondary">Clear All</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div id="categoriesContainer"></div>
 
     <!-- Food Details Dropdown -->
     <div id="foodDetailsDropdown" class="dropdown">
-      <h3>Food Details</h3>
       <div id="foodDetailsContent">
-        <div style="text-align: center">
-          <img
-            id="detailsImage"
-            style="width: 200px; height: 200px; object-fit: cover; margin-bottom: 15px"
-            src=""
-            alt=""
-          />
-          <h3 id="detailsName" style="margin: 10px 0"></h3>
-          <div id="detailsTags" style="color: #666; margin-bottom: 15px"></div>
+        <h2 id="detailsName" style="margin: 0 0 15px 0; font-size: 24px"></h2>
+
+        <div style="display: flex; gap: 15px; margin-bottom: 20px">
+          <!-- Image section - 60% -->
+          <div style="flex: 0 0 60%">
+            <img
+              id="detailsImage"
+              style="width: 100%; height: auto; object-fit: cover; border-radius: 8px"
+              src=""
+              alt=""
+            />
+          </div>
+
+          <!-- Nutrition section - 40% -->
+          <div style="flex: 0 0 40%">
+            <h4 style="margin: 0 0 10px 0; font-size: 16px">Nutrition Facts</h4>
+            <div class="nutrition-display compact">
+              <div class="nutrition-row">
+                <span>Protein:</span>
+                <span id="detailsProtein">-</span>
+              </div>
+              <div class="nutrition-row">
+                <span>Fat:</span>
+                <span id="detailsFat">-</span>
+              </div>
+              <div class="nutrition-row">
+                <span>Carbs:</span>
+                <span id="detailsCarbs">-</span>
+              </div>
+              <div class="nutrition-row">
+                <span>Fiber:</span>
+                <span id="detailsFiber">-</span>
+              </div>
+              <div class="nutrition-row">
+                <span>Sugar:</span>
+                <span id="detailsSugar">-</span>
+              </div>
+              <div class="nutrition-row">
+                <span>Sodium:</span>
+                <span id="detailsSodium">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tags section -->
+        <div class="details-section" style="margin-bottom: 15px">
+          <h4 style="margin: 0 0 8px 0">Tags</h4>
+          <div id="detailsTags"></div>
+        </div>
+
+        <!-- Notes Section -->
+        <div id="detailsNotesSection" class="details-section">
+          <h4>Notes</h4>
+          <p id="detailsNotes"></p>
+        </div>
+
+        <!-- Specific Data Section -->
+        <div id="detailsSpecificSection" class="details-section">
+          <h4>Specific Information</h4>
+          <p id="detailsSpecificData"></p>
         </div>
       </div>
+
       <div class="modal-buttons">
+        <button id="editFoodBtn" class="btn-primary">Edit</button>
         <button id="deleteFoodBtn" class="btn-danger">Delete</button>
         <button id="closeFoodDetailsBtn" class="btn-secondary">Close</button>
       </div>
@@ -48,21 +129,170 @@ index html:
     <!-- Add Food Dropdown -->
     <div id="addFoodDropdown" class="dropdown">
       <h3>Add New Food</h3>
-      <div class="form-group">
-        <input type="text" id="foodName" placeholder="Enter food name" />
-        <div id="foodNameError" class="error-message hidden">Please enter food name</div>
+
+      <!-- Basic Info Section -->
+      <div class="form-section">
+        <h4>Basic Information</h4>
+        <div class="form-group">
+          <input type="text" id="foodName" placeholder="Enter food name" />
+          <div id="foodNameError" class="error-message hidden">Please enter food name</div>
+        </div>
+        <div class="form-group">
+          <label>Food Image:</label>
+          <input type="file" id="foodImage" accept="image/*" />
+        </div>
+        <div class="form-group">
+          <label>Notes:</label>
+          <textarea
+            id="foodNotes"
+            placeholder="Cooking tips, where to buy, etc."
+            rows="2"
+          ></textarea>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Food Image:</label>
-        <input type="file" id="foodImage" accept="image/*" />
+
+      <!-- Nutrition Section -->
+      <div class="form-section">
+        <h4>Nutrition Facts (per serving)</h4>
+        <div class="nutrition-grid">
+          <div class="nutrition-input">
+            <label>Protein (g)</label>
+            <input type="number" id="nutritionProtein" min="0" step="0.1" />
+          </div>
+          <div class="nutrition-input">
+            <label>Fat (g)</label>
+            <input type="number" id="nutritionFat" min="0" step="0.1" />
+          </div>
+          <div class="nutrition-input">
+            <label>Carbs (g)</label>
+            <input type="number" id="nutritionCarbs" min="0" step="0.1" />
+          </div>
+          <div class="nutrition-input">
+            <label>Fiber (g)</label>
+            <input type="number" id="nutritionFiber" min="0" step="0.1" />
+          </div>
+          <div class="nutrition-input">
+            <label>Sugar (g)</label>
+            <input type="number" id="nutritionSugar" min="0" step="0.1" />
+          </div>
+          <div class="nutrition-input">
+            <label>Sodium (mg)</label>
+            <input type="number" id="nutritionSodium" min="0" step="1" />
+          </div>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Select Tags:</label>
+
+      <!-- Specific Data Section -->
+      <div class="form-section">
+        <h4>Specific Information</h4>
+        <div class="form-group">
+          <textarea
+            id="foodSpecificData"
+            placeholder="e.g., Rich in B vitamins, High in antioxidants, Good source of omega-3..."
+            rows="2"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Tags Section -->
+      <div class="form-section">
+        <h4>Tags</h4>
         <div id="tagsList"></div>
       </div>
+
       <div class="modal-buttons">
         <button id="saveFoodBtn" class="btn-primary">Save Food</button>
         <button id="cancelFoodBtn" class="btn-secondary">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Edit Food Dropdown -->
+    <div id="editFoodDropdown" class="dropdown">
+      <div class="form-section">
+        <h2 style="margin: 0 0 15px 0; font-size: 20px">Edit Food</h2>
+        <div class="form-group">
+          <label style="font-weight: bold; margin-bottom: 5px; display: block">Food Name</label>
+          <input
+            type="text"
+            id="editFoodName"
+            placeholder="Enter food name"
+            style="width: 100%; font-size: 16px"
+          />
+          <div id="editFoodNameError" class="error-message hidden">Please enter food name</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 15px; margin-bottom: 20px">
+        <!-- Image section - 60% -->
+        <div style="flex: 0 0 60%">
+          <label style="font-weight: bold; margin-bottom: 5px; display: block">Food Image</label>
+          <input type="file" id="editFoodImage" accept="image/*" style="width: 100%" />
+          <div id="currentImagePreview" style="margin-top: 10px"></div>
+        </div>
+
+        <!-- Nutrition section - 40% -->
+        <div style="flex: 0 0 40%">
+          <h4 style="margin: 0 0 10px 0; font-size: 16px">Nutrition Facts</h4>
+          <div class="nutrition-edit-compact">
+            <div class="nutrition-input-row">
+              <label>Protein (g)</label>
+              <input type="number" id="editNutritionProtein" min="0" step="0.1" />
+            </div>
+            <div class="nutrition-input-row">
+              <label>Fat (g)</label>
+              <input type="number" id="editNutritionFat" min="0" step="0.1" />
+            </div>
+            <div class="nutrition-input-row">
+              <label>Carbs (g)</label>
+              <input type="number" id="editNutritionCarbs" min="0" step="0.1" />
+            </div>
+            <div class="nutrition-input-row">
+              <label>Fiber (g)</label>
+              <input type="number" id="editNutritionFiber" min="0" step="0.1" />
+            </div>
+            <div class="nutrition-input-row">
+              <label>Sugar (g)</label>
+              <input type="number" id="editNutritionSugar" min="0" step="0.1" />
+            </div>
+            <div class="nutrition-input-row">
+              <label>Sodium (mg)</label>
+              <input type="number" id="editNutritionSodium" min="0" step="1" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tags Section -->
+      <div class="form-section">
+        <h4>Tags</h4>
+        <div id="editTagsList"></div>
+      </div>
+
+      <!-- Notes Section -->
+      <div class="form-section">
+        <h4>Notes</h4>
+        <textarea
+          id="editFoodNotes"
+          placeholder="Cooking tips, where to buy, etc."
+          rows="3"
+          style="width: 100%"
+        ></textarea>
+      </div>
+
+      <!-- Specific Data Section -->
+      <div class="form-section">
+        <h4>Specific Information</h4>
+        <textarea
+          id="editFoodSpecificData"
+          placeholder="e.g., Rich in B vitamins, High in antioxidants..."
+          rows="3"
+          style="width: 100%"
+        ></textarea>
+      </div>
+
+      <div class="modal-buttons">
+        <button id="updateFoodBtn" class="btn-primary">Update Food</button>
+        <button id="cancelEditBtn" class="btn-secondary">Cancel</button>
       </div>
     </div>
 
@@ -103,21 +333,38 @@ index html:
       </div>
     </div>
 
+    <!-- Add Subgroup Modal -->
+    <div id="addSubgroupDropdown" class="dropdown">
+      <h3>Add New Subgroup</h3>
+      <div class="form-group">
+        <input type="text" id="subgroupNameInput" placeholder="Enter subgroup name" />
+        <div id="subgroupNameError" class="error-message hidden">Please enter subgroup name</div>
+      </div>
+      <div class="modal-buttons">
+        <button id="saveSubgroupBtn" class="btn-primary">Save Subgroup</button>
+        <button id="cancelSubgroupBtn" class="btn-secondary">Cancel</button>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script type="module" src="app.js"></script>
   </body>
 </html>
 
-style css:
+style.css:
 body {
   font-family: Arial, sans-serif;
   margin: 20px;
+  min-height: 100vh;
+  overflow-y: auto;
 }
+
 button {
   padding: 10px 15px;
   margin: 5px;
   cursor: pointer;
 }
+
 .dropdown {
   display: none;
   position: fixed;
@@ -127,14 +374,19 @@ button {
   background: white;
   border: 2px solid #ccc;
   padding: 20px;
+  padding-bottom: 0;
   z-index: 1000;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   border-radius: 8px;
   min-width: 300px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
+
 .dropdown.active {
   display: block;
 }
+
 .modal-overlay {
   display: none;
   position: fixed;
@@ -145,85 +397,172 @@ button {
   background: rgba(0, 0, 0, 0.5);
   z-index: 999;
 }
+
 .modal-overlay.active {
   display: block;
 }
+
 .form-group {
   margin: 10px 0;
 }
+
 .form-group label {
   display: block;
   margin-bottom: 5px;
 }
+
 .form-group input,
 .form-group select {
   width: 200px;
   padding: 5px;
 }
+
 .tag-item {
   margin: 5px 0;
   padding: 5px;
   border: 1px solid #ddd;
 }
+
 .tag-checkbox {
   margin-right: 10px;
 }
+
+/* Food item styles */
 .food-item {
   border: 1px solid #ccc;
   margin: 5px;
   padding: 5px;
   display: inline-block;
-  width: 85px;
+  width: 110px;
   text-align: center;
   vertical-align: top;
+  position: relative;
+  overflow: visible;
+  z-index: 1;
+  transition: opacity 0.3s ease;
 }
+
+.food-item:hover {
+  z-index: 100;
+}
+
 .food-image {
-  width: 75px;
-  height: 75px;
+  width: 100px;
+  height: 100px;
   object-fit: cover;
   display: block;
   margin: 0 auto 5px auto;
   cursor: pointer;
   box-sizing: border-box;
+  transition: all 0.3s ease;
+  position: relative;
 }
 
 .food-image.no-image {
   background: #f0f0f0;
-  line-height: 75px;
+  line-height: 100px;
   text-align: center;
   font-size: 11px;
   color: #999;
 }
-.food-image:hover {
-  opacity: 0.8;
-  border: 2px solid #007bff;
+
+.food-item:hover .food-image {
+  transform: scale(1.8);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border: 2px solid #fff;
+  z-index: 100;
+  position: relative;
 }
+
+/* Edit mode styles */
+.edit-mode .food-item {
+  cursor: move;
+  transition: transform 0.2s;
+}
+
+.edit-mode .food-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.edit-mode .food-item:hover .food-image {
+  transform: scale(1.6);
+}
+/* Disable image hover in edit mode and bulk select mode */
+.edit-mode .food-item:hover .food-image,
+.bulk-select-mode .food-item:hover .food-image {
+  transform: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  z-index: 1 !important;
+}
+
+/* Also disable the background effect in these modes */
+.edit-mode .food-item:hover::after,
+.bulk-select-mode .food-item:hover::after {
+  width: 100% !important;
+  height: 100% !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+.food-item::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  border-radius: 4px;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  z-index: -1;
+}
+
+.food-item:hover::after {
+  width: 180px;
+  height: 180px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
 .food-name {
   font-size: 12px;
   font-weight: bold;
   margin: 3px 0;
 }
+
 .food-tags {
   font-size: 12px;
   color: #666;
 }
+
 .error-message {
   color: red;
   font-size: 12px;
   margin-top: 5px;
 }
+
 .hidden {
   display: none;
 }
 
-/* Button styles for modal actions */
+/* Modal buttons */
 .modal-buttons {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
   margin-top: 20px;
   padding-top: 15px;
+  padding-bottom: 20px;
   border-top: 1px solid #eee;
+  position: sticky;
+  bottom: 0;
+  background: white;
+  margin-left: -20px;
+  margin-right: -20px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .btn-primary {
@@ -258,6 +597,7 @@ button {
 .btn-secondary:hover {
   background-color: #545b62;
 }
+
 #modalOverlay {
   display: none !important;
   visibility: hidden !important;
@@ -269,29 +609,41 @@ input[type='text'] {
   outline: none;
 }
 
-/* Edit mode styles */
-.edit-mode .category-container {
-  border: 2px solid #007bff !important;
+/* Category styles */
+.category-container {
+  border: 1px solid #ccc;
+  margin: 10px;
+  padding: 8px 10px 10px 10px;
 }
 
-/* Sortable styles */
+.edit-mode .category-container {
+  border: 2px solid #007bff !important;
+  position: relative;
+}
+
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0px;
+  padding: 2px 0;
+  min-height: 28px;
+}
+
 .edit-mode .category-header {
   cursor: move;
   background: #f5f5f5;
-  margin: -10px -10px 10px -10px;
-  padding: 10px;
+  margin: -2px -10px 3px -10px;
+  padding: 3px 10px;
 }
 
-.edit-mode .food-item {
-  cursor: move;
-  transition: transform 0.2s;
+.edit-mode .foods-container {
+  min-height: 100px;
+  border: 2px dashed transparent;
+  transition: all 0.3s ease;
 }
 
-.edit-mode .food-item:hover {
-  transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
+/* Sortable styles */
 .sortable-ghost {
   opacity: 0.4;
 }
@@ -300,16 +652,21 @@ input[type='text'] {
   opacity: 0.8;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
-/* Ensure proper scrolling */
-body {
-  min-height: 100vh;
-  overflow-y: auto;
+
+.edit-mode .food-item.sortable-chosen {
+  opacity: 0.4;
+  transform: scale(1.05);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.edit-mode .sortable-ghost {
+  opacity: 0.2;
 }
 
 #categoriesContainer {
-  padding-bottom: 50px; /* Extra space at bottom for easier dropping */
+  padding-bottom: 50px;
 }
-/* Ensure confirmation modal appears on top */
+
 #confirmationOverlay {
   z-index: 1010;
 }
@@ -318,30 +675,549 @@ body {
   z-index: 1011;
 }
 
-app js:
+/* Filter Panel */
+.filter-panel {
+  margin: 20px 5px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #f8f9fa;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.filter-header {
+  padding: 12px 15px;
+  background: #e9ecef;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  font-weight: 500;
+}
+
+.filter-header:hover {
+  background: #dee2e6;
+}
+
+.filter-count {
+  background: #007bff;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-left: 10px;
+  display: none;
+}
+
+.filter-count.active {
+  display: inline-block;
+}
+
+.filter-toggle {
+  transition: transform 0.3s ease;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.filter-toggle.open {
+  transform: rotate(180deg);
+}
+
+.filter-content {
+  height: 0;
+  overflow: hidden;
+  transition: height 0.25s ease-out;
+}
+
+.filter-content-inner {
+  padding: 15px;
+}
+
+.filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-top: 2px;
+}
+
+.filter-tag-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  font-size: 14px;
+}
+
+.filter-tag-item:hover {
+  background: #f0f0f0;
+  border-color: #007bff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.filter-tag-item.selected {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.filter-tag-item input[type='checkbox'] {
+  display: none;
+}
+
+.filter-actions {
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+  text-align: right;
+}
+
+#clearFiltersBtn {
+  padding: 6px 15px;
+  font-size: 14px;
+}
+
+.food-item.filtered-out {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* Bulk selection */
+.bulk-select-mode .food-item {
+  position: relative;
+  cursor: pointer;
+}
+
+.bulk-select-mode .food-item::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #007bff;
+  border-radius: 3px;
+  background: white;
+  z-index: 10;
+}
+
+.bulk-select-mode .food-item.selected::before {
+  background: #007bff;
+  content: '✓';
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.bulk-select-mode .food-item.selected {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.bulk-actions-bar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  z-index: 1000;
+  animation: slideUp 0.3s ease-out;
+}
+
+.bulk-actions-bar button {
+  background: transparent;
+  color: white;
+  border: 1px solid white;
+  padding: 5px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.bulk-actions-bar button:hover {
+  background: white;
+  color: #333;
+}
+
+.bulk-actions-bar .selected-count {
+  font-weight: bold;
+}
+
+/* Form sections */
+.form-section {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 10px;
+}
+
+.form-section h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+/* Nutrition grid */
+.nutrition-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.nutrition-input {
+  display: flex;
+  flex-direction: column;
+}
+
+.nutrition-input label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 3px;
+}
+
+.nutrition-input input {
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  width: 100%;
+}
+
+/* Textarea styling */
+textarea {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  resize: vertical;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+/* Modal specific widths */
+#addFoodDropdown,
+#foodDetailsDropdown,
+#editFoodDropdown {
+  min-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+#foodDetailsDropdown,
+#editFoodDropdown {
+  max-width: 600px;
+}
+
+/* Details sections */
+.details-section {
+  margin: 15px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 5px;
+  text-align: left;
+}
+
+.details-section h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.details-section p {
+  margin: 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* Nutrition display */
+.nutrition-display {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.nutrition-display.compact {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.nutrition-display.compact .nutrition-row {
+  padding: 3px 8px;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.nutrition-display.compact .nutrition-row span:first-child {
+  font-weight: normal;
+  color: #666;
+}
+
+.nutrition-display.compact .nutrition-row span:last-child {
+  font-weight: 600;
+  color: #333;
+}
+
+.nutrition-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 10px;
+  background: white;
+  border-radius: 3px;
+}
+
+.nutrition-row span:first-child {
+  color: #666;
+  font-weight: 500;
+}
+
+.nutrition-row span:last-child {
+  color: #333;
+  font-weight: bold;
+}
+
+/* Compact nutrition edit */
+.nutrition-edit-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nutrition-input-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.nutrition-input-row label {
+  font-size: 12px;
+  color: #666;
+  flex: 1;
+}
+
+.nutrition-input-row input {
+  width: 70px;
+  padding: 4px 6px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+/* Edit modal sections */
+#editFoodDropdown .form-section {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+}
+
+#editFoodDropdown .form-section:last-of-type {
+  margin-bottom: 0;
+}
+
+#editFoodDropdown h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Modal z-index stacking */
+#foodDetailsOverlay {
+  z-index: 999;
+}
+
+#foodDetailsDropdown {
+  z-index: 1000;
+}
+
+#editFoodOverlay {
+  z-index: 1001;
+}
+
+#editFoodDropdown {
+  z-index: 1002;
+}
+
+/* Selectable tags */
+.selectable-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.selectable-tag:hover {
+  background: #e0e0e0;
+  border-color: #007bff;
+  transform: translateY(-1px);
+}
+
+.selectable-tag.selected {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.selectable-tag.selected:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+/* Tag display */
+#detailsTags .tag-badge {
+  background: #e9ecef;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 13px;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+.subgroup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 3px 5px;
+  background: #e9ecef;
+  border-radius: 4px;
+}
+
+.edit-mode .subgroup-header {
+  cursor: move;
+}
+
+.subgroup-container {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  margin: 8px;
+  padding: 6px;
+  transform: scale(0.95);
+  transform-origin: top left;
+  overflow: hidden;
+}
+
+.subgroup-foods {
+  display: grid;
+  grid-template-columns: repeat(4, 100px);
+  min-height: 60px;
+  gap: 2px;
+  justify-content: start; /* Changed from center to start */
+  padding: 0;
+}
+
+.subgroup-container .food-item {
+  transform: scale(0.88);
+  margin: 2px;
+  width: 100px;
+  justify-self: start; /* Changed from center to start */
+}
+.edit-mode .subgroups-drop-zone:empty {
+  border: 2px dashed #dee2e6 !important;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.edit-mode .subgroups-drop-zone:empty::after {
+  content: 'Drop subgroups here';
+  display: block;
+  text-align: center;
+  width: 100%;
+  color: #999;
+  font-size: 12px;
+  padding: 40px 0;
+  grid-column: 1 / -1; /* Span across all columns */
+}
+
+app.js:
 import { CONFIG } from './config.js'
 import { Food, Category } from './models.js'
 import { DataManager } from './data.js'
 import { UIManager } from './ui.js'
 import { ModalManager } from './modal.js'
-
-// Debug: Monitor what's setting tabIndex on body
-const originalSetAttribute = document.body.setAttribute
-document.body.setAttribute = function (name, value) {
-  if (name === 'tabindex' || name === 'tabIndex') {
-  }
-  return originalSetAttribute.call(this, name, value)
-}
-
-// Also monitor the property directly
-Object.defineProperty(document.body, 'tabIndex', {
-  set: function (value) {
-    this.setAttribute('tabindex', value)
-  },
-  get: function () {
-    return parseInt(this.getAttribute('tabindex') || '0')
-  },
-})
 
 class DietHelper {
   constructor() {
@@ -352,10 +1228,16 @@ class DietHelper {
     this.isEditMode = false
     this.categorySortable = null
     this.foodSortables = {}
-    this.currentFoodId = null // Track currently viewed food for deletion
+    this.subgroupSortables = {}
+    this.currentFoodId = null
+    this.editingSubgroupId = null
     this.dataManager = new DataManager()
     this.uiManager = new UIManager()
     this.modalManager = new ModalManager()
+    this.selectedFilterTags = new Set()
+    this.isFilterPanelOpen = false
+    this.selectedFoods = new Set()
+    this.isBulkSelectMode = false
     this.init()
   }
 
@@ -368,68 +1250,304 @@ class DietHelper {
       this.uiManager.renderCategories(this.categories, this.isEditMode)
     }
     this.initializeEventListeners()
+    this.initializeFilterPanel()
+    this.initializeKeyboardShortcuts()
   }
 
   initializeEventListeners() {
-    // Manage Tags Button
     document.getElementById('manageTagsBtn').addEventListener('click', () => {
       this.showManageTagsForm()
     })
 
-    // Edit Mode Button
     document.getElementById('editModeBtn').addEventListener('click', () => {
       this.toggleEditMode()
     })
 
-    // Add Category Button
     document.getElementById('addCategoryBtn').addEventListener('click', () => {
       this.showAddCategoryForm()
     })
 
-    // Save Category Button
     document.getElementById('saveCategoryBtn').addEventListener('click', () => {
       this.saveCategory()
     })
 
-    // Cancel Category Button
     document.getElementById('cancelCategoryBtn').addEventListener('click', () => {
       this.hideAddCategoryForm()
     })
 
-    // Save Food Button
     document.getElementById('saveFoodBtn').addEventListener('click', () => {
       this.saveFood()
     })
 
-    // Cancel Food Button
     document.getElementById('cancelFoodBtn').addEventListener('click', () => {
       this.hideAddFoodForm()
     })
 
-    // Add Tag Button
     document.getElementById('addTagBtn').addEventListener('click', () => {
       this.addTag()
     })
 
-    // Close Food Details Button
     document.getElementById('closeFoodDetailsBtn').addEventListener('click', () => {
       this.hideFoodDetails()
     })
 
-    // Delete Food Button - NEW
     document.getElementById('deleteFoodBtn').addEventListener('click', () => {
       this.deleteFood()
     })
 
-    // Close Tags Button
     document.getElementById('closeTagsBtn').addEventListener('click', () => {
       this.hideManageTagsForm()
     })
+
+    document.getElementById('bulkSelectBtn').addEventListener('click', () => {
+      this.toggleBulkSelectMode()
+    })
+
+    document.getElementById('editFoodBtn').addEventListener('click', () => {
+      this.editFood()
+    })
+
+    document.getElementById('updateFoodBtn').addEventListener('click', () => {
+      this.updateFood()
+    })
+
+    document.getElementById('cancelEditBtn').addEventListener('click', () => {
+      this.hideEditFoodForm()
+    })
+
+    document.getElementById('saveSubgroupBtn').addEventListener('click', () => {
+      this.saveSubgroup()
+    })
+
+    document.getElementById('cancelSubgroupBtn').addEventListener('click', () => {
+      this.hideAddSubgroupForm()
+    })
+  }
+
+  initializeKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+      const isInputActive = ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
+
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        this.modalManager.closeActiveModal()
+        return
+      }
+
+      if (isInputActive && e.key !== 'Escape') return
+
+      if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault()
+        if (this.categories.length === 0) {
+          this.showAddCategoryForm()
+        } else if (this.categories.length === 1) {
+          this.showAddFoodForm(this.categories[0].id)
+        } else {
+          this.showCategorySelector()
+        }
+      }
+
+      if (e.ctrlKey && e.key === 't') {
+        e.preventDefault()
+        this.showManageTagsForm()
+      }
+
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault()
+        this.handleSaveShortcut()
+      }
+
+      if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault()
+        if (!this.isFilterPanelOpen) {
+          this.toggleFilterPanel()
+        }
+        setTimeout(() => {
+          const firstTag = document.querySelector('.filter-tag-item input')
+          if (firstTag) firstTag.focus()
+        }, 100)
+      }
+
+      if (e.key === 'Delete' && this.isBulkSelectMode && this.selectedFoods.size > 0) {
+        e.preventDefault()
+        this.bulkDelete()
+      }
+
+      if (e.key === '/' && !isInputActive) {
+        e.preventDefault()
+        this.showKeyboardShortcutsHelp()
+      }
+    })
+  }
+
+  showCategorySelector() {
+    const overlay = document.createElement('div')
+    overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1999;
+  `
+
+    const selectorModal = document.createElement('div')
+    selectorModal.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 2000;
+    max-width: 400px;
+    min-width: 300px;
+  `
+
+    let categoriesHtml = this.categories
+      .map(
+        (cat, index) =>
+          `<button class="category-select-btn" data-id="${cat.id}" style="
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      text-align: left;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      background: white;
+    ">
+      ${index + 1}. ${cat.name}
+    </button>`
+      )
+      .join('')
+
+    selectorModal.innerHTML = `
+    <h3 style="margin-top: 0;">Select Category for New Food</h3>
+    <div style="max-height: 300px; overflow-y: auto;">
+      ${categoriesHtml}
+    </div>
+    <button id="cancelCategorySelect" style="margin-top: 15px; padding: 5px 15px;">Cancel</button>
+  `
+
+    document.body.appendChild(overlay)
+    document.body.appendChild(selectorModal)
+
+    const closeSelector = () => {
+      overlay.remove()
+      selectorModal.remove()
+    }
+
+    selectorModal.querySelectorAll('.category-select-btn').forEach((btn, index) => {
+      btn.onclick = () => {
+        const categoryId = parseInt(btn.dataset.id)
+        closeSelector()
+        this.showAddFoodForm(categoryId)
+      }
+
+      if (index < 9) {
+        const handler = (e) => {
+          if (e.key === String(index + 1)) {
+            document.removeEventListener('keydown', handler)
+            btn.click()
+          }
+        }
+        document.addEventListener('keydown', handler)
+      }
+    })
+
+    overlay.onclick = closeSelector
+    document.getElementById('cancelCategorySelect').onclick = closeSelector
+  }
+
+  handleSaveShortcut() {
+    const activeModal = this.modalManager.getActiveModal()
+
+    switch (activeModal) {
+      case 'addFood':
+        this.saveFood()
+        break
+      case 'editFood':
+        this.updateFood()
+        break
+      case 'addCategory':
+        this.saveCategory()
+        break
+      case 'manageTags':
+        const tagInput = document.getElementById('newTagName')
+        if (tagInput && tagInput.value.trim()) {
+          this.addTag()
+        }
+        break
+    }
+  }
+
+  showKeyboardShortcutsHelp() {
+    const overlay = document.createElement('div')
+    overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1999;
+  `
+
+    const helpModal = document.createElement('div')
+    helpModal.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 2000;
+    max-width: 400px;
+  `
+
+    helpModal.innerHTML = `
+    <h3 style="margin-top: 0;">Keyboard Shortcuts</h3>
+    <div style="line-height: 1.8;">
+      <div><kbd>Ctrl+N</kbd> - Add new food</div>
+      <div><kbd>Ctrl+T</kbd> - Manage tags</div>
+      <div><kbd>Ctrl+S</kbd> - Save current form</div>
+      <div><kbd>Ctrl+F</kbd> - Filter foods</div>
+      <div><kbd>Delete</kbd> - Delete selected (in bulk mode)</div>
+      <div><kbd>Escape</kbd> - Close modal</div>
+      <div><kbd>?</kbd> - Show this help</div>
+    </div>
+    <button id="closeHelpBtn" style="margin-top: 15px; padding: 5px 15px;">Close</button>
+  `
+
+    document.body.appendChild(overlay)
+    document.body.appendChild(helpModal)
+
+    const closeHelp = () => {
+      overlay.remove()
+      helpModal.remove()
+    }
+
+    overlay.onclick = closeHelp
+    document.getElementById('closeHelpBtn').onclick = closeHelp
+
+    const escapeHandler = (e) => {
+      if (e.key === 'Escape') {
+        closeHelp()
+        document.removeEventListener('keydown', escapeHandler)
+      }
+    }
+    document.addEventListener('keydown', escapeHandler)
   }
 
   showAddFoodForm(categoryId = null) {
     this.modalManager.closeActiveModal()
-
     this.currentCategoryId = categoryId
     this.uiManager.renderTagsForSelection(this.tags)
     this.modalManager.showAddFood()
@@ -453,9 +1571,7 @@ class DietHelper {
     const food = this.foods.find((f) => f.id === foodId)
     if (!food) return
 
-    // Store the current food ID for deletion
     this.currentFoodId = foodId
-
     this.uiManager.showFoodDetails(food, this.tags)
     this.modalManager.showFoodDetails()
   }
@@ -463,27 +1579,18 @@ class DietHelper {
   hideFoodDetails() {
     this.currentFoodId = null
     this.currentCategoryId = null
-
-    // Force complete modal cleanup
+    this.currentSubgroupId = null // Add this line
     this.modalManager.hideFoodDetails()
 
-    // Reset all focus-related states
     setTimeout(() => {
-      // Remove any lingering focus from body
       if (document.activeElement === document.body) {
         document.activeElement.blur()
       }
-
-      // Ensure body is not focusable
       document.body.removeAttribute('tabIndex')
       document.body.style.overflow = 'auto'
-
-      // Force browser to recalculate
       document.body.offsetHeight
     }, 50)
   }
-
-  // NEW: Delete food functionality
   async deleteFood() {
     if (!this.currentFoodId) return
 
@@ -503,12 +1610,21 @@ class DietHelper {
     })
   }
 
-  // NEW: Perform the actual food deletion
   async performDeleteFood(foodId) {
     try {
       let food = null
 
-      if (this.currentCategoryId) {
+      // Check if we're deleting from a subgroup
+      if (this.currentSubgroupId) {
+        const category = this.categories.find((c) => c.id === this.currentCategoryId)
+        if (category && category.subgroups) {
+          const subgroup = category.subgroups.find((s) => s.id === this.currentSubgroupId)
+          if (subgroup) {
+            food = subgroup.foods.find((f) => f.id === foodId)
+            subgroup.foods = subgroup.foods.filter((f) => f.id !== foodId)
+          }
+        }
+      } else if (this.currentCategoryId) {
         const category = this.categories.find((c) => c.id === this.currentCategoryId)
         if (category) {
           food = category.foods.find((f) => f.id === foodId)
@@ -519,21 +1635,21 @@ class DietHelper {
         this.foods = this.foods.filter((f) => f.id !== foodId)
       }
 
-      // Delete the image file if it exists and is not base64
       if (food && food.imageUrl && !food.imageUrl.startsWith('data:')) {
-        const deleteResult = await this.dataManager.deleteImage(food.imageUrl)
+        await this.dataManager.deleteImage(food.imageUrl)
       }
+
+      // Reset all current IDs
+      this.currentFoodId = null
+      this.currentCategoryId = null
+      this.currentSubgroupId = null
 
       await this.saveAllData()
       this.uiManager.renderCategories(this.categories, this.isEditMode)
-
       this.hideFoodDetails()
 
-      // Electron-specific: Force webContents to refocus after deletion
       if (typeof require !== 'undefined') {
-        // We're in Electron
         setTimeout(() => {
-          // Force the webContents to blur and refocus
           const currentWindow = window
           currentWindow.blur()
           setTimeout(() => {
@@ -545,6 +1661,7 @@ class DietHelper {
       alert('Failed to delete food. Please try again.')
     }
   }
+
   async saveFood() {
     const formData = this.uiManager.getFoodFormData()
 
@@ -556,40 +1673,66 @@ class DietHelper {
 
     this.uiManager.hideError('foodNameError')
 
-    // FIXED: Disable save button instead of overlay
     const saveBtn = document.getElementById('saveFoodBtn')
     const originalText = saveBtn.textContent
     saveBtn.disabled = true
     saveBtn.textContent = 'Saving...'
 
-    // Handle image
     let imageUrl = ''
     if (formData.image) {
       const imageResult = await this.dataManager.saveImage(formData.image)
-
       if (imageResult.success) {
         imageUrl = imageResult.path
       }
     }
 
-    // Re-enable button
     saveBtn.disabled = false
     saveBtn.textContent = originalText
 
-    this.createAndSaveFood(formData.name, imageUrl, formData.tags)
+    this.createAndSaveFood(
+      formData.name,
+      imageUrl,
+      formData.tags,
+      formData.notes,
+      formData.nutrition,
+      formData.specificData
+    )
   }
 
-  async createAndSaveFood(name, imageUrl, selectedTags) {
-    const newFood = new Food(Date.now(), name, imageUrl, false, selectedTags)
+  async createAndSaveFood(
+    name,
+    imageUrl,
+    selectedTags,
+    notes = '',
+    nutrition = null,
+    specificData = ''
+  ) {
+    const newFood = new Food(
+      Date.now(),
+      name,
+      imageUrl,
+      false,
+      selectedTags,
+      notes,
+      nutrition,
+      specificData
+    )
 
-    // Validate food data
     const validation = this.dataManager.validateFood(newFood)
     if (!validation.isValid) {
       alert('Invalid food data: ' + validation.errors.join(', '))
       return
     }
 
-    if (this.currentCategoryId) {
+    if (this.currentSubgroupId) {
+      const category = this.categories.find((c) => c.id === this.currentCategoryId)
+      if (category) {
+        const subgroup = category.subgroups.find((s) => s.id === this.currentSubgroupId)
+        if (subgroup) {
+          subgroup.foods.push(newFood)
+        }
+      }
+    } else if (this.currentCategoryId) {
       const category = this.categories.find((c) => c.id === this.currentCategoryId)
       if (category) {
         category.foods.push(newFood)
@@ -598,9 +1741,18 @@ class DietHelper {
       this.foods.push(newFood)
     }
 
+    this.currentSubgroupId = null
     await this.saveAllData()
     this.uiManager.renderCategories(this.categories, this.isEditMode)
     this.hideAddFoodForm()
+
+    // Re-enable sorting if in edit mode
+    if (this.isEditMode) {
+      this.disableFoodSorting()
+      setTimeout(() => {
+        this.enableCategorySorting()
+      }, 150)
+    }
   }
 
   async addTag() {
@@ -619,7 +1771,6 @@ class DietHelper {
       name: formData.name,
     }
 
-    // Validate tag data
     const validation = this.dataManager.validateTag(newTag)
     if (!validation.isValid) {
       alert('Invalid tag data: ' + validation.errors.join(', '))
@@ -630,26 +1781,25 @@ class DietHelper {
     this.uiManager.clearTagForm()
     await this.saveAllData()
     this.uiManager.renderExistingTags(this.tags)
+    this.renderFilterTags()
   }
 
   async deleteTag(tagId) {
-    const confirmed = this.modalManager.showConfirmation(
-      CONFIG.MESSAGES.CONFIRMATIONS.DELETE_TAG,
-      () => {
-        this.performDeleteTag(tagId)
-      }
-    )
+    this.modalManager.showConfirmation(CONFIG.MESSAGES.CONFIRMATIONS.DELETE_TAG, () => {
+      this.performDeleteTag(tagId)
+    })
   }
 
   async performDeleteTag(tagId) {
     this.tags = this.tags.filter((tag) => tag.id !== tagId)
-    // Remove tag from all foods
     this.foods.forEach((food) => {
       food.tags = food.tags.filter((id) => id !== tagId)
     })
     await this.saveAllData()
     this.uiManager.renderExistingTags(this.tags)
-    // Re-render foods in case any displayed foods had this tag
+    this.selectedFilterTags.delete(tagId)
+    this.renderFilterTags()
+    this.applyFilters()
     this.uiManager.renderFoods(this.foods, this.tags)
   }
 
@@ -672,34 +1822,201 @@ class DietHelper {
     }
 
     const newCategory = new Category(Date.now(), categoryName, [])
-
     this.categories.push(newCategory)
     this.saveAllData()
     this.uiManager.renderCategories(this.categories, this.isEditMode)
     this.hideAddCategoryForm()
   }
 
+  showAddSubgroupForm(categoryId) {
+    this.currentCategoryId = categoryId
+    document.getElementById('subgroupNameInput').value = ''
+    this.uiManager.hideError('subgroupNameError')
+    this.modalManager.showAddSubgroup()
+  }
+
+  hideAddSubgroupForm() {
+    this.modalManager.hideAddSubgroup()
+  }
+
+  saveSubgroup() {
+    const subgroupName = document.getElementById('subgroupNameInput').value.trim()
+
+    if (!subgroupName) {
+      this.uiManager.showError('subgroupNameError', 'Please enter subgroup name')
+      return
+    }
+
+    this.addSubgroup(this.currentCategoryId, subgroupName)
+    this.hideAddSubgroupForm()
+  }
+
+  addSubgroup(categoryId, name) {
+    const category = this.categories.find((c) => c.id === categoryId)
+    if (!category) return
+
+    const newSubgroup = {
+      id: Date.now(),
+      name: name,
+      foods: [],
+    }
+
+    if (!category.subgroups) {
+      category.subgroups = []
+    }
+
+    category.subgroups.push(newSubgroup)
+    this.saveAllData()
+    this.uiManager.renderCategories(this.categories, this.isEditMode)
+
+    // Re-enable sorting if in edit mode
+    if (this.isEditMode) {
+      // First disable existing sorting to clean up
+      this.disableFoodSorting()
+      // Then re-enable after a short delay to ensure DOM is updated
+      setTimeout(() => {
+        this.enableCategorySorting()
+      }, 150)
+    }
+  }
+  deleteSubgroup(categoryId, subgroupId) {
+    const category = this.categories.find((c) => c.id === categoryId)
+    if (!category) return
+
+    const subgroup = category.subgroups.find((s) => s.id === subgroupId)
+    if (!subgroup) return
+
+    const message =
+      subgroup.foods.length > 0
+        ? `Delete "${subgroup.name}" and move its ${subgroup.foods.length} foods to main category?`
+        : `Delete empty subgroup "${subgroup.name}"?`
+
+    this.modalManager.showConfirmation(message, () => {
+      if (subgroup.foods.length > 0) {
+        category.foods.push(...subgroup.foods)
+      }
+      category.subgroups = category.subgroups.filter((s) => s.id !== subgroupId)
+      this.saveAllData()
+      this.uiManager.renderCategories(this.categories, this.isEditMode)
+
+      // Re-enable sorting if in edit mode
+      if (this.isEditMode) {
+        // First disable existing sorting to clean up
+        this.disableFoodSorting()
+        // Then re-enable after a short delay to ensure DOM is updated
+        setTimeout(() => {
+          this.enableCategorySorting()
+        }, 150)
+      }
+    })
+  }
+
+  startRenameSubgroup(categoryId, subgroupId) {
+    const category = this.categories.find((c) => c.id === categoryId)
+    if (!category) return
+
+    const subgroup = category.subgroups.find((s) => s.id === subgroupId)
+    if (!subgroup) return
+
+    const nameSpan = document.getElementById(`subgroupName-${subgroupId}`)
+    if (!nameSpan) return
+
+    const originalName = subgroup.name
+
+    const input = document.createElement('input')
+    input.type = 'text'
+    input.value = subgroup.name
+    input.style.cssText = 'font-weight: bold; padding: 2px 5px; font-size: 14px;'
+
+    nameSpan.parentNode.replaceChild(input, nameSpan)
+    input.focus()
+    input.select()
+
+    const saveRename = () => {
+      const newName = input.value.trim()
+      if (newName && newName !== originalName) {
+        subgroup.name = newName
+        this.saveAllData()
+      }
+      this.uiManager.renderCategories(this.categories, this.isEditMode)
+
+      // Re-enable sorting if in edit mode
+      if (this.isEditMode) {
+        this.disableFoodSorting()
+        setTimeout(() => {
+          this.enableCategorySorting()
+        }, 150)
+      }
+    }
+
+    input.addEventListener('blur', saveRename)
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        saveRename()
+      } else if (e.key === 'Escape') {
+        this.uiManager.renderCategories(this.categories, this.isEditMode)
+      }
+    })
+  }
+
+  showSubgroupFoodDetails(categoryId, subgroupId, foodId) {
+    const category = this.categories.find((c) => c.id === categoryId)
+    if (!category) return
+
+    const subgroup = category.subgroups.find((s) => s.id === subgroupId)
+    if (!subgroup) return
+
+    const food = subgroup.foods.find((f) => f.id === foodId)
+    if (!food) return
+
+    this.currentFoodId = foodId
+    this.currentCategoryId = categoryId
+    this.currentSubgroupId = subgroupId
+
+    this.uiManager.showFoodDetails(food, this.tags)
+    this.modalManager.showFoodDetails()
+  }
+
+  showAddFoodToSubgroup(categoryId, subgroupId) {
+    this.modalManager.closeActiveModal()
+    this.currentCategoryId = categoryId
+    this.currentSubgroupId = subgroupId
+    this.uiManager.renderTagsForSelection(this.tags)
+    this.modalManager.showAddFood()
+  }
+
   toggleEditMode() {
     this.isEditMode = !this.isEditMode
 
-    // Update button text
     const editBtn = document.getElementById('editModeBtn')
+    const bulkSelectBtn = document.getElementById('bulkSelectBtn')
+
     editBtn.textContent = this.isEditMode ? 'Done' : 'Edit'
     editBtn.style.backgroundColor = this.isEditMode ? '#28a745' : ''
+    bulkSelectBtn.style.display = this.isEditMode ? 'inline-block' : 'none'
 
-    // First, re-render with edit mode state
-    this.uiManager.renderCategories(this.categories, this.isEditMode)
-
-    // Then, update container classes and sorting
     const container = document.getElementById('categoriesContainer')
+
     if (this.isEditMode) {
       container.classList.add('edit-mode')
-      // Enable sorting AFTER rendering
-      setTimeout(() => {
-        this.enableCategorySorting()
-      }, 150) // Slightly longer delay
+      if (this.isBulkSelectMode) {
+        this.toggleBulkSelectMode()
+      }
     } else {
       container.classList.remove('edit-mode')
+      if (this.isBulkSelectMode) {
+        this.toggleBulkSelectMode()
+      }
+    }
+
+    this.uiManager.renderCategories(this.categories, this.isEditMode)
+
+    if (this.isEditMode) {
+      setTimeout(() => {
+        this.enableCategorySorting()
+      }, 150)
+    } else {
       this.disableCategorySorting()
     }
   }
@@ -707,15 +2024,14 @@ class DietHelper {
   enableCategorySorting() {
     const container = document.getElementById('categoriesContainer')
 
-    // Enable category sorting with better scroll config
     this.categorySortable = Sortable.create(container, {
       animation: 150,
       handle: '.category-header',
       draggable: '.category-container',
       scroll: true,
-      forceAutoScrollFallback: true, // Force the auto-scroll
-      scrollSensitivity: 100, // Increased sensitivity
-      scrollSpeed: 20, // Faster scrolling
+      forceAutoScrollFallback: true,
+      scrollSensitivity: 100,
+      scrollSpeed: 20,
       onEnd: (evt) => {
         const movedCategory = this.categories.splice(evt.oldIndex, 1)[0]
         this.categories.splice(evt.newIndex, 0, movedCategory)
@@ -723,37 +2039,287 @@ class DietHelper {
       },
     })
 
-    // Enable food sorting within each category
+    // Enable subgroup sorting between categories
+    const sharedSubgroupGroup = 'shared-subgroups'
+
+    document.querySelectorAll('.category-container').forEach((categoryDiv) => {
+      const categoryNameEl = categoryDiv.querySelector('[id^="categoryName-"]')
+      if (!categoryNameEl) return
+
+      const categoryId = parseInt(categoryNameEl.id.split('-')[1])
+      const category = this.categories.find((c) => c.id === categoryId)
+      if (!category) return
+
+      // Find or create subgroups container
+      let subgroupsGrid = null
+
+      // Look for existing subgroup containers
+      const subgroupContainers = categoryDiv.querySelectorAll('.subgroup-container')
+      if (subgroupContainers.length > 0) {
+        subgroupsGrid = subgroupContainers[0].parentElement
+      }
+
+      // If no subgroups container exists, create one for receiving
+      if (!subgroupsGrid) {
+        const foodsDiv = document.getElementById(`foods-${categoryId}`)
+        if (foodsDiv) {
+          subgroupsGrid = document.createElement('div')
+          subgroupsGrid.style.cssText =
+            'display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; padding: 0 10px; min-height: 100px; border: 2px dashed transparent;'
+          subgroupsGrid.className = 'subgroups-drop-zone'
+          categoryDiv.insertBefore(subgroupsGrid, foodsDiv)
+        }
+      }
+
+      if (subgroupsGrid) {
+        this.subgroupSortables = this.subgroupSortables || {}
+        this.subgroupSortables[`category-${categoryId}`] = Sortable.create(subgroupsGrid, {
+          group: sharedSubgroupGroup,
+          animation: 150,
+          draggable: '.subgroup-container',
+          handle: '.subgroup-header',
+          scroll: true,
+          ghostClass: 'sortable-ghost',
+          chosenClass: 'sortable-chosen',
+          onEnd: (evt) => {
+            if (evt.from === evt.to && evt.oldIndex === evt.newIndex) return
+
+            const fromCategoryDiv = evt.from.closest('.category-container')
+            const toCategoryDiv = evt.to.closest('.category-container')
+
+            const fromCategoryId = parseInt(
+              fromCategoryDiv.querySelector('[id^="categoryName-"]').id.split('-')[1]
+            )
+            const toCategoryId = parseInt(
+              toCategoryDiv.querySelector('[id^="categoryName-"]').id.split('-')[1]
+            )
+
+            const fromCategory = this.categories.find((c) => c.id === fromCategoryId)
+            const toCategory = this.categories.find((c) => c.id === toCategoryId)
+
+            if (fromCategory && toCategory) {
+              const movedElement = evt.item
+              const subgroupId = parseInt(movedElement.id.split('-')[1])
+
+              // Find the subgroup in source category
+              let movedSubgroup = null
+              let subgroupIndex = -1
+
+              if (fromCategory.subgroups) {
+                subgroupIndex = fromCategory.subgroups.findIndex((s) => s.id === subgroupId)
+                if (subgroupIndex !== -1) {
+                  movedSubgroup = fromCategory.subgroups.splice(subgroupIndex, 1)[0]
+                }
+              }
+
+              if (movedSubgroup) {
+                // Initialize subgroups array if needed
+                if (!toCategory.subgroups) {
+                  toCategory.subgroups = []
+                }
+
+                // Add to new category
+                toCategory.subgroups.splice(evt.newIndex, 0, movedSubgroup)
+
+                this.saveAllData()
+                this.uiManager.renderCategories(this.categories, this.isEditMode)
+
+                // Re-enable sorting after render
+                setTimeout(() => {
+                  this.enableCategorySorting()
+                }, 150)
+              }
+            }
+          },
+        })
+      }
+    })
+
     this.enableFoodSorting()
   }
 
   disableCategorySorting() {
-    // Disable category sorting
     if (this.categorySortable) {
       this.categorySortable.destroy()
       this.categorySortable = null
     }
-
-    // Disable food sorting
+    // Disable subgroup sorting
+    if (this.subgroupSortables) {
+      Object.values(this.subgroupSortables).forEach((sortable) => {
+        if (sortable) {
+          sortable.destroy()
+        }
+      })
+      this.subgroupSortables = {}
+    }
     this.disableFoodSorting()
   }
 
   enableFoodSorting() {
+    const sharedGroup = 'shared-foods'
+
+    const handleDragStart = (evt) => {
+      document.querySelectorAll('.empty-category-message').forEach((msg) => {
+        msg.style.display = 'none'
+      })
+      document.querySelectorAll('.empty-subgroup-message').forEach((msg) => {
+        msg.style.display = 'none'
+      })
+    }
+
+    const handleDragEnd = (evt) => {
+      this.categories.forEach((category) => {
+        const foodsContainer = document.getElementById(`foods-${category.id}`)
+        if (foodsContainer) {
+          const foodItems = foodsContainer.querySelectorAll('.food-item')
+          const emptyMsg = foodsContainer.querySelector('.empty-category-message')
+
+          if (foodItems.length === 0) {
+            if (!emptyMsg) {
+              const msg = document.createElement('p')
+              msg.className = 'empty-category-message'
+              msg.style.cssText =
+                'color: #666; margin: 40px 0; position: absolute; width: 100%; text-align: center; pointer-events: none;'
+              msg.textContent = 'No foods in this category'
+              foodsContainer.appendChild(msg)
+            } else {
+              emptyMsg.style.display = 'block'
+            }
+          }
+        }
+
+        if (category.subgroups) {
+          category.subgroups.forEach((subgroup) => {
+            const subgroupContainer = document.getElementById(`subgroup-foods-${subgroup.id}`)
+            if (subgroupContainer) {
+              const foodItems = subgroupContainer.querySelectorAll('.food-item')
+              const emptyMsg = subgroupContainer.querySelector('.empty-subgroup-message')
+
+              if (foodItems.length === 0) {
+                if (!emptyMsg) {
+                  const msg = document.createElement('p')
+                  msg.className = 'empty-subgroup-message'
+                  msg.style.cssText =
+                    'color: #999; font-size: 12px; margin: 10px; position: absolute; width: 100%; text-align: center; pointer-events: none;'
+                  msg.textContent = 'No foods in this subgroup'
+                  subgroupContainer.appendChild(msg)
+                } else {
+                  emptyMsg.style.display = 'block'
+                }
+              }
+            }
+          })
+        }
+      })
+    }
+
+    const handleFoodMove = (evt) => {
+      if (evt.from === evt.to && evt.oldIndex === evt.newIndex) return
+
+      const fromId = evt.from.id
+      const toId = evt.to.id
+
+      const movedElement = evt.item
+      const foodImage = movedElement.querySelector('.food-image')
+      if (!foodImage) return
+
+      const foodId = parseInt(foodImage.dataset.foodId)
+
+      let movedFood = null
+      const fromParts = fromId.split('-')
+
+      if (fromParts[0] === 'foods') {
+        const fromCategoryId = parseInt(fromParts[1])
+        const sourceCategory = this.categories.find((c) => c.id === fromCategoryId)
+        if (sourceCategory) {
+          const foodIndex = sourceCategory.foods.findIndex((f) => f.id === foodId)
+          if (foodIndex !== -1) {
+            movedFood = sourceCategory.foods.splice(foodIndex, 1)[0]
+          }
+        }
+      } else if (fromParts[0] === 'subgroup' && fromParts[1] === 'foods') {
+        const subgroupId = parseInt(fromParts[2])
+        this.categories.forEach((category) => {
+          if (category.subgroups) {
+            const subgroup = category.subgroups.find((s) => s.id === subgroupId)
+            if (subgroup) {
+              const foodIndex = subgroup.foods.findIndex((f) => f.id === foodId)
+              if (foodIndex !== -1) {
+                movedFood = subgroup.foods.splice(foodIndex, 1)[0]
+              }
+            }
+          }
+        })
+      }
+
+      if (movedFood) {
+        const toParts = toId.split('-')
+
+        if (toParts[0] === 'foods') {
+          const toCategoryId = parseInt(toParts[1])
+          const destCategory = this.categories.find((c) => c.id === toCategoryId)
+          if (destCategory) {
+            destCategory.foods.splice(evt.newIndex, 0, movedFood)
+          }
+        } else if (toParts[0] === 'subgroup' && toParts[1] === 'foods') {
+          const subgroupId = parseInt(toParts[2])
+          this.categories.forEach((category) => {
+            if (category.subgroups) {
+              const subgroup = category.subgroups.find((s) => s.id === subgroupId)
+              if (subgroup) {
+                subgroup.foods.splice(evt.newIndex, 0, movedFood)
+              }
+            }
+          })
+        }
+
+        this.saveAllData()
+      }
+    }
+
     this.categories.forEach((category) => {
       const foodsContainer = document.getElementById(`foods-${category.id}`)
       if (foodsContainer) {
-        this.foodSortables[category.id] = Sortable.create(foodsContainer, {
-          group: `foods-${category.id}`,
+        this.foodSortables[`category-${category.id}`] = Sortable.create(foodsContainer, {
+          group: sharedGroup,
           animation: 150,
           draggable: '.food-item',
-          scroll: true, // Enable auto-scrolling
+          scroll: true,
           scrollSensitivity: 30,
           scrollSpeed: 10,
+          ghostClass: 'sortable-ghost',
+          chosenClass: 'sortable-chosen',
+          onStart: handleDragStart,
           onEnd: (evt) => {
-            const movedFood = category.foods.splice(evt.oldIndex, 1)[0]
-            category.foods.splice(evt.newIndex, 0, movedFood)
-            this.saveAllData()
+            handleFoodMove(evt)
+            handleDragEnd(evt)
           },
+        })
+      }
+
+      if (category.subgroups) {
+        category.subgroups.forEach((subgroup) => {
+          const subgroupFoodsContainer = document.getElementById(`subgroup-foods-${subgroup.id}`)
+          if (subgroupFoodsContainer) {
+            this.foodSortables[`subgroup-${subgroup.id}`] = Sortable.create(
+              subgroupFoodsContainer,
+              {
+                group: sharedGroup,
+                animation: 150,
+                draggable: '.food-item',
+                scroll: true,
+                scrollSensitivity: 30,
+                scrollSpeed: 10,
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                onStart: handleDragStart,
+                onEnd: (evt) => {
+                  handleFoodMove(evt)
+                  handleDragEnd(evt)
+                },
+              }
+            )
+          }
         })
       }
     })
@@ -775,31 +2341,34 @@ class DietHelper {
     const nameSpan = document.getElementById(`categoryName-${categoryId}`)
     if (!nameSpan) return
 
-    // Store original name in case of cancel
     const originalName = category.name
 
-    // Create input element
     const input = document.createElement('input')
     input.type = 'text'
     input.value = category.name
     input.style.cssText = 'font-weight: bold; padding: 2px 5px; margin-right: 10px;'
 
-    // Replace span with input
     nameSpan.parentNode.replaceChild(input, nameSpan)
     input.focus()
     input.select()
 
-    // Handle save on Enter or blur
     const saveRename = () => {
       const newName = input.value.trim()
       if (newName && newName !== originalName) {
-        category.name = newName
+        subgroup.name = newName
         this.saveAllData()
       }
       this.uiManager.renderCategories(this.categories, this.isEditMode)
+
+      // Re-enable sorting if in edit mode
+      if (this.isEditMode) {
+        this.disableFoodSorting()
+        setTimeout(() => {
+          this.enableCategorySorting()
+        }, 150)
+      }
     }
 
-    // Handle cancel on Escape
     const cancelRename = (e) => {
       if (e.key === 'Escape') {
         this.uiManager.renderCategories(this.categories, this.isEditMode)
@@ -817,11 +2386,6 @@ class DietHelper {
     })
   }
 
-  renameCategory(categoryId) {
-    // This is now just an alias for startRenameCategory
-    this.startRenameCategory(categoryId)
-  }
-
   deleteCategory(categoryId) {
     const category = this.categories.find((c) => c.id === categoryId)
     if (!category) return
@@ -836,6 +2400,14 @@ class DietHelper {
       this.categories = this.categories.filter((c) => c.id !== categoryId)
       this.saveAllData()
       this.uiManager.renderCategories(this.categories, this.isEditMode)
+
+      // Re-enable sorting if in edit mode
+      if (this.isEditMode) {
+        this.disableFoodSorting()
+        setTimeout(() => {
+          this.enableCategorySorting()
+        }, 150)
+      }
     })
   }
 
@@ -848,6 +2420,7 @@ class DietHelper {
 
     this.currentFoodId = foodId
     this.currentCategoryId = categoryId
+    this.currentSubgroupId = null // Make sure this is null for direct foods
 
     this.uiManager.showFoodDetails(food, this.tags)
     this.modalManager.showFoodDetails()
@@ -866,787 +2439,491 @@ class DietHelper {
       alert(CONFIG.MESSAGES.ERRORS.SAVE_FAILED)
     }
   }
+
+  initializeFilterPanel() {
+    const filterHeader = document.getElementById('filterHeader')
+    filterHeader.addEventListener('click', () => this.toggleFilterPanel())
+
+    const clearBtn = document.getElementById('clearFiltersBtn')
+    clearBtn.addEventListener('click', () => this.clearAllFilters())
+
+    this.renderFilterTags()
+
+    const filterModeToggle = document.getElementById('filterModeToggle')
+    filterModeToggle.addEventListener('change', () => {
+      this.applyFilters()
+    })
+  }
+
+  toggleFilterPanel() {
+    this.isFilterPanelOpen = !this.isFilterPanelOpen
+
+    const filterContent = document.getElementById('filterContent')
+    const filterToggle = document.getElementById('filterToggle')
+
+    if (this.isFilterPanelOpen) {
+      filterContent.style.height = 'auto'
+      const height = filterContent.scrollHeight
+      filterContent.style.height = '0'
+      filterContent.offsetHeight
+      filterContent.style.height = height + 'px'
+      filterContent.classList.add('open')
+      filterToggle.classList.add('open')
+    } else {
+      filterContent.style.height = filterContent.scrollHeight + 'px'
+      filterContent.offsetHeight
+      filterContent.style.height = '0'
+      filterContent.classList.remove('open')
+      filterToggle.classList.remove('open')
+    }
+  }
+
+  renderFilterTags() {
+    const filterTagsContainer = document.getElementById('filterTags')
+    filterTagsContainer.innerHTML = ''
+
+    this.tags.forEach((tag) => {
+      const tagDiv = document.createElement('div')
+      tagDiv.className = 'filter-tag-item'
+      if (this.selectedFilterTags.has(tag.id)) {
+        tagDiv.classList.add('selected')
+      }
+
+      tagDiv.textContent = tag.name
+      tagDiv.dataset.tagId = tag.id
+
+      tagDiv.addEventListener('click', () => {
+        this.toggleFilterTag(tag.id)
+      })
+
+      filterTagsContainer.appendChild(tagDiv)
+    })
+
+    this.updateFilterCount()
+  }
+
+  toggleFilterTag(tagId) {
+    if (this.selectedFilterTags.has(tagId)) {
+      this.selectedFilterTags.delete(tagId)
+    } else {
+      this.selectedFilterTags.add(tagId)
+    }
+
+    this.renderFilterTags()
+    this.applyFilters()
+  }
+
+  clearAllFilters() {
+    this.selectedFilterTags.clear()
+    this.renderFilterTags()
+    this.applyFilters()
+  }
+
+  updateFilterCount() {
+    const filterCount = document.getElementById('filterCount')
+    const count = this.selectedFilterTags.size
+
+    if (count > 0) {
+      filterCount.textContent = `(${count})`
+      filterCount.classList.add('active')
+    } else {
+      filterCount.classList.remove('active')
+    }
+  }
+
+  applyFilters() {
+    const allFoodItems = document.querySelectorAll('.food-item')
+    const useOrLogic = document.getElementById('filterModeToggle').checked
+
+    if (this.selectedFilterTags.size === 0) {
+      allFoodItems.forEach((item) => {
+        item.classList.remove('filtered-out')
+      })
+      return
+    }
+
+    allFoodItems.forEach((foodItem) => {
+      const foodImage = foodItem.querySelector('.food-image')
+      if (!foodImage) return
+
+      const foodId = parseInt(foodImage.dataset.foodId)
+      const categoryId = foodImage.dataset.categoryId
+        ? parseInt(foodImage.dataset.categoryId)
+        : null
+      const subgroupId = foodImage.dataset.subgroupId
+        ? parseInt(foodImage.dataset.subgroupId)
+        : null
+
+      let food = null
+
+      if (subgroupId && categoryId) {
+        // Food is in a subgroup
+        const category = this.categories.find((c) => c.id === categoryId)
+        if (category && category.subgroups) {
+          const subgroup = category.subgroups.find((s) => s.id === subgroupId)
+          food = subgroup?.foods.find((f) => f.id === foodId)
+        }
+      } else if (categoryId) {
+        // Food is in direct category
+        const category = this.categories.find((c) => c.id === categoryId)
+        food = category?.foods.find((f) => f.id === foodId)
+      } else {
+        // Food is at root level
+        food = this.foods.find((f) => f.id === foodId)
+      }
+
+      if (food) {
+        let shouldShow = false
+
+        if (useOrLogic) {
+          shouldShow = food.tags.some((tagId) => this.selectedFilterTags.has(tagId))
+        } else {
+          shouldShow = Array.from(this.selectedFilterTags).every((tagId) =>
+            food.tags.includes(tagId)
+          )
+        }
+
+        if (shouldShow) {
+          foodItem.classList.remove('filtered-out')
+        } else {
+          foodItem.classList.add('filtered-out')
+        }
+      }
+    })
+  }
+  toggleBulkSelectMode() {
+    this.isBulkSelectMode = !this.isBulkSelectMode
+    const bulkSelectBtn = document.getElementById('bulkSelectBtn')
+    const container = document.getElementById('categoriesContainer')
+
+    if (this.isBulkSelectMode) {
+      bulkSelectBtn.textContent = 'Cancel Select'
+      bulkSelectBtn.style.backgroundColor = '#dc3545'
+      container.classList.add('bulk-select-mode')
+      this.selectedFoods.clear()
+      this.showBulkActionsBar()
+      this.disableFoodSorting()
+    } else {
+      bulkSelectBtn.textContent = 'Select'
+      bulkSelectBtn.style.backgroundColor = ''
+      container.classList.remove('bulk-select-mode')
+      this.selectedFoods.clear()
+      this.hideBulkActionsBar()
+      if (this.isEditMode) {
+        this.enableFoodSorting()
+      }
+      document.querySelectorAll('.food-item.selected').forEach((item) => {
+        item.classList.remove('selected')
+      })
+    }
+  }
+
+  showBulkActionsBar() {
+    this.hideBulkActionsBar()
+
+    const bar = document.createElement('div')
+    bar.className = 'bulk-actions-bar'
+    bar.innerHTML = `
+    <span class="selected-count">0 selected</span>
+    <button onclick="dietHelper.selectAllVisible()">Select All</button>
+    <button onclick="dietHelper.unselectAll()">Unselect All</button>
+    <button onclick="dietHelper.bulkDelete()" style="background: #dc3545; border-color: #dc3545;">Delete Selected</button>
+  `
+    document.body.appendChild(bar)
+
+    this.updateBulkActionsBar()
+  }
+
+  hideBulkActionsBar() {
+    const bar = document.querySelector('.bulk-actions-bar')
+    if (bar) bar.remove()
+  }
+
+  updateBulkActionsBar() {
+    const bar = document.querySelector('.bulk-actions-bar')
+    if (bar) {
+      const count = this.selectedFoods.size
+      bar.querySelector('.selected-count').textContent = `${count} selected`
+    }
+  }
+
+  toggleFoodSelection(categoryId, foodId, subgroupId = null) {
+    const key = subgroupId ? `${categoryId}-${subgroupId}-${foodId}` : `${categoryId}-${foodId}`
+
+    const foodElement = subgroupId
+      ? document.querySelector(
+          `.food-image[data-category-id="${categoryId}"][data-subgroup-id="${subgroupId}"][data-food-id="${foodId}"]`
+        )?.parentElement
+      : document.querySelector(
+          `.food-image[data-category-id="${categoryId}"][data-food-id="${foodId}"]`
+        )?.parentElement
+
+    if (this.selectedFoods.has(key)) {
+      this.selectedFoods.delete(key)
+      foodElement?.classList.remove('selected')
+    } else {
+      this.selectedFoods.add(key)
+      foodElement?.classList.add('selected')
+    }
+
+    this.updateBulkActionsBar()
+  }
+
+  selectAllVisible() {
+    const allFoodItems = document.querySelectorAll('.food-item:not(.filtered-out)')
+
+    allFoodItems.forEach((item) => {
+      const img = item.querySelector('.food-image')
+      if (img) {
+        const categoryId = img.dataset.categoryId
+        const foodId = img.dataset.foodId
+        const subgroupId = img.dataset.subgroupId
+
+        if (categoryId && foodId) {
+          const key = subgroupId
+            ? `${categoryId}-${subgroupId}-${foodId}`
+            : `${categoryId}-${foodId}`
+          this.selectedFoods.add(key)
+          item.classList.add('selected')
+        }
+      }
+    })
+
+    this.updateBulkActionsBar()
+  }
+
+  unselectAll() {
+    this.selectedFoods.clear()
+    document.querySelectorAll('.food-item.selected').forEach((item) => {
+      item.classList.remove('selected')
+    })
+    this.updateBulkActionsBar()
+  }
+
+  bulkDelete() {
+    const count = this.selectedFoods.size
+    if (count === 0) return
+
+    const message = `Are you sure you want to delete ${count} selected food${count > 1 ? 's' : ''}?`
+
+    this.modalManager.showConfirmation(message, async () => {
+      for (const key of this.selectedFoods) {
+        const parts = key.split('-')
+
+        if (parts.length === 3) {
+          // Format: categoryId-subgroupId-foodId
+          const [categoryId, subgroupId, foodId] = parts.map(Number)
+          const category = this.categories.find((c) => c.id === categoryId)
+
+          if (category && category.subgroups) {
+            const subgroup = category.subgroups.find((s) => s.id === subgroupId)
+            if (subgroup) {
+              const food = subgroup.foods.find((f) => f.id === foodId)
+              if (food && food.imageUrl && !food.imageUrl.startsWith('data:')) {
+                await this.dataManager.deleteImage(food.imageUrl)
+              }
+              subgroup.foods = subgroup.foods.filter((f) => f.id !== foodId)
+            }
+          }
+        } else if (parts.length === 2) {
+          // Format: categoryId-foodId (direct foods)
+          const [categoryId, foodId] = parts.map(Number)
+          const category = this.categories.find((c) => c.id === categoryId)
+
+          if (category) {
+            const food = category.foods.find((f) => f.id === foodId)
+            if (food && food.imageUrl && !food.imageUrl.startsWith('data:')) {
+              await this.dataManager.deleteImage(food.imageUrl)
+            }
+            category.foods = category.foods.filter((f) => f.id !== foodId)
+          }
+        }
+      }
+
+      await this.saveAllData()
+      this.uiManager.renderCategories(this.categories, this.isEditMode)
+      this.toggleBulkSelectMode()
+    })
+  }
+
+  editFood() {
+    if (!this.currentFoodId) return
+
+    let food = null
+    let categoryId = this.currentCategoryId
+    let subgroupId = this.currentSubgroupId
+
+    this.editingFoodId = this.currentFoodId
+    this.editingCategoryId = this.currentCategoryId
+    this.editingSubgroupId = this.currentSubgroupId
+
+    if (subgroupId && categoryId) {
+      // Food is in a subgroup
+      const category = this.categories.find((c) => c.id === categoryId)
+      if (category && category.subgroups) {
+        const subgroup = category.subgroups.find((s) => s.id === subgroupId)
+        food = subgroup?.foods.find((f) => f.id === this.currentFoodId)
+      }
+    } else if (categoryId) {
+      // Food is in direct category
+      const category = this.categories.find((c) => c.id === categoryId)
+      food = category?.foods.find((f) => f.id === this.currentFoodId)
+    } else {
+      // Food is in root level
+      food = this.foods.find((f) => f.id === this.currentFoodId)
+    }
+
+    if (!food) return
+
+    this.populateEditForm(food)
+    this.modalManager.showEditFood()
+  }
+
+  populateEditForm(food) {
+    document.getElementById('editFoodName').value = food.name || ''
+    document.getElementById('editFoodNotes').value = food.notes || ''
+    document.getElementById('editFoodSpecificData').value = food.specificData || ''
+
+    const previewDiv = document.getElementById('currentImagePreview')
+    if (food.imageUrl) {
+      previewDiv.innerHTML = `
+      <img src="${food.imageUrl}" style="width: 100px; height: 100px; object-fit: cover; border: 1px solid #ddd; border-radius: 4px;">
+      <p style="font-size: 12px; color: #666; margin: 5px 0;">Current image (upload new to replace)</p>
+    `
+    } else {
+      previewDiv.innerHTML = ''
+    }
+
+    if (food.nutrition) {
+      document.getElementById('editNutritionProtein').value =
+        food.nutrition.protein !== null && food.nutrition.protein !== undefined
+          ? food.nutrition.protein
+          : ''
+      document.getElementById('editNutritionFat').value =
+        food.nutrition.fat !== null && food.nutrition.fat !== undefined ? food.nutrition.fat : ''
+      document.getElementById('editNutritionCarbs').value =
+        food.nutrition.carbs !== null && food.nutrition.carbs !== undefined
+          ? food.nutrition.carbs
+          : ''
+      document.getElementById('editNutritionFiber').value =
+        food.nutrition.fiber !== null && food.nutrition.fiber !== undefined
+          ? food.nutrition.fiber
+          : ''
+      document.getElementById('editNutritionSugar').value =
+        food.nutrition.sugar !== null && food.nutrition.sugar !== undefined
+          ? food.nutrition.sugar
+          : ''
+      document.getElementById('editNutritionSodium').value =
+        food.nutrition.sodium !== null && food.nutrition.sodium !== undefined
+          ? food.nutrition.sodium
+          : ''
+    }
+
+    this.uiManager.renderTagsForEdit(this.tags, food.tags)
+  }
+
+  hideEditFoodForm() {
+    this.modalManager.hideEditFood()
+    document.getElementById('editFoodImage').value = ''
+    document.getElementById('currentImagePreview').innerHTML = ''
+    this.editingSubgroupId = null
+  }
+
+  async updateFood() {
+    const formData = this.uiManager.getEditFoodFormData()
+
+    if (!formData.name) {
+      this.uiManager.showError('editFoodNameError', 'Please enter food name')
+      this.uiManager.focusElement('editFoodName')
+      return
+    }
+
+    this.uiManager.hideError('editFoodNameError')
+
+    let food = null
+    let category = null
+    let subgroup = null
+
+    if (this.editingSubgroupId && this.editingCategoryId) {
+      // Food is in a subgroup
+      category = this.categories.find((c) => c.id === this.editingCategoryId)
+      if (category && category.subgroups) {
+        subgroup = category.subgroups.find((s) => s.id === this.editingSubgroupId)
+        food = subgroup?.foods.find((f) => f.id === this.editingFoodId)
+      }
+    } else if (this.editingCategoryId) {
+      // Food is in direct category
+      category = this.categories.find((c) => c.id === this.editingCategoryId)
+      food = category?.foods.find((f) => f.id === this.editingFoodId)
+    } else {
+      // Food is in root level
+      food = this.foods.find((f) => f.id === this.editingFoodId)
+    }
+
+    if (!food) {
+      return
+    }
+
+    const updateBtn = document.getElementById('updateFoodBtn')
+    const originalText = updateBtn.textContent
+    updateBtn.disabled = true
+    updateBtn.textContent = 'Updating...'
+
+    let imageUrl = food.imageUrl
+    if (formData.image) {
+      if (food.imageUrl && !food.imageUrl.startsWith('data:')) {
+        await this.dataManager.deleteImage(food.imageUrl)
+      }
+      const imageResult = await this.dataManager.saveImage(formData.image)
+      if (imageResult.success) {
+        imageUrl = imageResult.path
+      }
+    }
+
+    food.name = formData.name
+    food.imageUrl = imageUrl
+    food.notes = formData.notes
+    food.nutrition = formData.nutrition
+    food.specificData = formData.specificData
+    food.tags = formData.tags
+
+    updateBtn.disabled = false
+    updateBtn.textContent = originalText
+
+    await this.saveAllData()
+    this.uiManager.renderCategories(this.categories, this.isEditMode)
+
+    let updatedFood = null
+    if (this.editingSubgroupId && this.editingCategoryId) {
+      const category = this.categories.find((c) => c.id === this.editingCategoryId)
+      if (category && category.subgroups) {
+        const subgroup = category.subgroups.find((s) => s.id === this.editingSubgroupId)
+        updatedFood = subgroup?.foods.find((f) => f.id === this.editingFoodId)
+      }
+    } else if (this.editingCategoryId) {
+      const category = this.categories.find((c) => c.id === this.editingCategoryId)
+      updatedFood = category?.foods.find((f) => f.id === this.editingFoodId)
+    } else {
+      updatedFood = this.foods.find((f) => f.id === this.editingFoodId)
+    }
+
+    this.hideEditFoodForm()
+
+    if (updatedFood) {
+      this.uiManager.showFoodDetails(updatedFood, this.tags)
+    }
+
+    this.editingFoodId = null
+    this.editingCategoryId = null
+    this.editingSubgroupId = null
+  }
 }
 
-// Initialize the app
 const dietHelper = new DietHelper()
-
-// Make available for HTML onclick handlers (only this instance)
 window.dietHelper = dietHelper
 
-models js:
-export class Food {
-  constructor(id, name, imageUrl, selected, tags) {
-    this.id = id
-    this.name = name
-    this.imageUrl = imageUrl
-    this.selected = selected
-    this.tags = tags
-  }
-}
-
-export class Category {
-  constructor(id, name, foods) {
-    this.id = id
-    this.name = name
-    this.foods = foods || []
-  }
-}
-
-config js:
-const CONFIG = {
-  // File paths and directories
-  FILES: {
-    DATA_FILE: 'data.json',
-    BACKUP_DIR: 'backups',
-    IMAGES_DIR: 'images',
-    LOGS_DIR: 'logs',
-  },
-
-  // Storage keys for browser fallback
-  STORAGE: {
-    MAIN_DATA: 'dietHelperData',
-    BACKUP_PREFIX: 'dietHelperBackup_',
-    SETTINGS: 'dietHelperSettings',
-  },
-
-  // UI Configuration
-  UI: {
-    FOOD_IMAGE_SIZE: {
-      GRID: { width: 75, height: 75 },
-      MODAL: { width: 200, height: 200 },
-    },
-    MODAL_ANIMATION_DURATION: 200,
-    GRID_COLUMNS: 'auto-fit',
-    MIN_CARD_WIDTH: 120,
-  },
-
-  // Validation rules
-  VALIDATION: {
-    FOOD_NAME: {
-      MIN_LENGTH: 1,
-      MAX_LENGTH: 100,
-      REQUIRED: true,
-    },
-    TAG_NAME: {
-      MIN_LENGTH: 1,
-      MAX_LENGTH: 50,
-      REQUIRED: true,
-    },
-    MAX_TAGS_PER_FOOD: 10,
-    MAX_TOTAL_TAGS: 100,
-    MAX_TOTAL_FOODS: 1000,
-  },
-
-  // Image handling
-  IMAGES: {
-    SUPPORTED_FORMATS: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-    MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
-    QUALITY: 0.8,
-    THUMBNAIL_SIZE: { width: 100, height: 100 },
-  },
-
-  // Default data structure
-  DEFAULTS: {
-    EMPTY_DATA: {
-      foods: [],
-      tags: [],
-    },
-    NEW_FOOD: {
-      id: null,
-      name: '',
-      imageUrl: '',
-      selected: false,
-      tags: [],
-    },
-    NEW_TAG: {
-      id: null,
-      name: '',
-    },
-  },
-
-  // Error messages
-  MESSAGES: {
-    ERRORS: {
-      FOOD_NAME_REQUIRED: 'Please enter food name',
-      TAG_NAME_REQUIRED: 'Please enter tag name',
-      FOOD_NAME_TOO_LONG: 'Food name is too long (max 100 characters)',
-      TAG_NAME_TOO_LONG: 'Tag name is too long (max 50 characters)',
-      INVALID_IMAGE_FORMAT: 'Unsupported image format. Please use JPG, PNG, GIF, or WebP',
-      IMAGE_TOO_LARGE: 'Image file is too large (max 5MB)',
-      SAVE_FAILED: 'Failed to save data. Please try again.',
-      LOAD_FAILED: 'Failed to load data',
-      MAX_FOODS_REACHED: 'Maximum number of foods reached (1000)',
-      MAX_TAGS_REACHED: 'Maximum number of tags reached (100)',
-      MAX_TAGS_PER_FOOD: 'Maximum 10 tags per food item',
-      DELETE_FOOD_FAILED: 'Failed to delete food. Please try again.',
-    },
-    SUCCESS: {
-      FOOD_SAVED: 'Food saved successfully',
-      TAG_SAVED: 'Tag saved successfully',
-      DATA_LOADED: 'Data loaded successfully',
-      BACKUP_CREATED: 'Backup created successfully',
-      FOOD_DELETED: 'Food deleted successfully',
-    },
-    CONFIRMATIONS: {
-      DELETE_TAG: 'Are you sure you want to delete this tag? It will be removed from all foods.',
-      DELETE_FOOD: 'Are you sure you want to delete this food item? This action cannot be undone.',
-      CLEAR_ALL_DATA: 'Are you sure you want to clear all data? This cannot be undone.',
-      RESTORE_BACKUP: 'Are you sure you want to restore from backup? Current data will be lost.',
-    },
-  },
-
-  // Feature flags
-  FEATURES: {
-    ANIMATIONS_ENABLED: true,
-    BACKUP_ENABLED: true,
-    IMAGE_COMPRESSION: true,
-    KEYBOARD_SHORTCUTS: true,
-    DARK_MODE: false,
-    EXPORT_IMPORT: true,
-    STATISTICS: false,
-  },
-
-  // Keyboard shortcuts
-  SHORTCUTS: {
-    ADD_FOOD: 'Ctrl+N',
-    MANAGE_TAGS: 'Ctrl+T',
-    CLOSE_MODAL: 'Escape',
-    SAVE: 'Ctrl+S',
-    SEARCH: 'Ctrl+F',
-    DELETE: 'Delete',
-  },
-
-  // Development settings
-  DEBUG: {
-    ENABLED: false,
-    LOG_LEVEL: 'info', // 'debug', 'info', 'warn', 'error'
-    SHOW_PERFORMANCE: false,
-  },
-
-  // App metadata
-  APP: {
-    NAME: 'Diet Helper',
-    VERSION: '1.0.0',
-    AUTHOR: 'Your Name',
-    DESCRIPTION: 'A simple diet management application',
-  },
-
-  // Environment detection
-  ENV: {
-    IS_ELECTRON: typeof require !== 'undefined',
-    IS_DEVELOPMENT: false, // Will be set based on environment
-  },
-}
-
-// Utility functions for config
-const ConfigUtils = {
-  // Get nested config value safely
-  get(path, defaultValue = null) {
-    const keys = path.split('.')
-    let current = CONFIG
-
-    for (const key of keys) {
-      if (current && typeof current === 'object' && key in current) {
-        current = current[key]
-      } else {
-        return defaultValue
-      }
-    }
-
-    return current
-  },
-
-  // Set nested config value
-  set(path, value) {
-    const keys = path.split('.')
-    const lastKey = keys.pop()
-    let current = CONFIG
-
-    for (const key of keys) {
-      if (!(key in current)) {
-        current[key] = {}
-      }
-      current = current[key]
-    }
-
-    current[lastKey] = value
-  },
-
-  // Validate image file
-  validateImage(file) {
-    if (!file) return { valid: false, error: 'No file provided' }
-
-    const extension = file.name.split('.').pop().toLowerCase()
-    if (!CONFIG.IMAGES.SUPPORTED_FORMATS.includes(extension)) {
-      return {
-        valid: false,
-        error: CONFIG.MESSAGES.ERRORS.INVALID_IMAGE_FORMAT,
-      }
-    }
-
-    if (file.size > CONFIG.IMAGES.MAX_FILE_SIZE) {
-      return {
-        valid: false,
-        error: CONFIG.MESSAGES.ERRORS.IMAGE_TOO_LARGE,
-      }
-    }
-
-    return { valid: true }
-  },
-
-  // Validate food name
-  validateFoodName(name) {
-    if (!name || name.trim().length === 0) {
-      return {
-        valid: false,
-        error: CONFIG.MESSAGES.ERRORS.FOOD_NAME_REQUIRED,
-      }
-    }
-
-    if (name.length > CONFIG.VALIDATION.FOOD_NAME.MAX_LENGTH) {
-      return {
-        valid: false,
-        error: CONFIG.MESSAGES.ERRORS.FOOD_NAME_TOO_LONG,
-      }
-    }
-
-    return { valid: true }
-  },
-
-  // Validate tag name
-  validateTagName(name) {
-    if (!name || name.trim().length === 0) {
-      return {
-        valid: false,
-        error: CONFIG.MESSAGES.ERRORS.TAG_NAME_REQUIRED,
-      }
-    }
-
-    if (name.length > CONFIG.VALIDATION.TAG_NAME.MAX_LENGTH) {
-      return {
-        valid: false,
-        error: CONFIG.MESSAGES.ERRORS.TAG_NAME_TOO_LONG,
-      }
-    }
-
-    return { valid: true }
-  },
-
-  // Check if feature is enabled
-  isFeatureEnabled(feature) {
-    return CONFIG.FEATURES[feature] === true
-  },
-
-  // Get file path
-  getFilePath(fileKey) {
-    return CONFIG.FILES[fileKey] || ''
-  },
-
-  // Get storage key
-  getStorageKey(keyName) {
-    return CONFIG.STORAGE[keyName] || ''
-  },
-
-  // Debug logging
-  log(level, message, data = null) {
-    if (!CONFIG.DEBUG.ENABLED) return
-
-    const levels = ['debug', 'info', 'warn', 'error']
-    const currentLevelIndex = levels.indexOf(CONFIG.DEBUG.LOG_LEVEL)
-    const messageLevelIndex = levels.indexOf(level)
-
-    if (messageLevelIndex >= currentLevelIndex) {
-      const timestamp = new Date().toISOString()
-      const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`
-
-      console[level === 'debug' ? 'log' : level](logMessage, data || '')
-    }
-  },
-}
-
-// Set environment
-ConfigUtils.set('ENV.IS_DEVELOPMENT', window.location.hostname === 'localhost')
-
-// Export using ES6 modules
-export { CONFIG, ConfigUtils }
-
-
- modal js:
-
+ui.js:
 import { CONFIG } from './config.js'
-
-export class ModalManager {
-  constructor() {
-    // FIXED: Create individual overlays for each modal type for better isolation
-    this.modals = {
-      foodDetails: {
-        modal: document.getElementById('foodDetailsDropdown'),
-        overlay: this.createOverlay('foodDetailsOverlay'),
-      },
-      addFood: {
-        modal: document.getElementById('addFoodDropdown'),
-        overlay: this.createOverlay('addFoodOverlay'),
-      },
-      manageTags: {
-        modal: document.getElementById('manageTagsDropdown'),
-        overlay: this.createOverlay('manageTagsOverlay'),
-      },
-      addCategory: {
-        modal: document.getElementById('addCategoryDropdown'),
-        overlay: this.createOverlay('addCategoryOverlay'),
-      },
-      confirmation: {
-        modal: document.getElementById('confirmationDropdown'),
-        overlay: this.createOverlay('confirmationOverlay'),
-      },
-    }
-
-    this.activeModal = null
-    this.initializeEventListeners()
-    this.replaceSharedOverlay()
-  }
-
-  // FIXED: Create individual overlay for each modal
-  createOverlay(id) {
-    const overlay = document.createElement('div')
-    overlay.id = id
-    overlay.className = 'modal-overlay'
-    overlay.style.cssText = `
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-        `
-    document.body.appendChild(overlay)
-    return overlay
-  }
-
-  // FIXED: Replace the shared overlay system
-  // FIXED: Replace the shared overlay system
-  // FIXED: Replace the shared overlay system
-  replaceSharedOverlay() {
-    // Don't remove the overlay, just disable its functionality
-    const oldOverlay = document.getElementById('modalOverlay')
-    if (oldOverlay) {
-      oldOverlay.style.display = 'none !important'
-      oldOverlay.style.visibility = 'hidden'
-      // Remove any existing event listeners
-      oldOverlay.replaceWith(oldOverlay.cloneNode(true))
-    }
-  }
-
-  initializeEventListeners() {
-    // FIXED: Add individual click handlers for each overlay
-    Object.keys(this.modals).forEach((modalType) => {
-      const { overlay } = this.modals[modalType]
-      if (overlay) {
-        overlay.addEventListener('click', () => {
-          this.closeModal(modalType)
-        })
-      }
-    })
-
-    // Close modal on Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        this.closeActiveModal()
-      }
-    })
-
-    // Prevent modal content clicks from closing modal
-    Object.values(this.modals).forEach(({ modal }) => {
-      if (modal) {
-        modal.addEventListener('click', (e) => {
-          e.stopPropagation()
-        })
-      }
-    })
-  }
-
-  // FIXED: Generic method to show any modal
-  showModal(modalType) {
-    console.log(`[MODAL] showModal called for: ${modalType}`)
-    console.log(`[MODAL] Body tabIndex before: ${document.body.tabIndex}`)
-    console.log(
-      `[MODAL] Active element before: ${document.activeElement?.tagName} (${document.activeElement?.id})`
-    )
-
-    this.closeActiveModal() // Close any open modal first
-
-    const { modal, overlay } = this.modals[modalType]
-    if (!modal || !overlay) return
-
-    this.activeModal = modalType
-
-    // Reset modal dimensions to prevent size issues
-    modal.style.width = ''
-    modal.style.height = ''
-    modal.style.maxWidth = '90vw'
-    modal.style.maxHeight = '90vh'
-
-    overlay.style.display = 'block'
-    overlay.classList.add('active')
-    modal.classList.add('active')
-
-    // Prevent body scrolling when modal is open
-    document.body.style.overflow = 'hidden'
-
-    // Add animation if enabled
-    if (CONFIG.FEATURES.ANIMATIONS_ENABLED) {
-      this.animateIn(modalType)
-    }
-  }
-  // Show modal without closing others (for stacking)
-  showModalStacked(modalType) {
-    const { modal, overlay } = this.modals[modalType]
-    if (!modal || !overlay) return
-
-    // Store previous active modal to restore later
-    this._previousModal = this.activeModal
-    this.activeModal = modalType
-
-    // Reset modal dimensions
-    modal.style.width = ''
-    modal.style.height = ''
-    modal.style.maxWidth = '90vw'
-    modal.style.maxHeight = '90vh'
-
-    overlay.style.display = 'block'
-    overlay.classList.add('active')
-    modal.classList.add('active')
-
-    // Keep body overflow hidden
-    document.body.style.overflow = 'hidden'
-
-    // Add animation if enabled
-    if (CONFIG.FEATURES.ANIMATIONS_ENABLED) {
-      this.animateIn(modalType)
-    }
-  }
-
-  // FIXED: Generic method to hide any modal
-  hideModal(modalType) {
-    const { modal, overlay } = this.modals[modalType]
-    if (!modal || !overlay) return
-
-    const doHide = () => {
-      overlay.style.display = 'none'
-      overlay.classList.remove('active')
-      modal.classList.remove('active')
-
-      if (this.activeModal === modalType) {
-        this.activeModal = null
-      }
-
-      // ALWAYS reset body state when ANY modal closes
-      document.body.style.overflow = 'auto'
-      document.body.removeAttribute('tabIndex')
-
-      console.log('[MODAL] Body tabIndex after hide:', document.body.tabIndex)
-    }
-
-    if (CONFIG.FEATURES.ANIMATIONS_ENABLED) {
-      this.animateOut(modalType, doHide)
-    } else {
-      doHide()
-    }
-  }
-  // Hide stacked modal and restore previous
-  hideModalStacked(modalType) {
-    const { modal, overlay } = this.modals[modalType]
-    if (!modal || !overlay) return
-
-    const doHide = () => {
-      overlay.style.display = 'none'
-      overlay.classList.remove('active')
-      modal.classList.remove('active')
-
-      // Restore previous active modal
-      this.activeModal = this._previousModal || null
-      this._previousModal = null
-
-      // Only reset body if no other modals are active
-      if (!this.activeModal) {
-        document.body.style.overflow = 'auto'
-        document.body.removeAttribute('tabIndex')
-      }
-    }
-
-    if (CONFIG.FEATURES.ANIMATIONS_ENABLED) {
-      this.animateOut(modalType, doHide)
-    } else {
-      doHide()
-    }
-  }
-
-  // FIXED: Close specific modal
-  closeModal(modalType) {
-    this.hideModal(modalType)
-  }
-
-  // Show food details modal
-  showFoodDetails() {
-    this.showModal('foodDetails')
-  }
-
-  // Hide food details modal
-  hideFoodDetails() {
-    this.hideModal('foodDetails')
-  }
-
-  // Show add food modal
-  showAddFood() {
-    this.showModal('addFood')
-
-    // Simple focus
-    setTimeout(() => {
-      const nameInput = document.getElementById('foodName')
-      if (nameInput) nameInput.focus()
-    }, 100)
-  }
-  // Hide add food modal
-  hideAddFood() {
-    this.hideModal('addFood')
-  }
-
-  // Show manage tags modal
-  showManageTags() {
-    this.showModal('manageTags')
-
-    // Focus on tag input
-    setTimeout(() => {
-      const tagInput = document.getElementById('newTagName')
-      if (tagInput) tagInput.focus()
-    }, 100)
-  }
-
-  // Hide manage tags modal
-  hideManageTags() {
-    this.hideModal('manageTags')
-  }
-  // Show add category modal
-  showAddCategory() {
-    this.showModal('addCategory')
-
-    // Focus on input
-    setTimeout(() => {
-      const input = document.getElementById('categoryNameInput')
-      if (input) input.focus()
-    }, 100)
-  }
-
-  // Hide add category modal
-  hideAddCategory() {
-    this.hideModal('addCategory')
-  }
-
-  // Close currently active modal
-  closeActiveModal() {
-    if (this.activeModal) {
-      this.hideModal(this.activeModal)
-    }
-    // Force cleanup body tabIndex
-    document.body.removeAttribute('tabIndex')
-    document.body.removeAttribute('tabindex')
-  }
-
-  resetAllOverlays() {
-    // Force all overlays to hide
-    Object.values(this.modals).forEach(({ overlay }) => {
-      if (overlay) {
-        overlay.style.display = 'none'
-        overlay.classList.remove('active')
-      }
-    })
-
-    // Reset pointer events
-    document.body.style.pointerEvents = ''
-    document.body.style.overflow = ''
-  }
-
-  // Check if any modal is open
-  isModalOpen() {
-    return this.activeModal !== null
-  }
-
-  // Get currently active modal
-  getActiveModal() {
-    return this.activeModal
-  }
-
-  // Show confirmation dialog
-  showConfirmation(message, onConfirm, onCancel, title) {
-    // Set default values
-    onCancel = onCancel || null
-    title = title || 'Confirm Delete'
-
-    // Store callbacks
-    this._confirmCallback = onConfirm
-    this._cancelCallback = onCancel
-
-    // Set title and message
-    document.getElementById('confirmTitle').textContent = title
-    document.getElementById('confirmMessage').textContent = message
-
-    // Show modal
-    this.showModalStacked('confirmation')
-
-    // Set up one-time event listeners
-    const yesBtn = document.getElementById('confirmYesBtn')
-    const noBtn = document.getElementById('confirmNoBtn')
-
-    const handleYes = () => {
-      this.hideModalStacked('confirmation')
-      if (this._confirmCallback) {
-        this._confirmCallback()
-      }
-      cleanup()
-    }
-
-    const handleNo = () => {
-      this.hideModalStacked('confirmation')
-      if (this._cancelCallback) {
-        this._cancelCallback()
-      }
-      cleanup()
-    }
-
-    const cleanup = () => {
-      yesBtn.removeEventListener('click', handleYes)
-      noBtn.removeEventListener('click', handleNo)
-      this._confirmCallback = null
-      this._cancelCallback = null
-    }
-
-    yesBtn.addEventListener('click', handleYes)
-    noBtn.addEventListener('click', handleNo)
-  }
-
-  // Show loading state in modal
-  showLoading(modalType, message = 'Loading...') {
-    const { modal } = this.modals[modalType]
-    if (modal) {
-      const loadingDiv = document.createElement('div')
-      loadingDiv.id = `modalLoading_${modalType}`
-      loadingDiv.style.cssText = `
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(255, 255, 255, 0.9);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 9999;
-            `
-      loadingDiv.innerHTML = `<p style="color: #666;">${message}</p>`
-      modal.style.position = 'relative'
-      modal.appendChild(loadingDiv)
-    }
-  }
-
-  // Hide loading state
-  hideLoading(modalType = null) {
-    if (modalType) {
-      const loadingDiv = document.getElementById(`modalLoading_${modalType}`)
-      if (loadingDiv) {
-        loadingDiv.remove()
-      }
-    } else {
-      // Remove all loading divs
-      Object.keys(this.modals).forEach((type) => {
-        const loadingDiv = document.getElementById(`modalLoading_${type}`)
-        if (loadingDiv) {
-          loadingDiv.remove()
-        }
-      })
-    }
-  }
-
-  // Animate modal entrance
-  animateIn(modalType) {
-    const { modal } = this.modals[modalType]
-    if (modal) {
-      modal.style.transform = 'translate(-50%, -60%) scale(0.9)'
-      modal.style.opacity = '0'
-
-      // Trigger animation
-      requestAnimationFrame(() => {
-        modal.style.transition = `all ${CONFIG.UI.MODAL_ANIMATION_DURATION}ms ease-out`
-        modal.style.transform = 'translate(-50%, -50%) scale(1)'
-        modal.style.opacity = '1'
-      })
-    }
-  }
-
-  // Animate modal exit
-  animateOut(modalType, callback = null) {
-    const { modal } = this.modals[modalType]
-    if (modal) {
-      modal.style.transition = `all ${CONFIG.UI.MODAL_ANIMATION_DURATION * 0.75}ms ease-in`
-      modal.style.transform = 'translate(-50%, -60%) scale(0.9)'
-      modal.style.opacity = '0'
-
-      setTimeout(() => {
-        modal.style.transition = ''
-        modal.style.transform = ''
-        modal.style.opacity = ''
-        if (callback) callback()
-      }, CONFIG.UI.MODAL_ANIMATION_DURATION * 0.75)
-    } else if (callback) {
-      callback()
-    }
-  }
-
-  // Enhanced show methods with animation (keeping for backward compatibility)
-  showFoodDetailsAnimated() {
-    this.showFoodDetails()
-  }
-
-  showAddFoodAnimated() {
-    this.showAddFood()
-  }
-
-  showManageTagsAnimated() {
-    this.showManageTags()
-  }
-
-  // Enhanced hide methods with animation (keeping for backward compatibility)
-  hideFoodDetailsAnimated() {
-    this.hideFoodDetails()
-  }
-
-  hideAddFoodAnimated() {
-    this.hideAddFood()
-  }
-
-  hideManageTagsAnimated() {
-    this.hideManageTags()
-  }
-
-  // FIXED: Cleanup method for proper resource management
-  destroy() {
-    // Remove created overlays
-    Object.values(this.modals).forEach(({ overlay }) => {
-      if (overlay && overlay.parentNode) {
-        overlay.parentNode.removeChild(overlay)
-      }
-    })
-
-    // Reset body overflow
-    document.body.style.overflow = 'auto'
-
-    this.activeModal = null
-  }
-}
- ui js:
- import { CONFIG } from './config.js'
 
 export class UIManager {
   constructor() {
@@ -1659,21 +2936,14 @@ export class UIManager {
       detailsTags: document.getElementById('detailsTags'),
     }
 
-    // FIXED: Track event listeners for cleanup
     this.eventListeners = new Map()
     this.currentFoodElements = []
     this.currentTagElements = []
   }
 
-  // FIXED: Add event listener with cleanup tracking
   addEventListenerWithCleanup(element, event, handler, identifier) {
-    // Remove existing listener if it exists
     this.removeEventListener(identifier)
-
-    // Add new listener
     element.addEventListener(event, handler)
-
-    // Store for cleanup
     this.eventListeners.set(identifier, {
       element,
       event,
@@ -1681,7 +2951,6 @@ export class UIManager {
     })
   }
 
-  // FIXED: Remove specific event listener
   removeEventListener(identifier) {
     const listener = this.eventListeners.get(identifier)
     if (listener) {
@@ -1690,7 +2959,6 @@ export class UIManager {
     }
   }
 
-  // FIXED: Clean up all event listeners
   cleanup() {
     this.eventListeners.forEach((listener, identifier) => {
       listener.element.removeEventListener(listener.event, listener.handler)
@@ -1700,7 +2968,6 @@ export class UIManager {
     this.currentTagElements = []
   }
 
-  // FIXED: Render all foods in grid layout with proper event management
   renderCategories(categories, isEditMode = false) {
     this.cleanup()
     this.elements.categoriesContainer.innerHTML = ''
@@ -1708,52 +2975,160 @@ export class UIManager {
     categories.forEach((category) => {
       const categoryDiv = document.createElement('div')
       categoryDiv.className = 'category-container'
-      categoryDiv.style.cssText = 'border: 1px solid #ccc; margin: 10px; padding: 10px;'
+      categoryDiv.style.cssText =
+        'border: 1px solid #ccc; margin: 10px; padding: 10px; padding-top:2px'
 
       const headerDiv = document.createElement('div')
-      headerDiv.className = 'category-header' // Add class for drag handle
-      headerDiv.style.cssText =
-        'display: flex; justify-content: space-between; margin-bottom: 10px;'
+      headerDiv.className = 'category-header'
+      headerDiv.style.cssText = 'display: flex; justify-content: space-between; margin-bottom: 3px;'
+
+      const actualEditMode = window.dietHelper ? window.dietHelper.isEditMode : isEditMode
 
       headerDiv.innerHTML = `
-            <button onclick="window.dietHelper.showAddFoodForm(${category.id})" style="padding: 5px 10px;">+ Add Food</button>
-            <div>
-                <span id="categoryName-${category.id}" 
-      style="margin-right: 10px; font-weight: bold; padding: 2px 5px;">${this.escapeHtml(category.name)}</span>
-                <button onclick="window.dietHelper.startRenameCategory(${category.id})" style="padding: 5px 10px; display: ${isEditMode ? 'inline-block' : 'none'};">Rename</button>
-                <button onclick="window.dietHelper.deleteCategory(${category.id})" style="padding: 5px 10px; display: ${isEditMode ? 'inline-block' : 'none'};">Delete</button>
-            </div>
-        `
+      <span id="categoryName-${category.id}" 
+        style="font-weight: bold; font-size: 16px;">${this.escapeHtml(category.name)}</span>
+      <div style="display: flex; gap: 5px; align-items: center;">
+        <button onclick="window.dietHelper.startRenameCategory(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">Rename</button>
+        <button onclick="window.dietHelper.deleteCategory(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">Delete</button>
+        <button onclick="window.dietHelper.showAddFoodForm(${category.id})" style="padding: 5px 15px; font-size: 16px; font-weight: bold;">+</button>
+      </div>
+    `
 
       categoryDiv.appendChild(headerDiv)
 
-      const foodsDiv = document.createElement('div')
-      foodsDiv.id = `foods-${category.id}` // Add ID for sortable
-      foodsDiv.style.cssText = 'display: flex; flex-wrap: wrap;'
+      if (category.subgroups && category.subgroups.length > 0) {
+        const subgroupsGrid = document.createElement('div')
+        subgroupsGrid.style.cssText =
+          'display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 10px 5px;'
 
-      if (category.foods.length === 0) {
-        foodsDiv.innerHTML = '<p style="color: #666;">No foods in this category</p>'
-      } else {
+        category.subgroups.forEach((subgroup) => {
+          const subgroupDiv = document.createElement('div')
+          subgroupDiv.className = 'subgroup-container'
+          subgroupDiv.id = `subgroup-${subgroup.id}`
+
+          const subgroupHeader = document.createElement('div')
+          subgroupHeader.className = 'subgroup-header'
+
+          subgroupHeader.innerHTML = `
+      <span id="subgroupName-${subgroup.id}" style="font-weight: bold; font-size: 14px;">${this.escapeHtml(subgroup.name)}</span>
+      <div style="display: flex; gap: 5px; align-items: center;">
+        <button onclick="window.dietHelper.startRenameSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 8px; font-size: 12px; display: ${actualEditMode ? 'inline-block' : 'none'};">Rename</button>
+        <button onclick="window.dietHelper.deleteSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 8px; font-size: 12px; display: ${actualEditMode ? 'inline-block' : 'none'};">Delete</button>
+        <button onclick="window.dietHelper.showAddFoodToSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 10px; font-size: 14px; font-weight: bold;">+</button>
+      </div>
+    `
+
+          subgroupDiv.appendChild(subgroupHeader)
+
+          const subgroupFoodsDiv = document.createElement('div')
+          subgroupFoodsDiv.className = 'subgroup-foods'
+          subgroupFoodsDiv.id = `subgroup-foods-${subgroup.id}`
+          subgroupFoodsDiv.style.cssText =
+            'display: flex; flex-wrap: wrap; position: relative; min-height: 60px;'
+
+          if (subgroup.foods.length === 0) {
+            subgroupFoodsDiv.innerHTML =
+              '<p class="empty-subgroup-message" style="color: #999; font-size: 12px; margin: 10px; position: absolute; width: 100%; text-align: center; pointer-events: none;">No foods in this subgroup</p>'
+          } else {
+            subgroup.foods.forEach((food) => {
+              const foodDiv = document.createElement('div')
+              foodDiv.className = 'food-item'
+
+              foodDiv.innerHTML = `
+              ${
+                food.imageUrl
+                  ? `<img src="${food.imageUrl}" class="food-image" data-category-id="${category.id}" data-subgroup-id="${subgroup.id}" data-food-id="${food.id}">`
+                  : `<div class="food-image no-image" data-category-id="${category.id}" data-subgroup-id="${subgroup.id}" data-food-id="${food.id}">No Image</div>`
+              }
+              <div class="food-name">${this.escapeHtml(food.name)}</div>
+            `
+
+              const imageElement = foodDiv.querySelector('.food-image')
+              const listenerId = `food-image-${category.id}-${subgroup.id}-${food.id}`
+
+              const clickHandler = (e) => {
+                if (window.dietHelper.isBulkSelectMode) {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  window.dietHelper.toggleFoodSelection(category.id, food.id, subgroup.id)
+                } else if (!window.dietHelper.isEditMode) {
+                  // Only show details if not in edit mode
+                  window.dietHelper.showSubgroupFoodDetails(category.id, subgroup.id, food.id)
+                }
+              }
+
+              this.addEventListenerWithCleanup(foodDiv, 'click', clickHandler, listenerId)
+              this.currentFoodElements.push(listenerId)
+
+              subgroupFoodsDiv.appendChild(foodDiv)
+            })
+          }
+
+          subgroupDiv.appendChild(subgroupFoodsDiv)
+          subgroupsGrid.appendChild(subgroupDiv)
+        })
+        categoryDiv.appendChild(subgroupsGrid)
+      }
+
+      if (actualEditMode) {
+        const addSubgroupBtn = document.createElement('button')
+        addSubgroupBtn.textContent = '+ Add Subgroup'
+        addSubgroupBtn.style.cssText =
+          'margin: 10px; padding: 5px 15px; background: #e9ecef; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;'
+        addSubgroupBtn.onclick = () => window.dietHelper.showAddSubgroupForm(category.id)
+        categoryDiv.appendChild(addSubgroupBtn)
+      }
+
+      const foodsDiv = document.createElement('div')
+      foodsDiv.id = `foods-${category.id}`
+      const needsMinHeight =
+        !category.subgroups || category.subgroups.length === 0 || category.foods.length > 0
+      foodsDiv.style.cssText = `display: flex; flex-wrap: wrap; margin: 10px 0; position: relative; ${needsMinHeight ? 'min-height: 80px;' : ''}`
+
+      if (category.foods.length === 0 && (!category.subgroups || category.subgroups.length === 0)) {
+        foodsDiv.innerHTML =
+          '<p class="empty-category-message" style="color: #666; margin: 40px 0; position: absolute; width: 100%; text-align: center; pointer-events: none;">No foods in this category</p>'
+      } else if (
+        category.foods.length === 0 &&
+        category.subgroups &&
+        category.subgroups.length > 0
+      ) {
+        foodsDiv.style.display = 'none'
+      } else if (category.foods.length > 0) {
+        const directFoodsLabel = document.createElement('div')
+        directFoodsLabel.style.cssText = 'width: 100%; font-size: 12px; color: #666; margin: 5px 0;'
+        directFoodsLabel.textContent = 'Direct foods:'
+        foodsDiv.appendChild(directFoodsLabel)
+
         category.foods.forEach((food) => {
           const foodDiv = document.createElement('div')
           foodDiv.className = 'food-item'
 
           foodDiv.innerHTML = `
-                   ${
-                     food.imageUrl
-                       ? `<img src="${food.imageUrl}" class="food-image" data-category-id="${category.id}" data-food-id="${food.id}">`
-                       : `<div class="food-image no-image" data-category-id="${category.id}" data-food-id="${food.id}">No Image</div>`
-                   }
-                    <div class="food-name">${this.escapeHtml(food.name)}</div>
-                `
+          ${
+            food.imageUrl
+              ? `<img src="${food.imageUrl}" class="food-image" data-category-id="${category.id}" data-food-id="${food.id}">`
+              : `<div class="food-image no-image" data-category-id="${category.id}" data-food-id="${food.id}">No Image</div>`
+          }
+          <div class="food-name">${this.escapeHtml(food.name)}</div>
+        `
 
           const imageElement = foodDiv.querySelector('.food-image')
-          const clickHandler = () => {
-            window.dietHelper.showCategoryFoodDetails(category.id, food.id)
+          const listenerId = `food-image-${category.id}-${food.id}`
+
+          const clickHandler = (e) => {
+            if (window.dietHelper.isBulkSelectMode) {
+              e.preventDefault()
+              e.stopPropagation()
+              window.dietHelper.toggleFoodSelection(category.id, food.id)
+            } else {
+              if (e.target.classList.contains('food-image')) {
+                window.dietHelper.showCategoryFoodDetails(category.id, food.id)
+              }
+            }
           }
 
-          const listenerId = `food-image-${category.id}-${food.id}`
-          this.addEventListenerWithCleanup(imageElement, 'click', clickHandler, listenerId)
+          this.addEventListenerWithCleanup(foodDiv, 'click', clickHandler, listenerId)
           this.currentFoodElements.push(listenerId)
 
           foodsDiv.appendChild(foodDiv)
@@ -1763,9 +3138,27 @@ export class UIManager {
       categoryDiv.appendChild(foodsDiv)
       this.elements.categoriesContainer.appendChild(categoryDiv)
     })
+
+    if (window.dietHelper && window.dietHelper.applyFilters) {
+      window.dietHelper.applyFilters()
+    }
+
+    if (window.dietHelper && window.dietHelper.isBulkSelectMode) {
+      const container = document.getElementById('categoriesContainer')
+      container.classList.add('bulk-select-mode')
+
+      window.dietHelper.selectedFoods.forEach((key) => {
+        const [categoryId, foodId] = key.split('-')
+        const foodElement = document.querySelector(
+          `.food-image[data-category-id="${categoryId}"][data-food-id="${foodId}"]`
+        )?.parentElement
+        if (foodElement) {
+          foodElement.classList.add('selected')
+        }
+      })
+    }
   }
 
-  // Render tags for selection in food form
   renderTagsForSelection(tags) {
     this.elements.tagsList.innerHTML = ''
 
@@ -1778,20 +3171,26 @@ export class UIManager {
       return
     }
 
+    const tagsContainer = document.createElement('div')
+    tagsContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px;'
+
     tags.forEach((tag) => {
-      const tagDiv = document.createElement('div')
-      tagDiv.className = 'tag-item'
-      tagDiv.innerHTML = `
-                <input type="checkbox" class="tag-checkbox" value="${tag.id}" id="tag_${tag.id}">
-                <label for="tag_${tag.id}">${this.escapeHtml(tag.name)}</label>
-            `
-      this.elements.tagsList.appendChild(tagDiv)
+      const tagButton = document.createElement('div')
+      tagButton.className = 'selectable-tag'
+      tagButton.dataset.tagId = tag.id
+      tagButton.textContent = this.escapeHtml(tag.name)
+
+      tagButton.addEventListener('click', () => {
+        tagButton.classList.toggle('selected')
+      })
+
+      tagsContainer.appendChild(tagButton)
     })
+
+    this.elements.tagsList.appendChild(tagsContainer)
   }
 
-  // FIXED: Render existing tags in manage tags form with proper event management
   renderExistingTags(tags) {
-    // Clean up existing tag event listeners
     this.currentTagElements.forEach((identifier) => {
       this.removeEventListener(identifier)
     })
@@ -1808,16 +3207,37 @@ export class UIManager {
       return
     }
 
+    const tagsGrid = document.createElement('div')
+    tagsGrid.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 10px;'
+
     tags.forEach((tag) => {
       const tagDiv = document.createElement('div')
       tagDiv.className = 'tag-item'
-      tagDiv.innerHTML = `
-                <span>${this.escapeHtml(tag.name)}</span>
-                <button class="delete-tag-btn" data-tag-id="${tag.id}" style="margin-left: 10px; padding: 2px 8px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">Delete</button>
-            `
+      tagDiv.style.cssText =
+        'display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border: 1px solid #ddd; border-radius: 5px;'
 
-      // FIXED: Add click event listener with cleanup tracking
-      const deleteBtn = tagDiv.querySelector('.delete-tag-btn')
+      const tagName = document.createElement('span')
+      tagName.textContent = this.escapeHtml(tag.name)
+      tagName.style.cssText =
+        'flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;'
+
+      const deleteBtn = document.createElement('button')
+      deleteBtn.className = 'delete-tag-btn'
+      deleteBtn.setAttribute('data-tag-id', tag.id)
+      deleteBtn.textContent = '−'
+      deleteBtn.style.cssText =
+        'width: 24px; height: 24px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 18px; line-height: 1; padding: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;'
+
+      deleteBtn.onmouseover = () => {
+        deleteBtn.style.background = '#c82333'
+      }
+      deleteBtn.onmouseout = () => {
+        deleteBtn.style.background = '#dc3545'
+      }
+
+      tagDiv.appendChild(tagName)
+      tagDiv.appendChild(deleteBtn)
+
       const clickHandler = () => {
         window.dietHelper.deleteTag(tag.id)
       }
@@ -1826,11 +3246,12 @@ export class UIManager {
       this.addEventListenerWithCleanup(deleteBtn, 'click', clickHandler, listenerId)
       this.currentTagElements.push(listenerId)
 
-      this.elements.existingTags.appendChild(tagDiv)
+      tagsGrid.appendChild(tagDiv)
     })
+
+    this.elements.existingTags.appendChild(tagsGrid)
   }
 
-  // Show food details in modal
   showFoodDetails(food, tags) {
     const tagNames = food.tags
       .map((tagId) => {
@@ -1839,68 +3260,126 @@ export class UIManager {
       })
       .filter((name) => name)
 
-    // Populate details
+    this.elements.detailsName.textContent = food.name
+
     this.elements.detailsImage.src = food.imageUrl || ''
     this.elements.detailsImage.style.display = food.imageUrl ? 'block' : 'none'
-    this.elements.detailsImage.style.width = CONFIG.UI.FOOD_IMAGE_SIZE.MODAL.width + 'px'
-    this.elements.detailsImage.style.height = CONFIG.UI.FOOD_IMAGE_SIZE.MODAL.height + 'px'
 
     if (!food.imageUrl) {
-      // Show placeholder for no image
       this.elements.detailsImage.style.display = 'block'
       this.elements.detailsImage.src =
         'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='
     }
 
-    this.elements.detailsName.textContent = food.name
-    this.elements.detailsTags.textContent =
-      tagNames.length > 0 ? `Tags: ${tagNames.join(', ')}` : 'No tags'
+    const tagsContainer = document.getElementById('detailsTags')
+    if (tagNames.length > 0) {
+      tagsContainer.textContent = tagNames.join(', ')
+      tagsContainer.style.color = '#495057'
+    } else {
+      tagsContainer.innerHTML = '<span style="color: #999; font-style: italic;">No tags</span>'
+    }
+
+    const notesElement = document.getElementById('detailsNotes')
+    if (food.notes) {
+      notesElement.textContent = food.notes
+      notesElement.style.fontStyle = 'normal'
+      notesElement.style.color = '#555'
+    } else {
+      notesElement.textContent = 'No notes added'
+      notesElement.style.fontStyle = 'italic'
+      notesElement.style.color = '#999'
+    }
+
+    const hasNutrition = food.nutrition && typeof food.nutrition === 'object'
+
+    if (hasNutrition) {
+      const proteinEl = document.getElementById('detailsProtein')
+      const fatEl = document.getElementById('detailsFat')
+      const carbsEl = document.getElementById('detailsCarbs')
+      const fiberEl = document.getElementById('detailsFiber')
+      const sugarEl = document.getElementById('detailsSugar')
+      const sodiumEl = document.getElementById('detailsSodium')
+
+      if (proteinEl)
+        proteinEl.textContent =
+          food.nutrition.protein !== null && food.nutrition.protein !== undefined
+            ? `${food.nutrition.protein}g`
+            : '-'
+      if (fatEl)
+        fatEl.textContent =
+          food.nutrition.fat !== null && food.nutrition.fat !== undefined
+            ? `${food.nutrition.fat}g`
+            : '-'
+      if (carbsEl)
+        carbsEl.textContent =
+          food.nutrition.carbs !== null && food.nutrition.carbs !== undefined
+            ? `${food.nutrition.carbs}g`
+            : '-'
+      if (fiberEl)
+        fiberEl.textContent =
+          food.nutrition.fiber !== null && food.nutrition.fiber !== undefined
+            ? `${food.nutrition.fiber}g`
+            : '-'
+      if (sugarEl)
+        sugarEl.textContent =
+          food.nutrition.sugar !== null && food.nutrition.sugar !== undefined
+            ? `${food.nutrition.sugar}g`
+            : '-'
+      if (sodiumEl)
+        sodiumEl.textContent =
+          food.nutrition.sodium !== null && food.nutrition.sodium !== undefined
+            ? `${food.nutrition.sodium}mg`
+            : '-'
+    } else {
+      const elements = [
+        'detailsProtein',
+        'detailsFat',
+        'detailsCarbs',
+        'detailsFiber',
+        'detailsSugar',
+        'detailsSodium',
+      ]
+      elements.forEach((id) => {
+        const el = document.getElementById(id)
+        if (el) el.textContent = '-'
+      })
+    }
+
+    const specificElement = document.getElementById('detailsSpecificData')
+    if (food.specificData) {
+      specificElement.textContent = food.specificData
+      specificElement.style.fontStyle = 'normal'
+      specificElement.style.color = '#555'
+    } else {
+      specificElement.textContent = 'No specific information added'
+      specificElement.style.fontStyle = 'italic'
+      specificElement.style.color = '#999'
+    }
   }
 
-  // Clear food form
   clearFoodForm() {
     const nameField = document.getElementById('foodName')
     const imageField = document.getElementById('foodImage')
     const errorDiv = document.getElementById('foodNameError')
+    const notesField = document.getElementById('foodNotes')
+    const specificDataField = document.getElementById('foodSpecificData')
 
     if (nameField) nameField.value = ''
     if (imageField) imageField.value = ''
     if (errorDiv) errorDiv.classList.add('hidden')
+    if (notesField) notesField.value = ''
+    if (specificDataField) specificDataField.value = ''
 
-    // Clear tag selections
-    const checkboxes = document.querySelectorAll('.tag-checkbox')
-    checkboxes.forEach((cb) => (cb.checked = false))
+    const nutritionFields = ['Protein', 'Fat', 'Carbs', 'Fiber', 'Sugar', 'Sodium']
+    nutritionFields.forEach((field) => {
+      const input = document.getElementById(`nutrition${field}`)
+      if (input) input.value = ''
+    })
+
+    const selectedTags = document.querySelectorAll('.selectable-tag.selected')
+    selectedTags.forEach((tag) => tag.classList.remove('selected'))
   }
-  rebuildFoodNameInput() {
-    const container = document.querySelector('#addFoodDropdown .form-group')
-    if (!container) return
 
-    // Remove old input and error div
-    const oldInput = document.getElementById('foodName')
-    const oldError = document.getElementById('foodNameError')
-
-    if (oldInput) oldInput.remove()
-    if (oldError) oldError.remove()
-
-    // Create fresh input
-    const newInput = document.createElement('input')
-    newInput.type = 'text'
-    newInput.id = 'foodName'
-    newInput.placeholder = 'Enter food name'
-
-    const newError = document.createElement('div')
-    newError.id = 'foodNameError'
-    newError.className = 'error-message hidden'
-    newError.textContent = 'Please enter food name'
-
-    // Insert at beginning of container
-    container.insertBefore(newInput, container.firstChild)
-    container.insertBefore(newError, newInput.nextSibling)
-
-    // Focus the new input
-    newInput.focus()
-  }
-  // Clear tag form
   clearTagForm() {
     const tagField = document.getElementById('newTagName')
     const errorDiv = document.getElementById('tagNameError')
@@ -1909,11 +3388,9 @@ export class UIManager {
     if (errorDiv) errorDiv.classList.add('hidden')
   }
 
-  // Show/hide error messages
   showError(elementId, message = null) {
     const errorDiv = document.getElementById(elementId)
     if (errorDiv) {
-      // Use provided message or default from config
       const errorMessage = message || CONFIG.MESSAGES.ERRORS.FOOD_NAME_REQUIRED
       errorDiv.textContent = errorMessage
       errorDiv.classList.remove('hidden')
@@ -1927,22 +3404,120 @@ export class UIManager {
     }
   }
 
-  // Get selected tags from checkboxes
-  getSelectedTags() {
+  getSelectedEditTags() {
     const selectedTags = []
-    const checkboxes = document.querySelectorAll('.tag-checkbox:checked')
-    checkboxes.forEach((cb) => {
-      selectedTags.push(parseInt(cb.value))
+    const selectedElements = document.querySelectorAll('#editTagsList .selectable-tag.selected')
+    selectedElements.forEach((el) => {
+      selectedTags.push(parseInt(el.dataset.tagId))
     })
     return selectedTags
   }
 
-  // Get form input values
   getFoodFormData() {
     return {
       name: document.getElementById('foodName')?.value.trim() || '',
       image: document.getElementById('foodImage')?.files[0] || null,
-      tags: this.getSelectedTags(),
+      tags: this.getSelectedFoodTags(),
+      notes: document.getElementById('foodNotes')?.value.trim() || '',
+      nutrition: {
+        protein:
+          document.getElementById('nutritionProtein')?.value !== ''
+            ? parseFloat(document.getElementById('nutritionProtein').value)
+            : null,
+        fat:
+          document.getElementById('nutritionFat')?.value !== ''
+            ? parseFloat(document.getElementById('nutritionFat').value)
+            : null,
+        carbs:
+          document.getElementById('nutritionCarbs')?.value !== ''
+            ? parseFloat(document.getElementById('nutritionCarbs').value)
+            : null,
+        fiber:
+          document.getElementById('nutritionFiber')?.value !== ''
+            ? parseFloat(document.getElementById('nutritionFiber').value)
+            : null,
+        sugar:
+          document.getElementById('nutritionSugar')?.value !== ''
+            ? parseFloat(document.getElementById('nutritionSugar').value)
+            : null,
+        sodium:
+          document.getElementById('nutritionSodium')?.value !== ''
+            ? parseFloat(document.getElementById('nutritionSodium').value)
+            : null,
+      },
+      specificData: document.getElementById('foodSpecificData')?.value.trim() || '',
+    }
+  }
+
+  renderTagsForEdit(tags, selectedTagIds = []) {
+    const container = document.getElementById('editTagsList')
+    container.innerHTML = ''
+
+    if (tags.length === 0) {
+      const noTagsMsg = document.createElement('p')
+      noTagsMsg.textContent = 'No tags available. Add some tags first!'
+      noTagsMsg.style.color = '#666'
+      noTagsMsg.style.fontSize = '12px'
+      container.appendChild(noTagsMsg)
+      return
+    }
+
+    const tagsContainer = document.createElement('div')
+    tagsContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px;'
+
+    tags.forEach((tag) => {
+      const tagButton = document.createElement('div')
+      tagButton.className = 'selectable-tag'
+      tagButton.dataset.tagId = tag.id
+      tagButton.textContent = this.escapeHtml(tag.name)
+
+      if (selectedTagIds.includes(tag.id)) {
+        tagButton.classList.add('selected')
+      }
+
+      tagButton.addEventListener('click', () => {
+        tagButton.classList.toggle('selected')
+      })
+
+      tagsContainer.appendChild(tagButton)
+    })
+
+    container.appendChild(tagsContainer)
+  }
+
+  getEditFoodFormData() {
+    return {
+      name: document.getElementById('editFoodName')?.value.trim() || '',
+      image: document.getElementById('editFoodImage')?.files[0] || null,
+      tags: this.getSelectedEditTags(),
+      notes: document.getElementById('editFoodNotes')?.value.trim() || '',
+      nutrition: {
+        protein:
+          document.getElementById('editNutritionProtein')?.value !== ''
+            ? parseFloat(document.getElementById('editNutritionProtein').value)
+            : null,
+        fat:
+          document.getElementById('editNutritionFat')?.value !== ''
+            ? parseFloat(document.getElementById('editNutritionFat').value)
+            : null,
+        carbs:
+          document.getElementById('editNutritionCarbs')?.value !== ''
+            ? parseFloat(document.getElementById('editNutritionCarbs').value)
+            : null,
+        fiber:
+          document.getElementById('editNutritionFiber')?.value !== ''
+            ? parseFloat(document.getElementById('editNutritionFiber').value)
+            : null,
+        sugar:
+          document.getElementById('editNutritionSugar')?.value !== ''
+            ? parseFloat(document.getElementById('editNutritionSugar').value)
+            : null,
+        sodium:
+          document.getElementById('editNutritionSodium')?.value !== ''
+            ? parseFloat(document.getElementById('editNutritionSodium').value)
+            : null,
+      },
+      specificData: document.getElementById('editFoodSpecificData')?.value.trim() || '',
     }
   }
 
@@ -1952,14 +3527,12 @@ export class UIManager {
     }
   }
 
-  // Utility function to escape HTML
   escapeHtml(text) {
     const div = document.createElement('div')
     div.textContent = text
     return div.innerHTML
   }
 
-  // Show loading state
   showLoading(elementId, message = 'Loading...') {
     const element = document.getElementById(elementId)
     if (element) {
@@ -1967,7 +3540,6 @@ export class UIManager {
     }
   }
 
-  // Focus on element
   focusElement(elementId) {
     const element = document.getElementById(elementId)
     if (element) {
@@ -1975,32 +3547,38 @@ export class UIManager {
     }
   }
 
-  // FIXED: Cleanup method to be called when UIManager is destroyed
+  getSelectedFoodTags() {
+    const selectedTags = []
+    const selectedElements = document.querySelectorAll('#tagsList .selectable-tag.selected')
+    selectedElements.forEach((el) => {
+      selectedTags.push(parseInt(el.dataset.tagId))
+    })
+    return selectedTags
+  }
+
   destroy() {
     this.cleanup()
   }
 }
 
-data js:
+data.js:
+
 import { CONFIG, ConfigUtils } from './config.js'
 
 export class DataManager {
   constructor() {
     this.dataFile = CONFIG.FILES.DATA_FILE
     this.imagesDir = CONFIG.FILES.IMAGES_DIR
-    this.hiddenCanvas = null // ADD THIS LINE
+    this.hiddenCanvas = null
   }
 
-  // Save data to JSON file
   async saveData(data) {
     try {
       if (typeof require !== 'undefined') {
-        // Electron environment
         const { ipcRenderer } = require('electron')
         const result = await ipcRenderer.invoke('save-data', data)
         return result
       } else {
-        // Browser fallback
         localStorage.setItem(CONFIG.STORAGE.MAIN_DATA, JSON.stringify(data))
         return { success: true }
       }
@@ -2010,11 +3588,9 @@ export class DataManager {
     }
   }
 
-  // Load data from JSON file
   async loadData() {
     try {
       if (typeof require !== 'undefined') {
-        // Electron environment
         const { ipcRenderer } = require('electron')
         const data = await ipcRenderer.invoke('load-data')
         return {
@@ -2026,7 +3602,6 @@ export class DataManager {
           },
         }
       } else {
-        // Browser fallback
         const data = JSON.parse(localStorage.getItem(CONFIG.STORAGE.MAIN_DATA) || '{}')
         return {
           success: true,
@@ -2047,21 +3622,18 @@ export class DataManager {
     }
   }
 
-  // Save image file - FIXED: Now converts to base64 for persistence
   async saveImage(imageFile) {
     try {
       if (!imageFile) {
         return { success: false, error: 'No image file provided' }
       }
 
-      // Validate image using ConfigUtils
       const validation = ConfigUtils.validateImage(imageFile)
       if (!validation.valid) {
         return { success: false, error: validation.error }
       }
 
       if (typeof require !== 'undefined') {
-        // Electron environment - save image to file system
         const reader = new FileReader()
 
         return new Promise((resolve) => {
@@ -2078,15 +3650,12 @@ export class DataManager {
           reader.readAsDataURL(imageFile)
         })
       } else {
-        // Browser fallback - convert to base64 for localStorage persistence
         return new Promise((resolve) => {
           const reader = new FileReader()
           reader.onload = (e) => {
             try {
-              // Optionally compress image if it's too large
               const base64Data = e.target.result
               if (CONFIG.FEATURES.IMAGE_COMPRESSION && base64Data.length > 500000) {
-                // ~375KB
                 this.compressImage(base64Data, imageFile.type)
                   .then((compressedData) => {
                     resolve({ success: true, path: compressedData })
@@ -2119,31 +3688,25 @@ export class DataManager {
       if (!imagePath) return { success: true }
 
       if (typeof require !== 'undefined') {
-        // Electron environment - delete actual file
         try {
           const { ipcRenderer } = require('electron')
           const result = await ipcRenderer.invoke('delete-image', imagePath)
           return result
         } catch (electronError) {
-          // If handler not registered, just log warning
           console.warn('Image deletion not implemented in Electron main process')
           return { success: true, warning: 'Image handler not registered' }
         }
       } else {
-        // Browser environment - no file to delete (base64 stored in localStorage)
         return { success: true }
       }
     } catch (error) {
       console.error('Error deleting image:', error)
-      // Don't fail the food deletion if image deletion fails
       return { success: true, warning: 'Image file could not be deleted' }
     }
   }
 
-  // Compress image to reduce storage size
   async compressImage(base64Data, mimeType) {
     return new Promise((resolve, reject) => {
-      // FIXED: Create hidden canvas to prevent visual glitches
       if (!this.hiddenCanvas) {
         this.hiddenCanvas = document.createElement('canvas')
         this.hiddenCanvas.style.cssText = `
@@ -2155,12 +3718,11 @@ export class DataManager {
         document.body.appendChild(this.hiddenCanvas)
       }
 
-      const canvas = this.hiddenCanvas // Use hidden canvas instead of creating new one
+      const canvas = this.hiddenCanvas
       const ctx = canvas.getContext('2d')
       const img = new Image()
 
       img.onload = () => {
-        // Calculate new dimensions while maintaining aspect ratio
         const maxWidth = 800
         const maxHeight = 600
         let { width, height } = img
@@ -2180,7 +3742,6 @@ export class DataManager {
         canvas.width = width
         canvas.height = height
 
-        // Draw and compress
         ctx.drawImage(img, 0, 0, width, height)
         const compressedData = canvas.toDataURL(mimeType || 'image/jpeg', CONFIG.IMAGES.QUALITY)
         resolve(compressedData)
@@ -2191,7 +3752,6 @@ export class DataManager {
     })
   }
 
-  // Validate food data
   validateFood(foodData) {
     const errors = []
 
@@ -2218,7 +3778,6 @@ export class DataManager {
     }
   }
 
-  // Validate tag data
   validateTag(tagData) {
     const errors = []
 
@@ -2237,7 +3796,6 @@ export class DataManager {
     }
   }
 
-  // Create backup of current data
   async createBackup() {
     try {
       const loadResult = await this.loadData()
@@ -2253,11 +3811,6 @@ export class DataManager {
       if (typeof require !== 'undefined') {
         const { ipcRenderer } = require('electron')
         const backupFileName = `backup_${Date.now()}.json`
-        // You'd need to add a backup IPC handler in main.js
-        // const result = await ipcRenderer.invoke('create-backup', backupData, backupFileName);
-        // return result;
-
-        // For now, just return success
         return { success: true, message: 'Backup feature needs IPC handler implementation' }
       } else {
         localStorage.setItem(
@@ -2273,7 +3826,6 @@ export class DataManager {
   }
 }
 
-// Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = DataManager
 } else {
@@ -2281,14 +3833,856 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 
+modal.js:
+import { CONFIG } from './config.js'
+
+export class ModalManager {
+  constructor() {
+    this.modals = {
+      foodDetails: {
+        modal: document.getElementById('foodDetailsDropdown'),
+        overlay: this.createOverlay('foodDetailsOverlay'),
+      },
+      addFood: {
+        modal: document.getElementById('addFoodDropdown'),
+        overlay: this.createOverlay('addFoodOverlay'),
+      },
+      manageTags: {
+        modal: document.getElementById('manageTagsDropdown'),
+        overlay: this.createOverlay('manageTagsOverlay'),
+      },
+      addCategory: {
+        modal: document.getElementById('addCategoryDropdown'),
+        overlay: this.createOverlay('addCategoryOverlay'),
+      },
+      confirmation: {
+        modal: document.getElementById('confirmationDropdown'),
+        overlay: this.createOverlay('confirmationOverlay'),
+      },
+      editFood: {
+        modal: document.getElementById('editFoodDropdown'),
+        overlay: this.createOverlay('editFoodOverlay'),
+      },
+      addSubgroup: {
+        modal: document.getElementById('addSubgroupDropdown'),
+        overlay: this.createOverlay('addSubgroupOverlay'),
+      },
+    }
+
+    this.activeModal = null
+    this.initializeEventListeners()
+    this.replaceSharedOverlay()
+  }
+
+  createOverlay(id) {
+    const overlay = document.createElement('div')
+    overlay.id = id
+    overlay.className = 'modal-overlay'
+    overlay.style.cssText = `
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        `
+    document.body.appendChild(overlay)
+    return overlay
+  }
+
+  replaceSharedOverlay() {
+    const oldOverlay = document.getElementById('modalOverlay')
+    if (oldOverlay) {
+      oldOverlay.style.display = 'none !important'
+      oldOverlay.style.visibility = 'hidden'
+      oldOverlay.replaceWith(oldOverlay.cloneNode(true))
+    }
+  }
+
+  initializeEventListeners() {
+    Object.keys(this.modals).forEach((modalType) => {
+      const { overlay } = this.modals[modalType]
+      if (overlay) {
+        overlay.addEventListener('click', () => {
+          this.closeModal(modalType)
+        })
+      }
+    })
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.closeActiveModal()
+      }
+    })
+
+    Object.values(this.modals).forEach(({ modal }) => {
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          e.stopPropagation()
+        })
+      }
+    })
+  }
+
+  showModal(modalType) {
+    if (modalType === 'editFood' && this.activeModal === 'foodDetails') {
+      // Keep food details open when showing edit modal
+    } else {
+      this.closeActiveModal()
+    }
+
+    const { modal, overlay } = this.modals[modalType]
+    if (!modal || !overlay) return
+
+    if (modalType === 'editFood' && this.activeModal === 'foodDetails') {
+      this._previousModal = this.activeModal
+    }
+
+    this.activeModal = modalType
+
+    modal.style.width = ''
+    modal.style.height = ''
+    modal.style.maxWidth = '90vw'
+    modal.style.maxHeight = '90vh'
+
+    overlay.style.display = 'block'
+    overlay.classList.add('active')
+    modal.classList.add('active')
+
+    document.body.style.overflow = 'hidden'
+
+    if (CONFIG.FEATURES.ANIMATIONS_ENABLED) {
+      this.animateIn(modalType)
+    }
+  }
+
+  showModalStacked(modalType) {
+    const { modal, overlay } = this.modals[modalType]
+    if (!modal || !overlay) return
+
+    this._previousModal = this.activeModal
+    this.activeModal = modalType
+
+    modal.style.width = ''
+    modal.style.height = ''
+    modal.style.maxWidth = '90vw'
+    modal.style.maxHeight = '90vh'
+
+    overlay.style.display = 'block'
+    overlay.classList.add('active')
+    modal.classList.add('active')
+
+    document.body.style.overflow = 'hidden'
+
+    if (CONFIG.FEATURES.ANIMATIONS_ENABLED) {
+      this.animateIn(modalType)
+    }
+  }
+
+  hideModal(modalType) {
+    const { modal, overlay } = this.modals[modalType]
+    if (!modal || !overlay) return
+
+    overlay.style.display = 'none'
+    overlay.classList.remove('active')
+    modal.classList.remove('active')
+
+    if (this.activeModal === modalType) {
+      if (this._previousModal) {
+        this.activeModal = this._previousModal
+        this._previousModal = null
+      } else {
+        this.activeModal = null
+      }
+    }
+
+    if (!this.activeModal) {
+      document.body.style.overflow = 'auto'
+      document.body.removeAttribute('tabIndex')
+    }
+  }
+
+  hideModalStacked(modalType) {
+    const { modal, overlay } = this.modals[modalType]
+    if (!modal || !overlay) return
+
+    overlay.style.display = 'none'
+    overlay.classList.remove('active')
+    modal.classList.remove('active')
+
+    this.activeModal = this._previousModal || null
+    this._previousModal = null
+
+    if (!this.activeModal) {
+      document.body.style.overflow = 'auto'
+      document.body.removeAttribute('tabIndex')
+    }
+  }
+
+  closeModal(modalType) {
+    this.hideModal(modalType)
+  }
+
+  showFoodDetails() {
+    this.showModal('foodDetails')
+  }
+
+  hideFoodDetails() {
+    this.hideModal('foodDetails')
+  }
+
+  showAddFood() {
+    this.showModal('addFood')
+    setTimeout(() => {
+      const nameInput = document.getElementById('foodName')
+      if (nameInput) nameInput.focus()
+    }, 100)
+  }
+
+  hideAddFood() {
+    this.hideModal('addFood')
+  }
+
+  showManageTags() {
+    this.showModal('manageTags')
+    setTimeout(() => {
+      const tagInput = document.getElementById('newTagName')
+      if (tagInput) tagInput.focus()
+    }, 100)
+  }
+
+  hideManageTags() {
+    this.hideModal('manageTags')
+  }
+
+  showAddCategory() {
+    this.showModal('addCategory')
+    setTimeout(() => {
+      const input = document.getElementById('categoryNameInput')
+      if (input) input.focus()
+    }, 100)
+  }
+
+  hideAddCategory() {
+    this.hideModal('addCategory')
+  }
+
+  closeActiveModal() {
+    if (this.activeModal) {
+      this.hideModal(this.activeModal)
+    }
+    document.body.removeAttribute('tabIndex')
+    document.body.removeAttribute('tabindex')
+  }
+
+  resetAllOverlays() {
+    Object.values(this.modals).forEach(({ overlay }) => {
+      if (overlay) {
+        overlay.style.display = 'none'
+        overlay.classList.remove('active')
+      }
+    })
+    document.body.style.pointerEvents = ''
+    document.body.style.overflow = ''
+  }
+
+  isModalOpen() {
+    return this.activeModal !== null
+  }
+
+  showAddSubgroup() {
+    this.showModal('addSubgroup')
+    setTimeout(() => {
+      const input = document.getElementById('subgroupNameInput')
+      if (input) input.focus()
+    }, 100)
+  }
+
+  hideAddSubgroup() {
+    this.hideModal('addSubgroup')
+  }
+
+  getActiveModal() {
+    return this.activeModal
+  }
+
+  showConfirmation(message, onConfirm, onCancel, title) {
+    onCancel = onCancel || null
+    title = title || 'Confirm Delete'
+
+    this._confirmCallback = onConfirm
+    this._cancelCallback = onCancel
+
+    document.getElementById('confirmTitle').textContent = title
+    document.getElementById('confirmMessage').textContent = message
+
+    this.showModalStacked('confirmation')
+
+    const yesBtn = document.getElementById('confirmYesBtn')
+    const noBtn = document.getElementById('confirmNoBtn')
+
+    const handleYes = () => {
+      this.hideModalStacked('confirmation')
+      if (this._confirmCallback) {
+        this._confirmCallback()
+      }
+      cleanup()
+    }
+
+    const handleNo = () => {
+      this.hideModalStacked('confirmation')
+      if (this._cancelCallback) {
+        this._cancelCallback()
+      }
+      cleanup()
+    }
+
+    const handleKeydown = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        handleYes()
+      } else if (e.key === 'Escape') {
+        e.preventDefault()
+        handleNo()
+      }
+    }
+
+    const cleanup = () => {
+      yesBtn.removeEventListener('click', handleYes)
+      noBtn.removeEventListener('click', handleNo)
+      document.removeEventListener('keydown', handleKeydown)
+      this._confirmCallback = null
+      this._cancelCallback = null
+    }
+
+    yesBtn.addEventListener('click', handleYes)
+    noBtn.addEventListener('click', handleNo)
+    document.addEventListener('keydown', handleKeydown)
+
+    setTimeout(() => yesBtn.focus(), 100)
+  }
+
+  showLoading(modalType, message = 'Loading...') {
+    const { modal } = this.modals[modalType]
+    if (modal) {
+      const loadingDiv = document.createElement('div')
+      loadingDiv.id = `modalLoading_${modalType}`
+      loadingDiv.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+            `
+      loadingDiv.innerHTML = `<p style="color: #666;">${message}</p>`
+      modal.style.position = 'relative'
+      modal.appendChild(loadingDiv)
+    }
+  }
+
+  hideLoading(modalType = null) {
+    if (modalType) {
+      const loadingDiv = document.getElementById(`modalLoading_${modalType}`)
+      if (loadingDiv) {
+        loadingDiv.remove()
+      }
+    } else {
+      Object.keys(this.modals).forEach((type) => {
+        const loadingDiv = document.getElementById(`modalLoading_${type}`)
+        if (loadingDiv) {
+          loadingDiv.remove()
+        }
+      })
+    }
+  }
+
+  animateIn(modalType) {
+    const { modal } = this.modals[modalType]
+    if (modal) {
+      modal.style.transform = 'translate(-50%, -60%) scale(0.9)'
+      modal.style.opacity = '0'
+
+      requestAnimationFrame(() => {
+        modal.style.transition = `all ${CONFIG.UI.MODAL_ANIMATION_DURATION}ms ease-out`
+        modal.style.transform = 'translate(-50%, -50%) scale(1)'
+        modal.style.opacity = '1'
+      })
+    }
+  }
+
+  showEditFood() {
+    this.showModal('editFood')
+    setTimeout(() => {
+      const nameInput = document.getElementById('editFoodName')
+      if (nameInput) nameInput.focus()
+    }, 100)
+  }
+
+  hideEditFood() {
+    this.hideModal('editFood')
+  }
+
+  destroy() {
+    Object.values(this.modals).forEach(({ overlay }) => {
+      if (overlay && overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay)
+      }
+    })
+    document.body.style.overflow = 'auto'
+    this.activeModal = null
+  }
+}
+
+
+models.js:
+export class Food {
+  constructor(id, name, imageUrl, selected, tags, notes = '', nutrition = null, specificData = '') {
+    this.id = id
+    this.name = name
+    this.imageUrl = imageUrl
+    this.selected = selected
+    this.tags = tags
+    this.notes = notes
+    this.nutrition = nutrition || {
+      protein: null,
+      fat: null,
+      carbs: null,
+      fiber: null,
+      sugar: null,
+      sodium: null,
+    }
+    this.specificData = specificData
+  }
+}
+
+export class Category {
+  constructor(id, name, foods, subgroups) {
+    this.id = id
+    this.name = name
+    this.foods = foods || []
+    this.subgroups = subgroups || []
+  }
+}
+
+export class Subgroup {
+  constructor(id, name, foods) {
+    this.id = id
+    this.name = name
+    this.foods = foods || []
+  }
+}
+
+
+config.js:
+const CONFIG = {
+  FILES: {
+    DATA_FILE: 'data.json',
+    BACKUP_DIR: 'backups',
+    IMAGES_DIR: 'images',
+    LOGS_DIR: 'logs',
+  },
+
+  STORAGE: {
+    MAIN_DATA: 'dietHelperData',
+    BACKUP_PREFIX: 'dietHelperBackup_',
+    SETTINGS: 'dietHelperSettings',
+  },
+
+  UI: {
+    FOOD_IMAGE_SIZE: {
+      GRID: { width: 75, height: 75 },
+      MODAL: { width: 200, height: 200 },
+    },
+    MODAL_ANIMATION_DURATION: 200,
+    GRID_COLUMNS: 'auto-fit',
+    MIN_CARD_WIDTH: 120,
+  },
+
+  VALIDATION: {
+    FOOD_NAME: {
+      MIN_LENGTH: 1,
+      MAX_LENGTH: 100,
+      REQUIRED: true,
+    },
+    TAG_NAME: {
+      MIN_LENGTH: 1,
+      MAX_LENGTH: 50,
+      REQUIRED: true,
+    },
+    MAX_TAGS_PER_FOOD: 10,
+    MAX_TOTAL_TAGS: 100,
+    MAX_TOTAL_FOODS: 1000,
+  },
+
+  IMAGES: {
+    SUPPORTED_FORMATS: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+    MAX_FILE_SIZE: 5 * 1024 * 1024,
+    QUALITY: 0.8,
+    THUMBNAIL_SIZE: { width: 100, height: 100 },
+  },
+
+  DEFAULTS: {
+    EMPTY_DATA: {
+      foods: [],
+      tags: [],
+    },
+    NEW_FOOD: {
+      id: null,
+      name: '',
+      imageUrl: '',
+      selected: false,
+      tags: [],
+    },
+    NEW_TAG: {
+      id: null,
+      name: '',
+    },
+  },
+
+  MESSAGES: {
+    ERRORS: {
+      FOOD_NAME_REQUIRED: 'Please enter food name',
+      TAG_NAME_REQUIRED: 'Please enter tag name',
+      FOOD_NAME_TOO_LONG: 'Food name is too long (max 100 characters)',
+      TAG_NAME_TOO_LONG: 'Tag name is too long (max 50 characters)',
+      INVALID_IMAGE_FORMAT: 'Unsupported image format. Please use JPG, PNG, GIF, or WebP',
+      IMAGE_TOO_LARGE: 'Image file is too large (max 5MB)',
+      SAVE_FAILED: 'Failed to save data. Please try again.',
+      LOAD_FAILED: 'Failed to load data',
+      MAX_FOODS_REACHED: 'Maximum number of foods reached (1000)',
+      MAX_TAGS_REACHED: 'Maximum number of tags reached (100)',
+      MAX_TAGS_PER_FOOD: 'Maximum 10 tags per food item',
+      DELETE_FOOD_FAILED: 'Failed to delete food. Please try again.',
+    },
+    SUCCESS: {
+      FOOD_SAVED: 'Food saved successfully',
+      TAG_SAVED: 'Tag saved successfully',
+      DATA_LOADED: 'Data loaded successfully',
+      BACKUP_CREATED: 'Backup created successfully',
+      FOOD_DELETED: 'Food deleted successfully',
+    },
+    CONFIRMATIONS: {
+      DELETE_TAG: 'Are you sure you want to delete this tag? It will be removed from all foods.',
+      DELETE_FOOD: 'Are you sure you want to delete this food item? This action cannot be undone.',
+      CLEAR_ALL_DATA: 'Are you sure you want to clear all data? This cannot be undone.',
+      RESTORE_BACKUP: 'Are you sure you want to restore from backup? Current data will be lost.',
+    },
+  },
+
+  FEATURES: {
+    ANIMATIONS_ENABLED: true,
+    BACKUP_ENABLED: true,
+    IMAGE_COMPRESSION: true,
+    KEYBOARD_SHORTCUTS: true,
+    DARK_MODE: false,
+    EXPORT_IMPORT: true,
+    STATISTICS: false,
+  },
+
+  SHORTCUTS: {
+    ADD_FOOD: 'Ctrl+N',
+    MANAGE_TAGS: 'Ctrl+T',
+    CLOSE_MODAL: 'Escape',
+    SAVE: 'Ctrl+S',
+    SEARCH: 'Ctrl+F',
+    DELETE: 'Delete',
+  },
+
+  DEBUG: {
+    ENABLED: false,
+    LOG_LEVEL: 'info',
+    SHOW_PERFORMANCE: false,
+  },
+
+  APP: {
+    NAME: 'Diet Helper',
+    VERSION: '1.0.0',
+    AUTHOR: 'Your Name',
+    DESCRIPTION: 'A simple diet management application',
+  },
+
+  ENV: {
+    IS_ELECTRON: typeof require !== 'undefined',
+    IS_DEVELOPMENT: false,
+  },
+}
+
+const ConfigUtils = {
+  get(path, defaultValue = null) {
+    const keys = path.split('.')
+    let current = CONFIG
+
+    for (const key of keys) {
+      if (current && typeof current === 'object' && key in current) {
+        current = current[key]
+      } else {
+        return defaultValue
+      }
+    }
+
+    return current
+  },
+
+  set(path, value) {
+    const keys = path.split('.')
+    const lastKey = keys.pop()
+    let current = CONFIG
+
+    for (const key of keys) {
+      if (!(key in current)) {
+        current[key] = {}
+      }
+      current = current[key]
+    }
+
+    current[lastKey] = value
+  },
+
+  validateImage(file) {
+    if (!file) return { valid: false, error: 'No file provided' }
+
+    const extension = file.name.split('.').pop().toLowerCase()
+    if (!CONFIG.IMAGES.SUPPORTED_FORMATS.includes(extension)) {
+      return {
+        valid: false,
+        error: CONFIG.MESSAGES.ERRORS.INVALID_IMAGE_FORMAT,
+      }
+    }
+
+    if (file.size > CONFIG.IMAGES.MAX_FILE_SIZE) {
+      return {
+        valid: false,
+        error: CONFIG.MESSAGES.ERRORS.IMAGE_TOO_LARGE,
+      }
+    }
+
+    return { valid: true }
+  },
+
+  validateFoodName(name) {
+    if (!name || name.trim().length === 0) {
+      return {
+        valid: false,
+        error: CONFIG.MESSAGES.ERRORS.FOOD_NAME_REQUIRED,
+      }
+    }
+
+    if (name.length > CONFIG.VALIDATION.FOOD_NAME.MAX_LENGTH) {
+      return {
+        valid: false,
+        error: CONFIG.MESSAGES.ERRORS.FOOD_NAME_TOO_LONG,
+      }
+    }
+
+    return { valid: true }
+  },
+
+  validateTagName(name) {
+    if (!name || name.trim().length === 0) {
+      return {
+        valid: false,
+        error: CONFIG.MESSAGES.ERRORS.TAG_NAME_REQUIRED,
+      }
+    }
+
+    if (name.length > CONFIG.VALIDATION.TAG_NAME.MAX_LENGTH) {
+      return {
+        valid: false,
+        error: CONFIG.MESSAGES.ERRORS.TAG_NAME_TOO_LONG,
+      }
+    }
+
+    return { valid: true }
+  },
+
+  isFeatureEnabled(feature) {
+    return CONFIG.FEATURES[feature] === true
+  },
+
+  getFilePath(fileKey) {
+    return CONFIG.FILES[fileKey] || ''
+  },
+
+  getStorageKey(keyName) {
+    return CONFIG.STORAGE[keyName] || ''
+  },
+
+  log(level, message, data = null) {
+    if (!CONFIG.DEBUG.ENABLED) return
+
+    const levels = ['debug', 'info', 'warn', 'error']
+    const currentLevelIndex = levels.indexOf(CONFIG.DEBUG.LOG_LEVEL)
+    const messageLevelIndex = levels.indexOf(level)
+
+    if (messageLevelIndex >= currentLevelIndex) {
+      const timestamp = new Date().toISOString()
+      const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`
+
+      console[level === 'debug' ? 'log' : level](logMessage, data || '')
+    }
+  },
+}
+
+ConfigUtils.set('ENV.IS_DEVELOPMENT', window.location.hostname === 'localhost')
+
+export { CONFIG, ConfigUtils }
 
 
 
-okay but from now on when i ask you improvement implementation dont give me full code files ok? 
-just give me needed part and where i have to add or replace in which file and in which section like 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+okay but from now on when i ask you any improvement implementation or fixing some things dont give me full code files ok? 
+just give me needed function to replace or add and where i have to add or replace in which file and in which section like 
 after that function before that function in that funcvtion ect right?
 
-what is this feature:
-**Keyboard shortcuts** - Already defined in config, just need implementation
 
-like how can it be used give me example
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -60,14 +60,15 @@ export class UIManager {
       const actualEditMode = window.dietHelper ? window.dietHelper.isEditMode : isEditMode
 
       headerDiv.innerHTML = `
-      <span id="categoryName-${category.id}" 
-        style="font-weight: bold; font-size: 16px;">${this.escapeHtml(category.name)}</span>
-      <div style="display: flex; gap: 5px; align-items: center;">
-        <button onclick="window.dietHelper.startRenameCategory(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">Rename</button>
-        <button onclick="window.dietHelper.deleteCategory(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">Delete</button>
-        <button onclick="window.dietHelper.showAddFoodForm(${category.id})" style="padding: 5px 15px; font-size: 16px; font-weight: bold;">+</button>
-      </div>
-    `
+  <span id="categoryName-${category.id}" 
+    style="font-weight: bold; font-size: 16px;">${this.escapeHtml(category.name)}</span>
+  <div style="display: flex; gap: 5px; align-items: center;">
+    <button onclick="window.dietHelper.showAddSubgroupForm(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">+ Subgroup</button>
+    <button onclick="window.dietHelper.startRenameCategory(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">Rename</button>
+    <button onclick="window.dietHelper.deleteCategory(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">Delete</button>
+    <button onclick="window.dietHelper.showAddFoodForm(${category.id})" style="padding: 5px 15px; font-size: 16px; font-weight: bold;">+</button>
+  </div>
+`
 
       categoryDiv.appendChild(headerDiv)
 
@@ -143,15 +144,6 @@ export class UIManager {
           subgroupsGrid.appendChild(subgroupDiv)
         })
         categoryDiv.appendChild(subgroupsGrid)
-      }
-
-      if (actualEditMode) {
-        const addSubgroupBtn = document.createElement('button')
-        addSubgroupBtn.textContent = '+ Add Subgroup'
-        addSubgroupBtn.style.cssText =
-          'margin: 10px; padding: 5px 15px; background: #e9ecef; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;'
-        addSubgroupBtn.onclick = () => window.dietHelper.showAddSubgroupForm(category.id)
-        categoryDiv.appendChild(addSubgroupBtn)
       }
 
       const foodsDiv = document.createElement('div')
