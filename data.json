@@ -34,7 +34,25 @@
     {
       "id": 1754896988663,
       "name": "daaddas",
-      "foods": [],
+      "foods": [
+        {
+          "id": 1755235524729,
+          "name": "dasdas",
+          "imageUrl": "images\\food_1755235524726.jpg",
+          "selected": false,
+          "tags": [],
+          "notes": "",
+          "nutrition": {
+            "protein": null,
+            "fat": null,
+            "carbs": null,
+            "fiber": null,
+            "sugar": null,
+            "sodium": null
+          },
+          "specificData": ""
+        }
+      ],
       "subgroups": [
         {
           "id": 1755148101823,
@@ -188,25 +206,7 @@
     {
       "id": 1754896990424,
       "name": "FATS",
-      "foods": [
-        {
-          "id": 1755235524729,
-          "name": "dasdas",
-          "imageUrl": "images\\food_1755235524726.jpg",
-          "selected": false,
-          "tags": [],
-          "notes": "",
-          "nutrition": {
-            "protein": null,
-            "fat": null,
-            "carbs": null,
-            "fiber": null,
-            "sugar": null,
-            "sodium": null
-          },
-          "specificData": ""
-        }
-      ],
+      "foods": [],
       "subgroups": []
     },
     {

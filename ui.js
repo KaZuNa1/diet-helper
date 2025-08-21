@@ -60,15 +60,15 @@ export class UIManager {
       const actualEditMode = window.dietHelper ? window.dietHelper.isEditMode : isEditMode
 
       headerDiv.innerHTML = `
-  <span id="categoryName-${category.id}" 
-    style="font-weight: bold; font-size: 16px;">${this.escapeHtml(category.name)}</span>
-  <div style="display: flex; gap: 5px; align-items: center;">
-    <button onclick="window.dietHelper.showAddSubgroupForm(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">+ Subgroup</button>
-    <button onclick="window.dietHelper.startRenameCategory(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">Rename</button>
-    <button onclick="window.dietHelper.deleteCategory(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">Delete</button>
-    <button onclick="window.dietHelper.showAddFoodForm(${category.id})" style="padding: 5px 15px; font-size: 16px; font-weight: bold;">+</button>
-  </div>
-`
+      <span id="categoryName-${category.id}" 
+        style="font-weight: bold; font-size: 16px;">${this.escapeHtml(category.name)}</span>
+      <div style="display: flex; gap: 5px; align-items: center;">
+        <button onclick="window.dietHelper.showAddSubgroupForm(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">+ Subgroup</button>
+        <button onclick="window.dietHelper.startRenameCategory(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">Rename</button>
+        <button onclick="window.dietHelper.deleteCategory(${category.id})" style="padding: 5px 10px; display: ${actualEditMode ? 'inline-block' : 'none'};">Delete</button>
+        <button onclick="window.dietHelper.showAddFoodForm(${category.id})" style="padding: 5px 15px; font-size: 16px; font-weight: bold;">+</button>
+      </div>
+    `
 
       categoryDiv.appendChild(headerDiv)
 
@@ -86,13 +86,13 @@ export class UIManager {
           subgroupHeader.className = 'subgroup-header'
 
           subgroupHeader.innerHTML = `
-      <span id="subgroupName-${subgroup.id}" style="font-weight: bold; font-size: 14px;">${this.escapeHtml(subgroup.name)}</span>
-      <div style="display: flex; gap: 5px; align-items: center;">
-        <button onclick="window.dietHelper.startRenameSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 8px; font-size: 12px; display: ${actualEditMode ? 'inline-block' : 'none'};">Rename</button>
-        <button onclick="window.dietHelper.deleteSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 8px; font-size: 12px; display: ${actualEditMode ? 'inline-block' : 'none'};">Delete</button>
-        <button onclick="window.dietHelper.showAddFoodToSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 10px; font-size: 14px; font-weight: bold;">+</button>
-      </div>
-    `
+          <span id="subgroupName-${subgroup.id}" style="font-weight: bold; font-size: 14px;">${this.escapeHtml(subgroup.name)}</span>
+          <div style="display: flex; gap: 5px; align-items: center;">
+            <button onclick="window.dietHelper.startRenameSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 8px; font-size: 12px; display: ${actualEditMode ? 'inline-block' : 'none'};">Rename</button>
+            <button onclick="window.dietHelper.deleteSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 8px; font-size: 12px; display: ${actualEditMode ? 'inline-block' : 'none'};">Delete</button>
+            <button onclick="window.dietHelper.showAddFoodToSubgroup(${category.id}, ${subgroup.id})" style="padding: 3px 10px; font-size: 14px; font-weight: bold;">+</button>
+          </div>
+        `
 
           subgroupDiv.appendChild(subgroupHeader)
 
@@ -128,7 +128,6 @@ export class UIManager {
                   e.stopPropagation()
                   window.dietHelper.toggleFoodSelection(category.id, food.id, subgroup.id)
                 } else if (!window.dietHelper.isEditMode) {
-                  // Only show details if not in edit mode
                   window.dietHelper.showSubgroupFoodDetails(category.id, subgroup.id, food.id)
                 }
               }
@@ -148,9 +147,19 @@ export class UIManager {
 
       const foodsDiv = document.createElement('div')
       foodsDiv.id = `foods-${category.id}`
-      const needsMinHeight =
-        !category.subgroups || category.subgroups.length === 0 || category.foods.length > 0
-      foodsDiv.style.cssText = `display: flex; flex-wrap: wrap; margin: 10px 0; position: relative; ${needsMinHeight ? 'min-height: 80px;' : ''}`
+      foodsDiv.className = 'foods-container'
+      const hasSubgroups = category.subgroups && category.subgroups.length > 0
+      const hasFoods = category.foods.length > 0
+
+      // Set narrow height by default when has subgroups, expand on drag
+      foodsDiv.style.cssText = `
+      display: flex; 
+      flex-wrap: wrap; 
+      margin: ${hasSubgroups ? '15px 0' : '10px 0'}; 
+      position: relative; 
+      min-height: ${hasSubgroups ? (hasFoods ? '80px' : '40px') : '80px'};
+      ${hasSubgroups && actualEditMode ? `padding: ${hasFoods ? '10px' : '5px'}; border: 2px dashed #dee2e6; transition: all 0.3s ease;` : ''}
+    `
 
       if (category.foods.length === 0 && (!category.subgroups || category.subgroups.length === 0)) {
         foodsDiv.innerHTML =
@@ -160,7 +169,14 @@ export class UIManager {
         category.subgroups &&
         category.subgroups.length > 0
       ) {
-        foodsDiv.style.display = 'none'
+        // Keep the container visible but empty when in edit mode for dropping
+        if (actualEditMode) {
+          foodsDiv.innerHTML =
+            '<p class="empty-category-message" style="color: #999; font-size: 11px; position: absolute; width: 100%; text-align: center; pointer-events: none; top: 50%; transform: translateY(-50%); margin: 0; padding: 0 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Direct foods drop zone</p>'
+        } else {
+          // Hide in non-edit mode if no direct foods
+          foodsDiv.style.display = 'none'
+        }
       } else if (category.foods.length > 0) {
         const directFoodsLabel = document.createElement('div')
         directFoodsLabel.style.cssText = 'width: 100%; font-size: 12px; color: #666; margin: 5px 0;'
@@ -215,12 +231,23 @@ export class UIManager {
       container.classList.add('bulk-select-mode')
 
       window.dietHelper.selectedFoods.forEach((key) => {
-        const [categoryId, foodId] = key.split('-')
-        const foodElement = document.querySelector(
-          `.food-image[data-category-id="${categoryId}"][data-food-id="${foodId}"]`
-        )?.parentElement
-        if (foodElement) {
-          foodElement.classList.add('selected')
+        const parts = key.split('-')
+        if (parts.length === 3) {
+          const [categoryId, subgroupId, foodId] = parts
+          const foodElement = document.querySelector(
+            `.food-image[data-category-id="${categoryId}"][data-subgroup-id="${subgroupId}"][data-food-id="${foodId}"]`
+          )?.parentElement
+          if (foodElement) {
+            foodElement.classList.add('selected')
+          }
+        } else if (parts.length === 2) {
+          const [categoryId, foodId] = parts
+          const foodElement = document.querySelector(
+            `.food-image[data-category-id="${categoryId}"][data-food-id="${foodId}"]`
+          )?.parentElement
+          if (foodElement) {
+            foodElement.classList.add('selected')
+          }
         }
       })
     }

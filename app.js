@@ -944,15 +944,50 @@ class DietHelper {
     const sharedGroup = 'shared-foods'
 
     const handleDragStart = (evt) => {
+      // Add drag class to body for CSS targeting
+      document.body.classList.add('sortable-drag')
+
+      // Hide all empty messages when dragging starts
       document.querySelectorAll('.empty-category-message').forEach((msg) => {
         msg.style.display = 'none'
       })
       document.querySelectorAll('.empty-subgroup-message').forEach((msg) => {
         msg.style.display = 'none'
       })
+
+      // Expand direct foods containers that have subgroups
+      this.categories.forEach((category) => {
+        if (category.subgroups && category.subgroups.length > 0) {
+          const foodsContainer = document.getElementById(`foods-${category.id}`)
+          if (foodsContainer) {
+            foodsContainer.style.minHeight = '120px'
+            foodsContainer.style.padding = '15px'
+            foodsContainer.style.border = '2px dashed #007bff'
+            foodsContainer.style.background = 'rgba(0, 123, 255, 0.05)'
+          }
+        }
+      })
     }
 
     const handleDragEnd = (evt) => {
+      // Remove drag class from body
+      document.body.classList.remove('sortable-drag')
+
+      // Reset direct foods containers styling
+      this.categories.forEach((category) => {
+        if (category.subgroups && category.subgroups.length > 0) {
+          const foodsContainer = document.getElementById(`foods-${category.id}`)
+          if (foodsContainer) {
+            // Reset to narrow state
+            foodsContainer.style.minHeight = category.foods.length > 0 ? '80px' : '40px'
+            foodsContainer.style.padding = category.foods.length > 0 ? '10px' : '5px'
+            foodsContainer.style.border = '2px dashed #dee2e6'
+            foodsContainer.style.background = 'transparent'
+          }
+        }
+      })
+
+      // Show empty messages for all empty containers
       this.categories.forEach((category) => {
         const foodsContainer = document.getElementById(`foods-${category.id}`)
         if (foodsContainer) {
@@ -960,6 +995,7 @@ class DietHelper {
           const emptyMsg = foodsContainer.querySelector('.empty-category-message')
 
           if (foodItems.length === 0) {
+            // Container is empty - ensure empty message is shown
             if (!emptyMsg) {
               const msg = document.createElement('p')
               msg.className = 'empty-category-message'
@@ -968,11 +1004,13 @@ class DietHelper {
               msg.textContent = 'No foods in this category'
               foodsContainer.appendChild(msg)
             } else {
+              // Make sure it's visible
               emptyMsg.style.display = 'block'
             }
           }
         }
 
+        // Same for subgroups
         if (category.subgroups) {
           category.subgroups.forEach((subgroup) => {
             const subgroupContainer = document.getElementById(`subgroup-foods-${subgroup.id}`)
@@ -989,6 +1027,7 @@ class DietHelper {
                   msg.textContent = 'No foods in this subgroup'
                   subgroupContainer.appendChild(msg)
                 } else {
+                  // Make sure it's visible
                   emptyMsg.style.display = 'block'
                 }
               }
@@ -997,7 +1036,6 @@ class DietHelper {
         }
       })
     }
-
     const handleFoodMove = (evt) => {
       if (evt.from === evt.to && evt.oldIndex === evt.newIndex) return
 
